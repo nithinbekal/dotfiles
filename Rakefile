@@ -5,11 +5,8 @@ desc "install the dot files into user's home directory"
 task :install do
   replace_all = false
 
-  Dir['**'].each do |file|
+  Dir['*'].each do |file|
     next if %w[Rakefile README.md].include?(file)
-
-    puts file
-    next
 
     if File.exist?(File.join(ENV['HOME'], ".#{file}"))
       if replace_all
