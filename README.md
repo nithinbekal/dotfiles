@@ -17,3 +17,10 @@ Before using Vim with this .vimrc, Vundle needs to be installed:
 
 After opening Vim, install plugins using the :BundleInstall command.
 
+### To get CommandT plugin working,
+
+    cd ~/.vim/bundle/Command-T/ruby/command-t
+    rvm use system
+    ruby extconf.rb
+    make
+
