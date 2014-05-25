@@ -148,12 +148,9 @@ stty -ixon
 
         RED="\[\033[0;31m\]"
      YELLOW="\[\033[0;33m\]"
-      GREEN="\[\033[0;32m\]"
        BLUE="\[\033[0;34m\]"
-  LIGHT_RED="\[\033[1;31m\]"
-LIGHT_GREEN="\[\033[1;32m\]"
+      GREEN="\[\033[1;32m\]"
       WHITE="\[\033[1;37m\]"
- LIGHT_GRAY="\[\033[0;37m\]"
  COLOR_NONE="\[\e[0m\]"
 
 function parse_git_branch {
@@ -164,7 +161,9 @@ function parse_git_branch {
   remote_pattern="# Your branch is (.*) of"
   diverge_pattern="# Your branch and (.*) have diverged"
   if [[ ! ${git_status} =~ "working directory clean" ]]; then
-    state="${YELLOW}⚡"
+    state="${RED} λ"
+  else
+    state="${GREEN} λ"
   fi
 
   # add an else if or two here if you want to get more specific
@@ -189,9 +188,9 @@ function prompt_func() {
     prompt="${TITLEBAR}${RED}\w${BLUE}$(parse_git_branch)${COLOR_NONE} "
     if test $previous_return_value -eq 0
     then
-        PS1="${prompt}${LIGHT_GREEN}λ${COLOR_NONE} "
+        PS1="${prompt}${COLOR_NONE}"
     else
-        PS1="${prompt}${LIGHT_GREEN}λ${COLOR_NONE} "
+        PS1="${prompt}${COLOR_NONE}"
     fi
 }
 
