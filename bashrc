@@ -141,6 +141,8 @@ alias reloadsh='source ~/.bashrc'
 st_run() { subl -n $@ >/dev/null 2>&1 & }
 alias st=st_run
 
+# Dibable flow control for vim
+stty -ixon
 
 # Custom scripts
 
@@ -192,6 +194,9 @@ function prompt_func() {
         PS1="${prompt}${LIGHT_GREEN}λ${COLOR_NONE} "
     fi
 }
+
+xmodmap -e "clear lock"
+xmodmap -e "keycode 0x42 = Escape"
 
 PROMPT_COMMAND=prompt_func
 
