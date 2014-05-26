@@ -53,4 +53,9 @@ export PATH=/usr/local/bin:$PATH
 
 LANG=en_US.UTF-8
 
+# Allow vim to accept Ctrl+S
+alias vim="stty stop '' -ixoff ; vim"
+# `Frozing' tty, so after any command terminal settings will be restored
+ttyctl -f
+
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
