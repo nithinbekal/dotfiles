@@ -48,10 +48,6 @@ augroup myfiletypes
   autocmd FileType ruby,eruby,yaml setlocal ai sw=2 sts=2 et
   autocmd FileType ruby,eruby,yaml setlocal path+=lib
   autocmd FileType ruby,eruby,yaml setlocal colorcolumn=80
-
-  " Clojure
-  autocmd FileType clojure setlocal colorcolumn=80
-  autocmd FileType clojure map <Leader>t :!lein test %<cr>
 augroup END
 
 " Enable built-in matchit plugin
