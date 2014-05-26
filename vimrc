@@ -56,7 +56,6 @@ runtime macros/matchit.vim
 
 let mapleader = ","
 
-" Basics
 map <Leader>q :q<cr>
 
 " Git
@@ -84,10 +83,6 @@ map <Leader>i mmgg=G`m<CR>
 map <Leader>p :set paste<CR>o<esc>"*]p:set nopaste<cr>
 map <Leader>ra :%s/
 map <Leader>rw :%s/\s\+$//<cr>:w<cr>
-map <Leader>sg :sp<cr>:grep
-map <Leader>so :so %<cr>
-map <Leader>sq j<c-v>}klllcs<esc>:wq<cr>
-map <Leader>ss ds)i <esc>:w<cr>
 map <Leader>vg :vsp<cr>:grep
 
 " Edit another file in the same directory as the current file
@@ -96,22 +91,36 @@ map <Leader>e :e <C-R>=escape(expand("%:p:h"),' ') . '/'<CR>
 map <Leader>s :split <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
 map <Leader>v :vnew <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
 
+map <Leader>n :call RenameFile()<cr>
+
 " Split navigation
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
-map <C-h> :nohl<cr>
-imap <C-l> :<Space>
-" Note that remapping C-s requires flow control to be disabled
-" (e.g. in .bashrc or .zshrc)
+" Remapping C-s requires flow control to be disabled in .bash/.zshrc
 map <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
 map <C-t> <esc>:tabnew<CR>
 map <C-x> <C-w>c
 map <C-n> :cn<CR>
 map <C-p> :cp<CR>
+
+"Remove highlighting for search terms
+map <C-h> :nohl<cr>
+
+" Disable Ex mode
+map Q <Nop>
+" Disable K looking stuff up
+map K <Nop>
+
+" Let's be reasonable, shall we?
+nmap k gk
+nmap j gj
+
+inoremap <Tab> <C-P>
+
 
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set history=500   " keep 500 lines of command line history
@@ -163,13 +172,6 @@ set nofoldenable " Say no to code folding...
 
 command! Q q " Bind :Q to :q
 command! Qall qall
-
-
-" Disable Ex mode
-map Q <Nop>
-
-" Disable K looking stuff up
-map K <Nop>
 
 " When loading text files, wrap them and don't split up words.
 au BufNewFile,BufRead *.txt setlocal lbr
@@ -259,12 +261,6 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-inoremap <Tab> <C-P>
-
-" Let's be reasonable, shall we?
-nmap k gk
-nmap j gj
-
 " Don't add the comment prefix when I hit enter or o/O on a comment line.
 set formatoptions-=or
 
@@ -292,7 +288,6 @@ function! RenameFile()
     redraw!
   endif
 endfunction
-map <Leader>n :call RenameFile()<cr>
 
 " Display extra whitespace
 set list listchars=tab:»·,trail:·
