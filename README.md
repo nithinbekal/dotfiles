@@ -17,10 +17,9 @@ Before using Vim with this .vimrc, Vundle needs to be installed:
 
 After opening Vim, install plugins using the :BundleInstall command.
 
-### To get CommandT plugin working,
+### Map Esc to Caps Lock (OSX)
 
-    cd ~/.vim/bundle/Command-T/ruby/command-t
-    rvm use system
-    ruby extconf.rb
-    make
+* Install [PCKeyboardHack](https://pqrs.org/macosx/keyremap4macbook/pckeyboardhack.html.en) utility.
+* System Preferences > Keyboard > Modifier keys: Set Caps Lock to no action.
+* PCKeyboardHack: Change CapsLock key to 53 (ESC)
 
