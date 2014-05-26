@@ -14,6 +14,7 @@ Plugin 'gmarik/Vundle.vim'
 " My bundles
 Plugin 'ervandew/supertab'
 Plugin 'kchmck/vim-coffee-script'
+Plugin 'kien/ctrlp.vim'
 Plugin 'skwp/greplace.vim'
 Plugin 'tomtom/tcomment_vim'
 Plugin 'tpope/vim-bundler'
@@ -23,7 +24,6 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
 Plugin 'vim-ruby/vim-ruby'
-Plugin 'wincent/Command-T'
 
 " nelstrom's plugin depends on kana's
 Plugin 'kana/vim-textobj-user'
