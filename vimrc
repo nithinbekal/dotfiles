@@ -56,57 +56,61 @@ runtime macros/matchit.vim
 
 let mapleader = ","
 
-vmap <Leader>b :<C-U>!git blame <C-R>=expand("%:p") <CR> \| sed -n <C-R>=line("'<") <CR>,<C-R>=line("'>") <CR>p <CR>
+" Git
+map <Leader>gac :Gcommit -m -a ""<LEFT>
+map <Leader>gc :Gcommit -m ""<LEFT>
+map <Leader>gs :Gstatus<CR>
+map <Leader>gw :!git add . && git commit -m 'WIP' && git push<cr>
+
+" Ruby
 map <Leader>bb :!bundle install<cr>
-nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
-vmap <Leader>bed "td?describe<cr>obed<tab><esc>"tpkdd/end<cr>o<esc>:nohl<cr>
-map <Leader>co ggVG"*y
+map <Leader>d orequire 'pry'<cr>binding.pry<esc>:w<cr>
+map <Leader>f :call OpenFactoryFile()<CR>
+map <Leader>rd :!bundle exec rspec % --format documentation<CR>
+
+" Rails
+map <Leader>m :Rmodel 
 map <Leader>cc :Rjcollection client/
 map <Leader>cj :Rjspec client/
 map <Leader>cm :Rjmodel client/
 map <Leader>ct :Rtemplate client/
 map <Leader>cv :Rjview client/
-map <Leader>d orequire 'pry'<cr>binding.pry<esc>:w<cr>
-map <Leader>gac :Gcommit -m -a ""<LEFT>
-map <Leader>gc :Gcommit -m ""<LEFT>
-map <Leader>gs :Gstatus<CR>
-map <Leader>gw :!git add . && git commit -m 'WIP' && git push<cr>
-map <Leader>f :call OpenFactoryFile()<CR>
-map <Leader>fix :cnoremap % %<CR>
 map <Leader>fa :sp test/factories.rb<CR>
-map <Leader>h :CommandT<CR>
+map <Leader>vc :RVcontroller<cr>
+map <Leader>vf :RVfunctional<cr>
+map <Leader>su :RSunittest 
+map <Leader>sv :RSview 
+map <Leader>sc :sp db/schema.rb<cr>
+map <Leader>sm :RSmodel 
+map <Leader>y :!rspec --drb %<cr>
+map <Leader>u :Runittest<cr>
+map <Leader>vu :RVunittest<CR>
+map <Leader>vm :RVmodel<cr>
+map <Leader>vv :RVview<cr>
+
+" Vim
+nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
+map <Leader>vi :tabe ~/.vimrc<CR>
+
+" Other
+map <Leader>co ggVG"*y
+map <Leader>fix :cnoremap % %<CR>
 map <Leader>i mmgg=G`m<CR>
-map <Leader>j :CommandT app/assets/javascripts<cr>client/
 map <Leader>l oconsole.log 'debugging'<esc>:w<cr>
-map <Leader>m :Rmodel 
 map <Leader>o :w<cr>:call RunCurrentLineInTest()<CR>
 map <Leader>p :set paste<CR>o<esc>"*]p:set nopaste<cr>
 map <Leader>ra :%s/
-map <Leader>rd :!bundle exec rspec % --format documentation<CR>
-map <Leader>rf :CommandTFlush<CR>:CommandT<CR>
 map <Leader>rs :vsp <C-r>#<cr><C-w>w
 map <Leader>rt q:?!ruby<cr><cr>
 map <Leader>rw :%s/\s\+$//<cr>:w<cr>
-map <Leader>sc :sp db/schema.rb<cr>
 map <Leader>sg :sp<cr>:grep 
-map <Leader>sm :RSmodel 
 map <Leader>sp yss<p>
 map <Leader>so :so %<cr>
 map <Leader>sq j<c-v>}klllcs<esc>:wq<cr>
 map <Leader>ss ds)i <esc>:w<cr>
 map <Leader>st :!ruby -Itest % -n "//"<left><left>
-map <Leader>su :RSunittest 
-map <Leader>sv :RSview 
 map <Leader>t :w<cr>:call RunCurrentTest()<CR>
-map <Leader>y :!rspec --drb %<cr>
-map <Leader>u :Runittest<cr>
-map <Leader>vc :RVcontroller<cr>
-map <Leader>vf :RVfunctional<cr>
 map <Leader>vg :vsp<cr>:grep 
-map <Leader>vi :tabe ~/.vimrc<CR>
-map <Leader>vu :RVunittest<CR>
-map <Leader>vm :RVmodel<cr>
-map <Leader>vv :RVview<cr>
 map <Leader>w <C-w>w
 map <Leader>x :exec getline(".")<cr>
 
@@ -126,10 +130,6 @@ map <C-t> <esc>:tabnew<CR>
 map <C-x> <C-w>c
 map <C-n> :cn<CR>
 map <C-p> :cp<CR>
-
-" Emacs-like beginning and end of line.
-imap <c-e> <c-o>$
-imap <c-a> <c-o>^
 
 
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
@@ -299,8 +299,6 @@ autocmd User Rails Rnavcommand jspec       spec/javascripts                   -g
 set formatoptions-=or
 
 " set statusline+=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
-
-let g:CommandTMaxHeight=50
 
 " Don't wait so long for the next keypress (particularly in ambigious Leader
 " situations.
