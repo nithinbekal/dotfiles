@@ -56,6 +56,9 @@ runtime macros/matchit.vim
 
 let mapleader = ","
 
+" Basics
+map <Leader>q :q<cr>
+
 " Git
 map <Leader>gac :Gcommit -m -a ""<LEFT>
 map <Leader>gc :Gcommit -m ""<LEFT>
@@ -67,6 +70,7 @@ map <Leader>bb :!bundle install<cr>
 map <Leader>d orequire 'pry'<cr>binding.pry<esc>:w<cr>
 map <Leader>f :call OpenFactoryFile()<CR>
 map <Leader>rd :!bundle exec rspec % --format documentation<CR>
+map <Leader>st :!ruby -Itest % -n "//"<left><left>
 
 " Rails
 map <Leader>m :Rmodel 
@@ -87,6 +91,8 @@ map <Leader>u :Runittest<cr>
 map <Leader>vu :RVunittest<CR>
 map <Leader>vm :RVmodel<cr>
 map <Leader>vv :RVview<cr>
+map <Leader>t :w<cr>:call RunCurrentTest()<CR>
+map <Leader>o :w<cr>:call RunCurrentLineInTest()<CR>
 
 " Vim
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
@@ -94,10 +100,8 @@ map <Leader>vi :tabe ~/.vimrc<CR>
 
 " Other
 map <Leader>co ggVG"*y
-map <Leader>fix :cnoremap % %<CR>
 map <Leader>i mmgg=G`m<CR>
 map <Leader>l oconsole.log 'debugging'<esc>:w<cr>
-map <Leader>o :w<cr>:call RunCurrentLineInTest()<CR>
 map <Leader>p :set paste<CR>o<esc>"*]p:set nopaste<cr>
 map <Leader>ra :%s/
 map <Leader>rs :vsp <C-r>#<cr><C-w>w
@@ -108,11 +112,19 @@ map <Leader>sp yss<p>
 map <Leader>so :so %<cr>
 map <Leader>sq j<c-v>}klllcs<esc>:wq<cr>
 map <Leader>ss ds)i <esc>:w<cr>
-map <Leader>st :!ruby -Itest % -n "//"<left><left>
-map <Leader>t :w<cr>:call RunCurrentTest()<CR>
 map <Leader>vg :vsp<cr>:grep 
 map <Leader>w <C-w>w
 map <Leader>x :exec getline(".")<cr>
+
+" Split navigation
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
+" Open new split panes to right and bottom
+set splitbelow
+set splitright
 
 " Edit another file in the same directory as the current file
 " uses expression to extract path from current file's path
@@ -322,13 +334,13 @@ highlight SignColumn ctermbg=black
 " RENAME CURRENT FILE (thanks Gary Bernhardt)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! RenameFile()
-    let old_name = expand('%')
-    let new_name = input('New file name: ', expand('%'), 'file')
-    if new_name != '' && new_name != old_name
-        exec ':saveas ' . new_name
-        exec ':silent !rm ' . old_name
-        redraw!
-    endif
+  let old_name = expand('%')
+  let new_name = input('New file name: ', expand('%'), 'file')
+  if new_name != '' && new_name != old_name
+    exec ':saveas ' . new_name
+    exec ':silent !rm ' . old_name
+    redraw!
+  endif
 endfunction
 map <Leader>n :call RenameFile()<cr>
 
@@ -360,18 +372,18 @@ if has("autocmd")
 
   " Put these in an autocmd group, so that we can delete them easily.
   augroup vimrcEx
-  au!
+    au!
 
-  " For all text files set 'textwidth' to 78 characters.
-  autocmd FileType text setlocal textwidth=78
+    " For all text files set 'textwidth' to 78 characters.
+    autocmd FileType text setlocal textwidth=78
 
-  " When editing a file, always jump to the last known cursor position.
-  " Don't do it when the position is invalid or when inside an event handler
-  " (happens when dropping a file on gvim).
-  autocmd BufReadPost *
-    \ if line("'\"") > 0 && line("'\"") <= line("$") |
-    \   exe "normal g`\"" |
-    \ endif
+    " When editing a file, always jump to the last known cursor position.
+    " Don't do it when the position is invalid or when inside an event handler
+    " (happens when dropping a file on gvim).
+    autocmd BufReadPost *
+          \ if line("'\"") > 0 && line("'\"") <= line("$") |
+          \   exe "normal g`\"" |
+          \ endif
 
   augroup END
 
