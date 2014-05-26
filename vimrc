@@ -25,10 +25,6 @@ Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
 Plugin 'vim-ruby/vim-ruby'
 
-" nelstrom's plugin depends on kana's
-Plugin 'kana/vim-textobj-user'
-Plugin 'nelstrom/vim-textobj-rubyblock'
-
 " Colors
 Plugin 'nanotech/jellybeans.vim'
 
