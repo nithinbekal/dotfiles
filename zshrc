@@ -58,4 +58,6 @@ alias vim="stty stop '' -ixoff ; vim"
 # `Frozing' tty, so after any command terminal settings will be restored
 ttyctl -f
 
+alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
+
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
