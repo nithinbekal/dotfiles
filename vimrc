@@ -15,7 +15,6 @@ Plugin 'gmarik/Vundle.vim'
 Plugin 'ervandew/supertab'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
-Plugin 'mileszs/ack.vim'
 Plugin 'skwp/greplace.vim'
 Plugin 'tomtom/tcomment_vim'
 Plugin 'tpope/vim-bundler'
@@ -25,6 +24,7 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
 Plugin 'vim-ruby/vim-ruby'
+Plugin 'yegappan/grep'
 
 " Colors
 Plugin 'nanotech/jellybeans.vim'
@@ -93,6 +93,8 @@ map <Leader>s :split <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
 map <Leader>v :vnew <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
 
 map <Leader>n :call RenameFile()<cr>
+
+map <Leader>f :Grep<cr>
 
 " Split navigation
 nnoremap <C-J> <C-W><C-J>
