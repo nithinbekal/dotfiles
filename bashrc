@@ -115,6 +115,9 @@ PROMPT_COMMAND=prompt_func
 xmodmap -e "clear lock"
 xmodmap -e "keycode 0x42 = Escape"
 
+# for tmux: export 256color
+[ -n "$TMUX" ] && export TERM=screen-256color
+
 export EDITOR=vim
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
