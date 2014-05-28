@@ -58,6 +58,9 @@ runtime macros/matchit.vim
 let mapleader = ","
 
 map <Leader>q :q<cr>
+map <Leader>f :Grep<cr>
+map <Leader>n :call RenameFile()<cr>
+map <Leader>m :Rmodel
 
 " Git
 map <Leader>gac :Gcommit -m -a ""<LEFT>
@@ -65,18 +68,9 @@ map <Leader>gc :Gcommit -m ""<LEFT>
 map <Leader>gs :Gstatus<CR>
 map <Leader>gw :!git add . && git commit -m 'WIP' && git push<cr>
 
-" Ruby
-map <Leader>bb :!bundle install<cr>
-map <Leader>rd :!bundle exec rspec % --format documentation<CR>
-map <Leader>st :!ruby -Itest % -n "//"<left><left>
-map <Leader>m :Rmodel
-map <Leader>y :!rspec --drb %<cr>
-map <Leader>t :w<cr>:call RunCurrentTest()<CR>
-map <Leader>o :w<cr>:call RunCurrentLineInTest()<CR>
-
 " Vim
-nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
 map <Leader>vi :tabe ~/.vimrc<CR>
+nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
 
 " Other
 map <Leader>co ggVG"*y
@@ -92,10 +86,6 @@ map <Leader>e :e <C-R>=escape(expand("%:p:h"),' ') . '/'<CR>
 map <Leader>s :split <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
 map <Leader>v :vnew <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
 
-map <Leader>n :call RenameFile()<cr>
-
-map <Leader>f :Grep<cr>
-
 " Split navigation
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
@@ -109,9 +99,6 @@ map <C-t> <esc>:tabnew<CR>
 map <C-x> <C-w>c
 map <C-n> :cn<CR>
 map <C-p> :cp<CR>
-
-"Remove highlighting for search terms
-map <C-h> :nohl<cr>
 
 " Disable Ex mode
 map Q <Nop>
@@ -171,7 +158,7 @@ au FileType xml exe ":silent 1,$!xmllint --format --recover - 2>/dev/null"
 
 set shiftround " When at 3 spaces and I hit >>, go to 4, not 5.
 
-set nofoldenable " Say no to code folding...
+set nofoldenable " Say no to code folding
 
 command! Q q " Bind :Q to :q
 command! Qall qall
@@ -189,9 +176,6 @@ set wildmode=list:full
 set noesckeys
 set ttimeout
 set ttimeoutlen=1
-
-" Turn on spell-checking in markdown and text.
-" au BufRead,BufNewFile *.md,*.txt setlocal spell
 
 " Merge a tab into a split in the previous window
 function! MergeTabs()
@@ -211,58 +195,10 @@ endfunction
 
 nmap <C-W>u :call MergeTabs()<CR>
 
-
 " Squash all commits into the first during rebase
 function! SquashAll()
   normal ggj}klllcf:w
 endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Test-running stuff
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! RunCurrentTest()
-  let in_test_file = match(expand("%"), '\(.feature\|_spec.rb\|_test.rb\)$') != -1
-  if in_test_file
-    call SetTestFile()
-
-    if match(expand('%'), '\.feature$') != -1
-      call SetTestRunner("!bin/cucumber")
-      exec g:bjo_test_runner g:bjo_test_file
-    elseif match(expand('%'), '_spec\.rb$') != -1
-      call SetTestRunner("!bin/rspec")
-      exec g:bjo_test_runner g:bjo_test_file
-    else
-      call SetTestRunner("!ruby -Itest")
-      exec g:bjo_test_runner g:bjo_test_file
-    endif
-  else
-    exec g:bjo_test_runner g:bjo_test_file
-  endif
-endfunction
-
-function! SetTestRunner(runner)
-  let g:bjo_test_runner=a:runner
-endfunction
-
-function! RunCurrentLineInTest()
-  let in_test_file = match(expand("%"), '\(.feature\|_spec.rb\|_test.rb\)$') != -1
-  if in_test_file
-    call SetTestFileWithLine()
-  end
-
-  exec "!bin/rspec" g:bjo_test_file . ":" . g:bjo_test_file_line
-endfunction
-
-function! SetTestFile()
-  let g:bjo_test_file=@%
-endfunction
-
-function! SetTestFileWithLine()
-  let g:bjo_test_file=@%
-  let g:bjo_test_file_line=line(".")
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Don't add the comment prefix when I hit enter or o/O on a comment line.
 set formatoptions-=or
