@@ -92,6 +92,16 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
+" Disable arrow keys
+map <up> <nop>
+map <down> <nop>
+map <left> <nop>
+map <right> <nop>
+imap <up> <nop>
+imap <down> <nop>
+imap <left> <nop>
+imap <right> <nop>
+
 " Remapping C-s requires flow control to be disabled in .bash/.zshrc
 map <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
