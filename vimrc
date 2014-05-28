@@ -57,7 +57,7 @@ runtime macros/matchit.vim
 
 let mapleader = ","
 
-map <Leader>q :q<cr>
+map <Leader>q :bd<cr>
 map <Leader>f :Grep<cr>
 map <Leader>n :call RenameFile()<cr>
 map <Leader>m :Rmodel
