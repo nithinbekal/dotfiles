@@ -29,6 +29,10 @@ task :install do
       link_file(file)
     end
   end
+
+  puts "Moving utilities to ~/.bin"
+  system %Q{rm -rf "$HOME/.bin"}
+  system %Q{ln -s "$PWD/bin" "$HOME/.bin"}
 end
 
 def replace_file(file)

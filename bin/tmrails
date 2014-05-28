@@ -1,0 +1,50 @@
+#!/bin/sh
+
+if [ -z "$1" ]
+then
+  echo "Usage: tmrails projectDir"
+  exit -1
+fi
+
+cd $1
+silently git gui
+
+tmux start-server
+
+# new-session creates first window named 'rails'
+tmux new-session -d -s rails-app -n rails
+
+# split window 'h'orizontally (into two vertical panes)
+tmux split-window -t rails-app:rails -h
+
+# select the left-most pane
+tmux last-pane
+
+# split this pane 'v'ertically (into two horizontal panes)
+tmux split-window -t rails-app:rails -v
+
+# create a second window for 'logs'
+tmux new-window -t rails-app:2 -n logs
+
+# start a vim editor in the left-most vertical pane
+tmux send-keys -t rails-app:rails.2 "cd $1; vim" C-m
+
+# widen the vim editor pane by 20 cells
+tmux resize-pane -L -t rails-app:rails.2 30
+
+# run guard -c clears shell after each change
+tmux send-keys -t rails-app:rails.0 "cd $1; guard -c" C-m
+
+# start rails console
+tmux send-keys -t rails-app:rails.1 "cd $1; rails c" C-m
+
+# start rails server
+tmux send-keys -t rails-app:logs "cd $1; rails s" C-m
+
+# select the vim pane in the rails window
+tmux select-window -t rails-app:rails
+tmux select-pane -t rails-app:rails.2
+
+# make the tmux session active
+tmux attach-session -d -t rails-app
+

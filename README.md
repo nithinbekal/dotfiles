@@ -1,7 +1,7 @@
 #### Nithin Bekal's dotfiles
 
-This repo will contain the dot files I use to configure my system. I'm using
-this with both OSX and Elementary OS.
+This repo will contain the dot files I use to configure my system. The
+[bin](bin) directory contains some utility scripts that get copied to `~/.bin`.
 
 ## Install
 
