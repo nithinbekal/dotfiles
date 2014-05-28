@@ -2,12 +2,11 @@
 
 if [ -z "$1" ]
 then
-  echo "Usage: tmrails projectDir"
+  echo "You need to specify the project directory as an argument"
   exit -1
 fi
 
 cd $1
-silently git gui
 
 tmux start-server
 
