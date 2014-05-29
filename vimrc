@@ -16,8 +16,8 @@ Plugin 'ervandew/supertab'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'skwp/greplace.vim'
-Plugin 'tomtom/tcomment_vim'
 Plugin 'tpope/vim-bundler'
+Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-dispatch'
 Plugin 'tpope/vim-endwise'
 Plugin 'tpope/vim-fugitive'
@@ -36,24 +36,25 @@ filetype plugin indent on    " required
 " Use the colorscheme from above
 colorscheme jellybeans
 
-" ========================================================================
-" Ruby stuff
-" ========================================================================
 syntax on                 " Enable syntax highlighting
 filetype plugin indent on " Enable filetype-specific indenting and plugins
 
 augroup myfiletypes
   " Clear old autocmds in group
   autocmd!
+
   " autoindent with two spaces, always expand tabs
   autocmd FileType ruby,eruby,yaml setlocal ai sw=2 sts=2 et
   autocmd FileType ruby,eruby,yaml setlocal path+=lib
   autocmd FileType ruby,eruby,yaml setlocal colorcolumn=80
+
+  " comments on hamls files with vim-commentary
+  autocmd FileType haml set commentstring=\/\ %s
 augroup END
 
 " Enable built-in matchit plugin
 runtime macros/matchit.vim
-" ================
+
 
 let mapleader = ","
 
