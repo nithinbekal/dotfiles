@@ -26,19 +26,19 @@ tmux split-window -t rails-app:rails -v
 tmux new-window -t rails-app:2 -n logs
 
 # start a vim editor in the left-most vertical pane
-tmux send-keys -t rails-app:rails.2 "cd $1; vim" C-m
+tmux send-keys -t rails-app:rails.2 "vim" C-m
 
 # widen the vim editor pane by 20 cells
 tmux resize-pane -L -t rails-app:rails.2 30
 
 # run guard -c clears shell after each change
-tmux send-keys -t rails-app:rails.0 "cd $1; guard -c" C-m
+tmux send-keys -t rails-app:rails.0 "guard -c" C-m
 
 # start rails console
-tmux send-keys -t rails-app:rails.1 "cd $1; rails c" C-m
+tmux send-keys -t rails-app:rails.1 "rails c" C-m
 
 # start rails server
-tmux send-keys -t rails-app:logs "cd $1; rails s" C-m
+tmux send-keys -t rails-app:logs "rails s" C-m
 
 # select the vim pane in the rails window
 tmux select-window -t rails-app:rails
