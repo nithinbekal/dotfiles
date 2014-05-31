@@ -27,7 +27,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 alias bx="bundle exec"
-alias todo="~/code/play/todo.txt-cli/todo.sh"
+alias lt="task list"
 
 alias vim="stty stop '' -ixoff ; vim" # Allow vim to accept Ctrl+S
 ttyctl -f                             # `Frozing' tty, so after any command terminal settings will be restored
