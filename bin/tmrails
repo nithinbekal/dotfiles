@@ -44,6 +44,8 @@ tmux send-keys -t rails-app:logs "rails s" C-m
 tmux select-window -t rails-app:rails
 tmux select-pane -t rails-app:rails.2
 
+open http://localhost:3000/
+
 # make the tmux session active
 tmux attach-session -d -t rails-app
 
