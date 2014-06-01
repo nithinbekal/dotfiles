@@ -76,17 +76,9 @@ nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
 
 " Other
 map <Leader>co ggVG"*y
-map <Leader>i mmgg=G`m<CR>
 map <Leader>p :set paste<CR>o<esc>"*]p:set nopaste<cr>
-map <Leader>ra :%s/
-map <Leader>rw :%s/\s\+$//<cr>:w<cr>
-map <Leader>vg :vsp<cr>:grep
-
-" Edit another file in the same directory as the current file
-" uses expression to extract path from current file's path
-map <Leader>e :e <C-R>=escape(expand("%:p:h"),' ') . '/'<CR>
-map <Leader>s :split <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
-map <Leader>v :vnew <C-R>=escape(expand("%:p:h"), ' ') . '/'<CR>
+map <Leader>h :%s/
+map <Leader>v :vnew<CR><C-P>
 
 " Split navigation
 nnoremap <C-J> <C-W><C-J>
