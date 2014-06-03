@@ -76,7 +76,7 @@ nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
 
 " Other
 map <Leader>co ggVG"*y
-map <Leader>p :set paste<CR>o<esc>"*]p:set nopaste<cr>
+map <Leader>p o<esc>
 map <Leader>h :%s/
 map <Leader>v :vnew<CR><C-P>
 
@@ -140,6 +140,7 @@ set relativenumber
 set gdefault " assume the /g flag on :s substitutions to replace all matches in a line
 set autoindent " always set autoindenting on
 set bg=light
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 
 " Open new split panes to right and bottom
 set splitbelow
