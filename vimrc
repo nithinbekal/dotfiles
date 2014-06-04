@@ -78,7 +78,7 @@ nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
 map <Leader>co ggVG"*y
 map <Leader>p o<esc>
 map <Leader>h :%s/
-map <Leader>v :vnew<CR><C-P>
+map <Leader>v :vnew<CR>
 
 " Split navigation
 nnoremap <C-J> <C-W><C-J>
