@@ -117,6 +117,8 @@ map K <Nop>
 nmap k gk
 nmap j gj
 
+nnoremap <leader>. :CtrlPTag<cr>
+
 inoremap <Tab> <C-P>
 
 
