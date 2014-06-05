@@ -80,6 +80,10 @@ map <Leader>p o<esc>
 map <Leader>h :%s/
 map <Leader>v :vnew<CR>
 
+" Copy and paste in OSX
+vmap <F2> :w !pbcopy<CR><CR>
+map <F3> :r !pbpaste<CR>
+
 " Split navigation
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
