@@ -11,19 +11,12 @@ source $ZSH/oh-my-zsh.sh
 LANG=en_US.UTF-8
 
 if [[ "$OSTYPE" == 'linux-gnu' ]]; then
-
   # Use caps lock key for ESC
   xmodmap -e "clear lock"
   xmodmap -e "keycode 0x42 = Escape"
 
   # for tmux: export 256color
   [ -n "$TMUX" ] && export TERM=xterm-color
-
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-
-  # Go to login screen in OSX
-  alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
-
 fi
 
 alias bx="bundle exec"
