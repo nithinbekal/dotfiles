@@ -62,7 +62,7 @@ let mapleader = ","
 map <Leader>q :bd<cr>
 map <Leader>f :Grep<cr>
 map <Leader>n :call RenameFile()<cr>
-map <Leader>m :Rmodel
+map <Leader>s :A<cr>
 
 " Git
 map <Leader>gac :Gcommit -m -a ""<LEFT>
