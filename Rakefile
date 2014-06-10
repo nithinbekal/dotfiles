@@ -33,6 +33,10 @@ task :install do
   puts "Moving utilities to ~/.bin"
   system %Q{rm -rf "$HOME/.bin"}
   system %Q{ln -s "$PWD/bin" "$HOME/.bin"}
+
+  puts 'Moving snippets to ~/.vim/snippets'
+  system %Q{rm -rf $HOME/.vim/snippets}
+  system %Q{ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"}
 end
 
 def replace_file(file)

@@ -227,9 +227,6 @@ au BufWritePre *.rb :%s/\s\+$//e
 " Set gutter background to black
 highlight SignColumn ctermbg=black
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" RENAME CURRENT FILE (thanks Gary Bernhardt)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! RenameFile()
   let old_name = expand('%')
   let new_name = input('New file name: ', expand('%'), 'file')
@@ -239,6 +236,19 @@ function! RenameFile()
     redraw!
   endif
 endfunction
+
+fun! SnippetFilename(...)
+  let template = get(a:000, 0, "$1")
+  let arg2 = get(a:000, 1, "")
+
+  let basename = expand('%:t:r')
+
+  if basename == ''
+    return arg2
+  else
+    return substitute(template, '$1', basename, 'g')
+  endif
+endf
 
 " Display extra whitespace
 set list listchars=tab:»·,trail:·
