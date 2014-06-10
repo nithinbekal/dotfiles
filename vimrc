@@ -81,8 +81,6 @@ map <Leader>vi :tabe ~/.vimrc<CR>
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
 
 " Other
-map <Leader>co ggVG"*y
-map <Leader>p o<esc>
 map <Leader>h :%s/
 map <Leader>v :vnew<CR>
 
