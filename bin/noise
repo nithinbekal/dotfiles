@@ -1,2 +1,2 @@
 FILE=$1
-silently afplay ~/Music/noise/$FILE.mp3
+silently afplay ~/Music/noise/$FILE.mp3 -v 0.2
