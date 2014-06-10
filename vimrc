@@ -28,6 +28,11 @@ Plugin 'tpope/vim-unimpaired'
 Plugin 'vim-ruby/vim-ruby'
 Plugin 'yegappan/grep'
 
+" Snipmate and dependencies
+Plugin 'MarcWeber/vim-addon-mw-utils'
+Plugin 'tomtom/tlib_vim'
+Plugin 'garbas/vim-snipmate'
+
 " Colors
 Plugin 'nanotech/jellybeans.vim'
 
