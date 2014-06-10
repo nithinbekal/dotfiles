@@ -212,11 +212,6 @@ endfunction
 
 nmap <C-W>u :call MergeTabs()<CR>
 
-" Squash all commits into the first during rebase
-function! SquashAll()
-  normal ggj}klllcf:w
-endfunction
-
 " Don't add the comment prefix when I hit enter or o/O on a comment line.
 set formatoptions-=or
 
