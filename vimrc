@@ -65,24 +65,22 @@ runtime macros/matchit.vim
 
 let mapleader = ","
 
-map <Leader>q :bd<cr>
 map <Leader>f :Grep<cr>
-map <Leader>n :call RenameFile()<cr>
-map <Leader>s :A<cr>
-
-" Git
 map <Leader>gac :Gcommit -m -a ""<LEFT>
 map <Leader>gc :Gcommit -m ""<LEFT>
 map <Leader>gs :Gstatus<CR>
 map <Leader>gw :!git add . && git commit -m 'WIP' && git push<cr>
+map <Leader>h :%s/
+map <Leader>n :call RenameFile()<cr>
+map <Leader>q :bd<cr>
+map <Leader>rc :Rcontroller 
+map <Leader>rv :Rview 
+map <Leader>s :A<cr>
+map <Leader>v :vnew<CR>
 
 " Vim
 map <Leader>vi :tabe ~/.vimrc<CR>
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
-
-" Other
-map <Leader>h :%s/
-map <Leader>v :vnew<CR>
 
 " Copy and paste in OSX
 vmap <F2> :w !pbcopy<CR><CR>
@@ -114,6 +112,7 @@ map <C-p> :cp<CR>
 
 " Disable Ex mode
 map Q <Nop>
+
 " Disable K looking stuff up
 map K <Nop>
 
