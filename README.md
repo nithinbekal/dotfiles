@@ -17,6 +17,16 @@ Before using Vim with this .vimrc, Vundle needs to be installed:
 
 After opening Vim, install plugins using the :BundleInstall command.
 
+To install Ag (Elementary OS Luna - apt-get won't work):
+
+    sudo apt-get install -y automake pkg-config libpcre3-dev zlib1g-dev liblzma-dev
+    git clone https://github.com/ggreer/the_silver_searcher ag
+    cd ag
+    ./build.sh
+    sudo make install
+    cd ..
+    rm -rf ag
+
 ### Map Esc to Caps Lock (OSX)
 
 * Install [PCKeyboardHack](https://pqrs.org/macosx/keyremap4macbook/pckeyboardhack.html.en) utility.
