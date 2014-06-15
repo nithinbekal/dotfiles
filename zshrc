@@ -11,12 +11,11 @@ source $ZSH/oh-my-zsh.sh
 LANG=en_US.UTF-8
 
 if [[ "$OSTYPE" == 'linux-gnu' ]]; then
-  # Use caps lock key for ESC
+  export TERM=xterm-256color
+
+  # Use caps lock key for ESC in Linux
   xmodmap -e "clear lock"
   xmodmap -e "keycode 0x42 = Escape"
-
-  # for tmux: export 256color
-  [ -n "$TMUX" ] && export TERM=xterm-color
 fi
 
 alias bx="bundle exec"
