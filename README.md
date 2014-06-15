@@ -11,13 +11,14 @@ This repo will contain the dot files I use to configure my system. The
 
 ## Vim
 
-Before using Vim with this .vimrc, Vundle needs to be installed:
+Before using Vim with this .vimrc, [Vundle](https://github.com/gmarik/Vundle.vim) needs to be installed:
 
     git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    vim +PluginInstall +qall
 
-After opening Vim, install plugins using the :BundleInstall command.
-
-To install Ag (Elementary OS Luna - apt-get won't work):
+To install [Ag](https://github.com/ggreer/the_silver_searcher) for
+[Ag.vim](https://github.com/rking/ag.vim) (apt-get won't work in Elementary OS
+Luna): 
 
     sudo apt-get install -y automake pkg-config libpcre3-dev zlib1g-dev liblzma-dev
     git clone https://github.com/ggreer/the_silver_searcher ag
