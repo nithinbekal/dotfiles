@@ -190,24 +190,6 @@ set noesckeys
 set ttimeout
 set ttimeoutlen=1
 
-" Merge a tab into a split in the previous window
-function! MergeTabs()
-  if tabpagenr() == 1
-    return
-  endif
-  let bufferName = bufname("%")
-  if tabpagenr("$") == tabpagenr()
-    close!
-  else
-    close!
-    tabprev
-  endif
-  split
-  execute "buffer " . bufferName
-endfunction
-
-nmap <C-W>u :call MergeTabs()<CR>
-
 " Don't add the comment prefix when I hit enter or o/O on a comment line.
 set formatoptions-=or
 
