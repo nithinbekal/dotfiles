@@ -10,42 +10,20 @@ cd $1
 
 tmux start-server
 
-# new-session creates first window named 'rails'
 tmux new-session -d -s rails-app -n rails
-
-# split window 'h'orizontally (into two vertical panes)
 tmux split-window -t rails-app:rails -h
 
-# select the left-most pane
 tmux last-pane
+tmux resize-pane -R -t rails-app:rails.0 40
 
-# split this pane 'v'ertically (into two horizontal panes)
-tmux split-window -t rails-app:rails -v
-
-# create a second window for 'logs'
 tmux new-window -t rails-app:2 -n logs
 
-# start a vim editor in the left-most vertical pane
-tmux send-keys -t rails-app:rails.2 "vim" C-m
+tmux send-keys -t rails-app:rails.0 "vim"      C-m
+tmux send-keys -t rails-app:rails.1 "guard -c" C-m
+tmux send-keys -t rails-app:logs    "rails s"  C-m
 
-# widen the vim editor pane by 20 cells
-tmux resize-pane -L -t rails-app:rails.2 30
-
-# run guard -c clears shell after each change
-tmux send-keys -t rails-app:rails.0 "guard -c" C-m
-
-# start rails console
-tmux send-keys -t rails-app:rails.1 "rails c" C-m
-
-# start rails server
-tmux send-keys -t rails-app:logs "rails s" C-m
-
-# select the vim pane in the rails window
 tmux select-window -t rails-app:rails
-tmux select-pane -t rails-app:rails.2
+tmux select-pane -t rails-app:rails.1
 
-open http://localhost:3000/
-
-# make the tmux session active
 tmux attach-session -d -t rails-app
 
