@@ -14,6 +14,7 @@ Plugin 'gmarik/Vundle.vim'
 " My bundles
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
+Plugin 'plasticboy/vim-markdown'
 Plugin 'rking/ag.vim'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'tpope/vim-commentary'
@@ -160,6 +161,9 @@ set tags=./tags;
 
 " Fuzzy finder: ignore stuff that can't be opened, and generated files
 let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**;rdoc/**"
+
+" Disable folding markdown text
+let g:vim_markdown_folding_disabled=1
 
 " Highlight the status line
 highlight StatusLine ctermfg=blue ctermbg=yellow
