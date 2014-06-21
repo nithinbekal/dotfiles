@@ -14,6 +14,7 @@ Plugin 'gmarik/Vundle.vim'
 " My bundles
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
+Plugin 'mortice/pbcopy.vim'
 Plugin 'plasticboy/vim-markdown'
 Plugin 'rking/ag.vim'
 Plugin 'terryma/vim-multiple-cursors'
