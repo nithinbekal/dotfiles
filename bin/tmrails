@@ -23,7 +23,7 @@ tmux send-keys -t rails-app:rails.1 "guard -c" C-m
 tmux send-keys -t rails-app:logs    "rails s"  C-m
 
 tmux select-window -t rails-app:rails
-tmux select-pane -t rails-app:rails.1
+tmux select-pane -t rails-app:rails.0
 
 tmux attach-session -d -t rails-app
 
