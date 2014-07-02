@@ -1,0 +1,1 @@
+git log master..dev --oneline | grep Merge | cut -d' ' -f2- | sed 's/Merge/*/'
