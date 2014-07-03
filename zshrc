@@ -24,6 +24,8 @@ alias lt="task list"
 alias vim="stty stop '' -ixoff ; vim" # Allow vim to accept Ctrl+S
 ttyctl -f                             # `Frozing' tty, so after any command terminal settings will be restored
 
+ssh-add &>/dev/null
+
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
 export PATH=~/.bin:$PATH
