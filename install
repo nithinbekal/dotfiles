@@ -1,0 +1,48 @@
+
+echo "Linking ~/.bashrc"
+rm "$HOME/.bashrc"
+ln -s "$PWD/bashrc" "$HOME/.bashrc"
+
+echo "Linking ~/.bin"
+rm "$HOME/.bin"
+ln -s "$PWD/bin" "$HOME/.bin"
+
+echo "Linking ~/.ctags"
+rm "$HOME/.ctags"
+ln -s "$PWD/ctags" "$HOME/.ctags"
+
+echo "Linking ~/.gemrc"
+rm "$HOME/.gemrc"
+ln -s "$PWD/gemrc" "$HOME/.gemrc"
+
+echo "Linking ~/.gvimrc"
+rm "$HOME/.gvimrc"
+ln -s "$PWD/gvimrc" "$HOME/.gvimrc"
+
+echo "Linking ~/.tmux.conf"
+rm "$HOME/.tmux.conf"
+ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
+
+echo "Linking ~/.vim-snippets"
+rm "$HOME/.vim-snippets"
+ln -s "$PWD/vim-snippets" "$HOME/.vim-snippets"
+
+echo "Linking ~/.vimrc"
+rm "$HOME/.vimrc"
+ln -s "$PWD/vimrc" "$HOME/.vimrc"
+
+echo "Linking ~/.zlogin"
+rm "$HOME/.zlogin"
+ln -s "$PWD/zlogin" "$HOME/.zlogin"
+
+echo "Linking ~/.zshrc"
+rm "$HOME/.zshrc"
+ln -s "$PWD/zshrc" "$HOME/.zshrc"
+
+echo "Moving utilities to ~/.bin"
+rm -rf "$HOME/.bin"
+ln -s "$PWD/bin" "$HOME/.bin"
+
+echo "Moving snippets to ~/.vim/snippets"
+rm -rf $HOME/.vim/snippets
+ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
