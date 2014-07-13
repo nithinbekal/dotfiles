@@ -40,6 +40,9 @@ Plugin 'nanotech/jellybeans.vim'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
+" Needed for colors to work on gnome-terminal
+set t_Co=256
+
 " Use the colorscheme from above
 colorscheme jellybeans
 
@@ -233,13 +236,6 @@ fun! SnippetFilename(...)
     return substitute(template, '$1', basename, 'g')
   endif
 endf
-
-" Switch syntax highlighting on, when the terminal has colors
-" Also switch on highlighting the last used search pattern.
-if &t_Co > 2 || has("gui_running")
-  syntax on
-  set hlsearch
-endif
 
 " Make it more obvious which paren I'm on
 hi MatchParen cterm=none ctermbg=black ctermfg=yellow
