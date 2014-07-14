@@ -32,5 +32,10 @@ export PATH=~/.bin:$PATH
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 
-export NVM_DIR="/Users/nithin/.nvm"
+if [[ "$OSTYPE" == 'linux-gnu' ]]; then
+  export NVM_DIR="/home/nithin/.nvm"
+else
+  export NVM_DIR="/Users/nithin/.nvm"
+fi
+
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
