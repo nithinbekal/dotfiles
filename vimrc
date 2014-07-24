@@ -168,6 +168,10 @@ let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;
 " Disable folding markdown text
 let g:vim_markdown_folding_disabled=1
 
+" Faster Ctrl-P
+let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard', 'find %s -type f']
+let g:ctrlp_use_caching = 0
+
 " Highlight the status line
 highlight StatusLine ctermfg=blue ctermbg=yellow
 
