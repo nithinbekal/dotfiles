@@ -68,7 +68,7 @@ runtime macros/matchit.vim
 
 let mapleader = ","
 
-map <Leader>f :Grep<cr>
+map <Leader>f :Ack 
 map <Leader>gac :Gcommit -m -a ""<LEFT>
 map <Leader>gc :Gcommit -m ""<LEFT>
 map <Leader>gs :Gstatus<CR>
