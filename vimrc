@@ -178,6 +178,8 @@ highlight StatusLine ctermfg=blue ctermbg=yellow
 " Format xml files
 au FileType xml exe ":silent 1,$!xmllint --format --recover - 2>/dev/null"
 
+autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+
 set shiftround " When at 3 spaces and I hit >>, go to 4, not 5.
 
 set nofoldenable " Say no to code folding
