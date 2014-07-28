@@ -19,7 +19,7 @@ if [[ "$OSTYPE" == 'linux-gnu' ]]; then
 fi
 
 alias bx="bundle exec"
-alias lt="task list"
+alias jkls="jekyll serve --watch"
 
 alias vim="stty stop '' -ixoff ; vim" # Allow vim to accept Ctrl+S
 ttyctl -f                             # `Frozing' tty, so after any command terminal settings will be restored
