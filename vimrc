@@ -151,6 +151,7 @@ set gdefault " assume the /g flag on :s substitutions to replace all matches in 
 set autoindent " always set autoindenting on
 set bg=light
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip
+set hlsearch
 
 " Open new split panes to right and bottom
 set splitbelow
