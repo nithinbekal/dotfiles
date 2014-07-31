@@ -74,7 +74,8 @@ map <Leader>gc :Gcommit -m ""<LEFT>
 map <Leader>gs :Gstatus<CR>
 map <Leader>gw :!git add . && git commit -m 'WIP' && git push<cr>
 map <Leader>h :%s/
-map <Leader>n :call RenameFile()<cr>
+map <Leader>mv :call RenameFile()<cr>
+map <Leader>n :nohl<cr>
 map <Leader>q :bd<cr>
 map <Leader>rc :Rcontroller 
 map <Leader>rv :Rview 
@@ -109,7 +110,6 @@ imap <right> <nop>
 map <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
 map <C-t> <esc>:tabnew<CR>
-map <C-n> :nohl<CR>
 
 " Disable Ex mode
 map Q <Nop>
