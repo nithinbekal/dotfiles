@@ -27,6 +27,7 @@ Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-unimpaired'
 Plugin 'vim-ruby/vim-ruby'
+Plugin 'Townk/vim-autoclose'
 
 " Snipmate and dependencies
 Plugin 'MarcWeber/vim-addon-mw-utils'
