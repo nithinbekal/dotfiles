@@ -32,6 +32,9 @@ export PATH=~/.bin:$PATH
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
 if [[ "$OSTYPE" == 'linux-gnu' ]]; then
   export NVM_DIR="/home/nithin/.nvm"
 else
