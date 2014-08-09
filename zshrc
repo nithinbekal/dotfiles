@@ -35,10 +35,6 @@ PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
-if [[ "$OSTYPE" == 'linux-gnu' ]]; then
-  export NVM_DIR="/home/nithin/.nvm"
-else
-  export NVM_DIR="/Users/nithin/.nvm"
-fi
+export NVM_DIR=$HOME/.nvm
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
