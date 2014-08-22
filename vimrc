@@ -12,6 +12,7 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 
 " My bundles
+Plugin 'elixir-lang/vim-elixir'
 Plugin 'junegunn/goyo.vim'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
