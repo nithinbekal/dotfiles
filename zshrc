@@ -38,3 +38,4 @@ export PATH=$PATH:$GOPATH/bin
 export NVM_DIR=$HOME/.nvm
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
+export DOCKER_HOST=tcp://$(boot2docker ip 2>/dev/null):2375
