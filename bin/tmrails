@@ -2,11 +2,10 @@
 
 if [ -z "$1" ]
 then
-  echo "You need to specify the project directory as an argument"
-  exit -1
+  cd $(pwd)
+else
+  cd $1
 fi
-
-cd $1
 
 tmux start-server
 
