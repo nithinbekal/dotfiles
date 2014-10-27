@@ -18,8 +18,10 @@ if [[ "$OSTYPE" == 'linux-gnu' ]]; then
   xmodmap -e "keycode 0x42 = Escape"
 fi
 
+alias blog="cd Dropbox/blog"
 alias bx="bundle exec"
 alias jkls="jekyll serve --watch"
+alias todo="vim ~/Dropbox/todo.md"
 
 alias vim="stty stop '' -ixoff ; vim" # Allow vim to accept Ctrl+S
 ttyctl -f                             # `Frozing' tty, so after any command terminal settings will be restored
