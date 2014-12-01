@@ -1,1 +1,1 @@
-set gfn=DejaVu\ Sans\ Mono\ 10
+colorscheme jellybeans
