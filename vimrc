@@ -138,7 +138,7 @@ set autoread
 set wmh=0
 set viminfo+=!
 set guioptions-=T
-set guifont=Triskweline_10:h10
+set guifont=Monaco:h12
 set et
 set sw=2
 set smarttab
