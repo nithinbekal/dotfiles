@@ -35,6 +35,8 @@ export PATH=~/.bin:$PATH
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 
+export EDITOR=vim
+
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
