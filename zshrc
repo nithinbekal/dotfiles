@@ -24,8 +24,8 @@ alias jkls="jekyll serve --watch"
 alias todo="vim ~/Dropbox/todo.md"
 alias vim-swp-clear="rm -rf ~/.tmp/*.swp"
 
-alias vim="stty stop '' -ixoff ; vim" # Allow vim to accept Ctrl+S
-ttyctl -f                             # `Frozing' tty, so after any command terminal settings will be restored
+alias vim="stty stop '' -ixoff ; mvim -v" # Allow vim to accept Ctrl+S
+ttyctl -f                                 # `Frozing' tty, so after any command terminal settings will be restored
 
 ssh-add &>/dev/null
 
