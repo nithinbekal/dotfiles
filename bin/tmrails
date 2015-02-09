@@ -17,9 +17,9 @@ tmux resize-pane -R -t rails-app:rails.0 40
 
 tmux new-window -t rails-app:2 -n logs
 
-tmux send-keys -t rails-app:rails.0 "vim"      C-m
+tmux send-keys -t rails-app:rails.0 "vim" C-m
 tmux send-keys -t rails-app:rails.1 "guard -c" C-m
-tmux send-keys -t rails-app:logs    "rails s"  C-m
+tmux send-keys -t rails-app:logs "foreman start" C-m
 
 tmux select-window -t rails-app:rails
 tmux select-pane -t rails-app:rails.0
