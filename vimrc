@@ -86,6 +86,7 @@ map <Leader>v :vnew<CR>
 " Vim
 map <Leader>vi :tabe ~/.vimrc<CR>
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
+map <Leader>gt :tabe ~/Dropbox/gtd.md<CR>
 
 " Copy and paste in OSX
 vmap <F2> :w !pbcopy<CR><CR>
