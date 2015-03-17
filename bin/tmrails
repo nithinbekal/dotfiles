@@ -13,7 +13,7 @@ tmux new-session -d -s rails-app -n rails
 tmux split-window -t rails-app:rails -h
 
 tmux last-pane
-tmux resize-pane -R -t rails-app:rails.0 40
+tmux resize-pane -R -t rails-app:rails.0 20
 
 tmux new-window -t rails-app:2 -n logs
 
