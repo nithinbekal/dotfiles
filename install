@@ -1,4 +1,8 @@
 
+echo "Linking ~/.ackrc"
+rm "$HOME/.ackrc"
+ln -s "$PWD/ackrc" "$HOME/.ackrc"
+
 echo "Linking ~/.bashrc"
 rm "$HOME/.bashrc"
 ln -s "$PWD/bashrc" "$HOME/.bashrc"
