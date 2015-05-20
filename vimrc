@@ -86,7 +86,8 @@ map <Leader>v :vnew<CR>
 " Vim
 map <Leader>vi :tabe ~/.vimrc<CR>
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
-map <Leader>gt :tabe ~/Dropbox/gtd.md<CR>
+map <Leader>gt :tabe ~/Dropbox/todo/gtd.md<CR>
+map <Leader>gg :tabe ~/Dropbox/todo/work.md<CR>
 
 " Copy and paste in OSX
 vmap <F2> :w !pbcopy<CR><CR>
@@ -147,6 +148,7 @@ set noincsearch
 set ignorecase smartcase
 set laststatus=2  " Always show status line.
 set relativenumber
+set number
 set gdefault " assume the /g flag on :s substitutions to replace all matches in a line
 set autoindent " always set autoindenting on
 set bg=light
