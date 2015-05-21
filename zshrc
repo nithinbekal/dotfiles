@@ -19,7 +19,8 @@ if [[ "$OSTYPE" == 'linux-gnu' ]]; then
 fi
 
 alias bx="bundle exec"
-alias todo="vim ~/Dropbox/todo.md"
+alias todo="vim ~/Dropbox/todo/gtd.md"
+alias v="vim"
 alias vim-swp-clear="rm -rf ~/.tmp/*.swp"
 
 alias vim="stty stop '' -ixoff ; mvim -v" # Allow vim to accept Ctrl+S
