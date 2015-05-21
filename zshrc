@@ -18,9 +18,7 @@ if [[ "$OSTYPE" == 'linux-gnu' ]]; then
   xmodmap -e "keycode 0x42 = Escape"
 fi
 
-alias blog="cd Dropbox/blog"
 alias bx="bundle exec"
-alias jkls="jekyll serve --watch"
 alias todo="vim ~/Dropbox/todo.md"
 alias vim-swp-clear="rm -rf ~/.tmp/*.swp"
 
