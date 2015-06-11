@@ -13,7 +13,6 @@ Plugin 'gmarik/Vundle.vim'
 
 " My bundles
 Plugin 'elixir-lang/vim-elixir'
-Plugin 'junegunn/goyo.vim'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'mileszs/ack.vim'
@@ -81,7 +80,8 @@ map <Leader>q :bd<cr>
 map <Leader>rc :Rcontroller 
 map <Leader>rv :Rview 
 map <Leader>s :A<cr>
-map <Leader>v :vnew<CR>
+map <Leader>v :vnew<cr>
+map <Leader>, :Rake test<cr>
 
 " Vim
 map <Leader>vi :tabe ~/.vimrc<CR>
