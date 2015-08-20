@@ -83,6 +83,9 @@ map <Leader>s :A<cr>
 map <Leader>v :vnew<cr>
 map <Leader>, :Rake test<cr>
 
+" Upcase previous word in insert mode
+inoremap <C-x>c <esc>bgUWea
+
 " Vim
 map <Leader>vi :tabe ~/.vimrc<CR>
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
