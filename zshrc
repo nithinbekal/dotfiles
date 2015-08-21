@@ -7,6 +7,7 @@ DISABLE_AUTO_UPDATE="true"
 plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
+source $HOME/.env.local
 
 LANG=en_US.UTF-8
 
