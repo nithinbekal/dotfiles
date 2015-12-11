@@ -78,6 +78,7 @@ map <Leader>mv :call RenameFile()<cr>
 map <Leader>n :nohl<cr>
 map <Leader>q :bd<cr>
 map <Leader>rc :Rcontroller 
+map <Leader>rm :!rm %
 map <Leader>rv :Rview 
 map <Leader>s :A<cr>
 map <Leader>v :vnew<cr>
