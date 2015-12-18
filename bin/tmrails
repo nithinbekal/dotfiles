@@ -24,5 +24,5 @@ tmux send-keys -t rails-app:logs "foreman start" C-m
 tmux select-window -t rails-app:rails
 tmux select-pane -t rails-app:rails.0
 
-tmux attach-session -d -t rails-app
+tmux -u attach-session -d -t rails-app
 

@@ -14,4 +14,4 @@ tmux send-keys -t blog:jekyll "rvm use 2.1.2 do jekyll serve --watch" C-m
 
 tmux select-window -t blog:vim
 
-tmux attach-session -d -t blog
+tmux -u attach-session -d -t blog
