@@ -12,6 +12,8 @@ source $HOME/.env.local
 LANG=en_US.UTF-8
 
 alias bx="bundle exec"
+alias dn="cd ~/Dropbox/notes"
+alias dnv="cd ~/Dropbox/notes && vim"
 alias todo="vim ~/Dropbox/todo/gtd.md"
 alias v="vim"
 alias vim-swp-clear="rm -rf ~/.tmp/*.swp"
