@@ -77,9 +77,9 @@ map <Leader>h :%s/
 map <Leader>mv :call RenameFile()<cr>
 map <Leader>n :nohl<cr>
 map <Leader>q :bd<cr>
-map <Leader>rc :Rcontroller 
+map <Leader>rc :Econtroller 
 map <Leader>rm :!rm %
-map <Leader>rv :Rview 
+map <Leader>rv :Eview 
 map <Leader>s :A<cr>
 map <Leader>v :vnew<cr>
 map <Leader>, :Rake test<cr>
