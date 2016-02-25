@@ -10,7 +10,7 @@ tmux split-window -t blog:rails -h
 tmux new-window -t blog:2 -n jekyll
 
 tmux send-keys -t blog:vim "vim" C-m
-tmux send-keys -t blog:jekyll "rvm use 2.1.2 do jekyll serve --watch" C-m
+tmux send-keys -t blog:jekyll "jekyll serve --watch" C-m
 
 tmux select-window -t blog:vim
 
