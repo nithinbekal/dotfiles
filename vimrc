@@ -17,6 +17,7 @@ Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'mortice/pbcopy.vim'
+Plugin 'rizzatti/dash.vim'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-dispatch'
@@ -68,6 +69,7 @@ runtime macros/matchit.vim
 
 let mapleader = ","
 
+map <leader>dd :Dash<cr>
 map <Leader>f :Ack 
 map <Leader>gac :Gcommit -m -a ""<LEFT>
 map <Leader>gc :Gcommit -m ""<LEFT>
