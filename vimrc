@@ -15,8 +15,10 @@ Plugin 'gmarik/Vundle.vim'
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
+Plugin 'lambdatoast/elm.vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'mortice/pbcopy.vim'
+Plugin 'rhysd/vim-crystal'
 Plugin 'rizzatti/dash.vim'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'tpope/vim-commentary'
@@ -94,6 +96,12 @@ map <Leader>vi :tabe ~/.vimrc<CR>
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
 map <Leader>gt :tabe ~/Dropbox/todo/gtd.md<CR>
 map <Leader>gg :tabe ~/Dropbox/todo/work.md<CR>
+
+" Elm
+
+nnoremap <leader>el :ElmEvalLine<CR>
+vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
+nnoremap <leader>em :ElmMakeCurrentFile<CR>
 
 " Copy and paste in OSX
 vmap <F2> :w !pbcopy<CR><CR>
