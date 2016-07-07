@@ -30,7 +30,7 @@ Luna):
 
 ### Map Esc to Caps Lock (OSX)
 
-* Install [PCKeyboardHack](https://pqrs.org/macosx/keyremap4macbook/pckeyboardhack.html.en) utility.
+* Install [Seil](https://pqrs.org/macosx/keyremap4macbook/pckeyboardhack.html.en) utility.
 * System Preferences > Keyboard > Modifier keys: Set Caps Lock to no action.
 * PCKeyboardHack: Change CapsLock key to 53 (ESC)
 
