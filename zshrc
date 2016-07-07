@@ -39,10 +39,6 @@ export NVM_DIR=$HOME/.nvm
 
 export JAVA_HOME="/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home"
 
-export DOCKER_HOST=tcp://$(boot2docker ip 2>/dev/null):2376
-export DOCKER_CERT_PATH=~/.boot2docker/certs/boot2docker-vm
-export DOCKER_TLS_VERIFY=1
-
 export RUBYMOTION_ANDROID_SDK=/Users/nithin/.rubymotion-android/sdk
 export RUBYMOTION_ANDROID_NDK=/Users/nithin/.rubymotion-android/ndk
 
