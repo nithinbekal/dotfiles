@@ -47,9 +47,6 @@ filetype plugin indent on    " required
 " Needed for colors to work on gnome-terminal
 set t_Co=256
 
-" Use the colorscheme from above
-colorscheme jellybeans
-
 syntax on                 " Enable syntax highlighting
 filetype plugin indent on " Enable filetype-specific indenting and plugins
 
@@ -141,7 +138,6 @@ nmap j gj
 
 nnoremap <leader>. :CtrlPTag<cr>
 
-
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set history=500   " keep 500 lines of command line history
 set ruler   " show the cursor position all the time
@@ -176,6 +172,9 @@ set splitright
 
 " Set the tag file search order
 set tags=./tags;
+
+" Use the colorscheme from above
+colorscheme jellybeans
 
 " Make the omnicomplete text readable
 :highlight PmenuSel ctermfg=black
