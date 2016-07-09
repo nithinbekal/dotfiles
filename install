@@ -23,6 +23,10 @@ echo "Linking ~/.gvimrc"
 rm "$HOME/.gvimrc"
 ln -s "$PWD/gvimrc" "$HOME/.gvimrc"
 
+echo "Linking ~/.spacemacs"
+rm "$HOME/.spacemacs"
+ln -s "$PWD/spacemacs" "$HOME/.spacemacs"
+
 echo "Linking ~/.tmux.conf"
 rm "$HOME/.tmux.conf"
 ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
