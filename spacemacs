@@ -25,6 +25,7 @@ values."
      ;; ----------------------------------------------------------------
      auto-completion
      ;; better-defaults
+     clojure
      dash
      emacs-lisp
      elixir
