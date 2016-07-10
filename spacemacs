@@ -24,15 +24,17 @@ values."
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
      auto-completion
-     ;; better-defaults
      clojure
      dash
      emacs-lisp
      elixir
      git
+     html
      markdown
      org
      osx
+     ruby
+     ruby-on-rails
      ; feshell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
