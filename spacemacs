@@ -35,6 +35,7 @@ values."
      osx
      ruby
      ruby-on-rails
+     unimpaired
      ; feshell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
