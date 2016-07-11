@@ -13,6 +13,7 @@ Plugin 'gmarik/Vundle.vim'
 
 " My bundles
 Plugin 'elixir-lang/vim-elixir'
+Plugin 'guns/vim-clojure-static'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'lambdatoast/elm.vim'
