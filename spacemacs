@@ -33,7 +33,9 @@ values."
      markdown
      org
      osx
-     ruby
+     (ruby :variables
+           ruby-enable-enh-ruby-mode t
+           ruby-enable-ruby-on-rails-support t)
      ruby-on-rails
      unimpaired
      ; feshell :variables
