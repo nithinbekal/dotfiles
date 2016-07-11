@@ -261,6 +261,11 @@ you should place your code here."
 
   (define-key evil-normal-state-map (kbd "C-s") 'save-buffer)
   (define-key evil-normal-state-map (kbd ",f")  'helm-projectile-find-file)
+
+  ;; Scroll with mouse on the terminal
+  (unless window-system
+    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
+    (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
