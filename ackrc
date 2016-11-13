@@ -4,3 +4,4 @@ ruby=.haml,.feature,.scss,.coffee
 --ignore-dir=tmp
 --ignore-dir=vendor
 --ignore-file=is:tags
+--ignore-dir=deps
