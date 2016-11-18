@@ -5,3 +5,4 @@ ruby=.haml,.feature,.scss,.coffee
 --ignore-dir=vendor
 --ignore-file=is:tags
 --ignore-dir=deps
+--ignore-dir=priv/static
