@@ -14,6 +14,7 @@ Plugin 'gmarik/Vundle.vim'
 " My bundles
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'guns/vim-clojure-static'
+Plugin 'janko-m/vim-test'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'lambdatoast/elm.vim'
@@ -87,6 +88,7 @@ map <Leader>rc :Econtroller
 map <Leader>rm :!rm %
 map <Leader>rv :Eview 
 map <Leader>s :A<cr>
+map <Leader>tt :TestSuite<cr>
 map <Leader>v :vnew<cr>
 map <Leader>, :Rake test<cr>
 
