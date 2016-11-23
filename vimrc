@@ -133,45 +133,48 @@ map K <Nop>
 nmap k gk
 nmap j gj
 
-set backspace=indent,eol,start " allow backspacing over everything in insert mode
-set history=500   " keep 500 lines of command line history
-set ruler   " show the cursor position all the time
-set showcmd   " display incomplete commands
-set autoindent
+set autoindent                  " always set autoindenting on
+set backspace=indent,eol,start  " allow backspacing over everything in insert mode
+set backupdir=~/.tmp            " Don't clutter my dirs up with swp and tmp files
+set directory=~/.tmp            " Don't clutter my dirs up with swp and tmp files
+set et                          " Use the appropriate number of spaces to insert a tab
+set formatoptions-=or           " Don't add the comment prefix when I hit enter or o/O on a comment line.
+set gdefault                    " assume the /g flag on :s substitutions to replace all matches in a line
+set guioptions-=T               " Hide toolbar in GUI vim
+set history=500                 " keep 500 lines of command line history
+set laststatus=2                " Always show status line.
+set nofoldenable                " Say no to code folding
+set ruler                       " show the cursor position all the time
+set shiftround                  " When at 3 spaces and I hit >>, go to 4, not 5.
+set showcmd                     " display incomplete commands
+set splitbelow                  " Open new split panes below
+set splitright                  " Open new split panes to the right
+set tags=./tags;                " Set the tag file search order
+set timeoutlen=500              " Don't wait so long for the next keypress (particularly in ambigious Leader situations.
+set wildmenu                    " Better? completion on command line
+set wildmode=list:full          " What to do when I press 'wildchar'. Worth tweaking to see what feels right.
+
 set showmatch
 set nowrap
-set backupdir=~/.tmp
-set directory=~/.tmp " Don't clutter my dirs up with swp and tmp files
 set autoread
 set wmh=0
 set viminfo+=!
-set guioptions-=T
 set guifont=Monaco:h12
-set et
 set sw=2
 set smarttab
 set noincsearch
 set ignorecase smartcase
-set laststatus=2  " Always show status line.
 set relativenumber
 set number
-set gdefault " assume the /g flag on :s substitutions to replace all matches in a line
-set autoindent " always set autoindenting on
 set bg=light
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 set hlsearch
 
-" Open new split panes to right and bottom
-set splitbelow
-set splitright
+" (Hopefully) removes the delay when hitting esc in insert mode
+set noesckeys
+set ttimeout
+set ttimeoutlen=1
 
-" Set the tag file search order
-set tags=./tags;
-
-set shiftround " When at 3 spaces and I hit >>, go to 4, not 5.
-set nofoldenable " Say no to code folding
-
-" Use the colorscheme from above
 colorscheme jellybeans
 
 " Make the omnicomplete text readable
@@ -206,25 +209,6 @@ au BufNewFile,BufRead *.txt setlocal lbr
 au BufNewFile,BufRead *.txt setlocal nolist " Don't display whitespace
 au BufNewFile,BufRead *.md  setlocal wrap
 au BufNewFile,BufRead *.md  setlocal lbr
-
-" Better? completion on command line
-set wildmenu
-" What to do when I press 'wildchar'. Worth tweaking to see what feels right.
-set wildmode=list:full
-
-" (Hopefully) removes the delay when hitting esc in insert mode
-set noesckeys
-set ttimeout
-set ttimeoutlen=1
-
-" Don't add the comment prefix when I hit enter or o/O on a comment line.
-set formatoptions-=or
-
-" set statusline+=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
-
-" Don't wait so long for the next keypress (particularly in ambigious Leader
-" situations.
-set timeoutlen=500
 
 " Remove trailing whitespace on save for ruby files.
 au BufWritePre *.rb :%s/\s\+$//e
