@@ -17,6 +17,7 @@ Plugin 'janko-m/vim-test'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'lambdatoast/elm.vim'
+Plugin 'ludovicchabant/vim-gutentags'           " Generate tags on save
 Plugin 'MarcWeber/vim-addon-mw-utils'           " Needed by snipmate
 Plugin 'mattn/emmet-vim'
 Plugin 'mileszs/ack.vim'
@@ -167,6 +168,9 @@ colorscheme jellybeans
 
 " Fuzzy finder: ignore stuff that can't be opened, and generated files
 let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**;rdoc/**"
+
+" Write tags to one common dir
+let g:gutentags_cache_dir = '~/.tags_cache'
 
 " Disable folding markdown text
 let g:vim_markdown_folding_disabled=1
