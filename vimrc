@@ -165,8 +165,6 @@ set noesckeys
 set ttimeout
 set ttimeoutlen=1
 
-set statusline+=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
-
 colorscheme jellybeans
 
 let g:airline_mode_map = {
