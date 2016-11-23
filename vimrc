@@ -28,6 +28,7 @@ Plugin 'rizzatti/dash.vim'
 Plugin 'slashmili/alchemist.vim'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'tomtom/tlib_vim'                        " Needed by snipmate
+Plugin 'Townk/vim-autoclose'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-dispatch'
 Plugin 'tpope/vim-endwise'
@@ -38,7 +39,6 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-unimpaired'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-ruby/vim-ruby'
-Plugin 'Townk/vim-autoclose'
 
 call vundle#end() " All of your Plugins must be added before this
 
