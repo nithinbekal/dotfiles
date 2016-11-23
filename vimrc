@@ -45,22 +45,6 @@ set t_Co=256 " Needed for colors to work on gnome-terminal
 syntax on                 " Enable syntax highlighting
 filetype plugin indent on " Enable filetype-specific indenting and plugins
 
-" Enable built-in matchit plugin
-runtime macros/matchit.vim
-
-augroup myfiletypes
-  " Clear old autocmds in group
-  autocmd!
-
-  " autoindent with two spaces, always expand tabs
-  autocmd FileType ruby,eruby,yaml setlocal ai sw=2 sts=2 et
-  autocmd FileType ruby,eruby,yaml setlocal path+=lib
-  autocmd FileType ruby,eruby,yaml setlocal colorcolumn=80
-
-  " comments on hamls files with vim-commentary
-  autocmd FileType haml set commentstring=\/\ %s
-augroup END
-
 
 let mapleader = ","
 
@@ -133,6 +117,10 @@ map K <Nop>
 nmap k gk
 nmap j gj
 
+command! Q q " Bind :Q to :q
+command! Qall qall
+
+
 set autoindent                  " always set autoindenting on
 set backspace=indent,eol,start  " allow backspacing over everything in insert mode
 set backupdir=~/.tmp            " Don't clutter my dirs up with swp and tmp files
@@ -177,9 +165,6 @@ set ttimeoutlen=1
 
 colorscheme jellybeans
 
-" Make the omnicomplete text readable
-:highlight PmenuSel ctermfg=black
-
 " Fuzzy finder: ignore stuff that can't be opened, and generated files
 let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**;rdoc/**"
 
@@ -193,28 +178,59 @@ let g:ctrlp_use_caching = 0
 " make test commands execute using dispatch.vim
 let test#strategy = "dispatch"
 
+runtime macros/matchit.vim " Enable built-in matchit plugin
+
+" Make it more obvious which paren I'm on
+highlight MatchParen cterm=none ctermbg=black ctermfg=yellow
+
+" Make the omnicomplete text readable
+highlight PmenuSel ctermfg=black
+
 " Highlight the status line
 highlight StatusLine ctermfg=blue ctermbg=yellow
 
-" Format xml files
-au FileType xml exe ":silent 1,$!xmllint --format --recover - 2>/dev/null"
-
-autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-
-command! Q q " Bind :Q to :q
-command! Qall qall
-
-" When loading text files, wrap them and don't split up words.
-au BufNewFile,BufRead *.txt setlocal lbr
-au BufNewFile,BufRead *.txt setlocal nolist " Don't display whitespace
-au BufNewFile,BufRead *.md  setlocal wrap
-au BufNewFile,BufRead *.md  setlocal lbr
-
-" Remove trailing whitespace on save for ruby files.
-au BufWritePre *.rb :%s/\s\+$//e
-
 " Set gutter background to black
 highlight SignColumn ctermbg=black
+
+
+" Format xml files
+autocmd FileType xml exe ":silent 1,$!xmllint --format --recover - 2>/dev/null"
+
+" Markdown
+autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+
+" When loading text files, wrap them and don't split up words.
+autocmd BufNewFile,BufRead *.txt setlocal lbr
+autocmd BufNewFile,BufRead *.txt setlocal nolist " Don't display whitespace
+autocmd BufNewFile,BufRead *.md  setlocal wrap
+autocmd BufNewFile,BufRead *.md  setlocal lbr
+
+augroup haml
+  autocmd!
+  " comments on hamls files with vim-commentary
+  autocmd FileType haml set commentstring=\/\ %s
+augroup END
+
+" Create a directory for the current file if it does not exist.
+augroup Mkdir
+  autocmd!
+  autocmd BufWritePre *
+    \ if !isdirectory(expand("<afile>:p:h")) |
+        \ call mkdir(expand("<afile>:p:h"), "p") |
+    \ endif
+augroup END
+
+augroup Ruby
+  autocmd!
+
+  " autoindent with two spaces, always expand tabs
+  autocmd FileType ruby,eruby,yaml setlocal ai sw=2 sts=2 et
+  autocmd FileType ruby,eruby,yaml setlocal path+=lib
+  autocmd FileType ruby,eruby,yaml setlocal colorcolumn=80
+
+  " Remove trailing whitespace on save for ruby files.
+  autocmd BufWritePre *.rb :%s/\s\+$//e
+augroup END
 
 function! RenameFile()
   let old_name = expand('%')
@@ -238,18 +254,6 @@ fun! SnippetFilename(...)
     return substitute(template, '$1', basename, 'g')
   endif
 endf
-
-" Make it more obvious which paren I'm on
-hi MatchParen cterm=none ctermbg=black ctermfg=yellow
-
-" Create a directory for the current file if it does not exist.
-augroup Mkdir
-  autocmd!
-  autocmd BufWritePre *
-    \ if !isdirectory(expand("<afile>:p:h")) |
-        \ call mkdir(expand("<afile>:p:h"), "p") |
-    \ endif
-augroup END
 
 " ========================================================================
 " End of things set by me.
