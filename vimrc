@@ -1,6 +1,6 @@
-" ========================================================================
-" Vundle stuff
-" ========================================================================
+
+" Vundle setup
+
 set nocompatible " Required by vundle
 filetype off     " Required by vundle
 
@@ -8,23 +8,25 @@ filetype off     " Required by vundle
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
-" let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
-" My bundles
 Plugin 'elixir-lang/vim-elixir'
+Plugin 'garbas/vim-snipmate'
 Plugin 'guns/vim-clojure-static'
 Plugin 'janko-m/vim-test'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'lambdatoast/elm.vim'
+Plugin 'MarcWeber/vim-addon-mw-utils'           " Needed by snipmate
 Plugin 'mattn/emmet-vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'mortice/pbcopy.vim'
+Plugin 'nanotech/jellybeans.vim'                " Color scheme
 Plugin 'rhysd/vim-crystal'
 Plugin 'rizzatti/dash.vim'
 Plugin 'slashmili/alchemist.vim'
 Plugin 'terryma/vim-multiple-cursors'
+Plugin 'tomtom/tlib_vim'                        " Needed by snipmate
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-dispatch'
 Plugin 'tpope/vim-endwise'
@@ -36,23 +38,15 @@ Plugin 'tpope/vim-unimpaired'
 Plugin 'vim-ruby/vim-ruby'
 Plugin 'Townk/vim-autoclose'
 
-" Snipmate and dependencies
-Plugin 'MarcWeber/vim-addon-mw-utils'
-Plugin 'tomtom/tlib_vim'
-Plugin 'garbas/vim-snipmate'
+call vundle#end() " All of your Plugins must be added before this
 
-" Colors
-Plugin 'nanotech/jellybeans.vim'
-
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
-filetype plugin indent on    " required
-
-" Needed for colors to work on gnome-terminal
-set t_Co=256
+set t_Co=256 " Needed for colors to work on gnome-terminal
 
 syntax on                 " Enable syntax highlighting
 filetype plugin indent on " Enable filetype-specific indenting and plugins
+
+" Enable built-in matchit plugin
+runtime macros/matchit.vim
 
 augroup myfiletypes
   " Clear old autocmds in group
@@ -67,12 +61,11 @@ augroup myfiletypes
   autocmd FileType haml set commentstring=\/\ %s
 augroup END
 
-" Enable built-in matchit plugin
-runtime macros/matchit.vim
-
 
 let mapleader = ","
 
+map <leader>,   :CtrlP<cr>
+map <leader>.   :w<cr>:TestSuite<cr>
 map <leader>dd :Dash<cr>
 map <Leader>f :Ack 
 map <Leader>gac :Gcommit -m -a ""<LEFT>
@@ -88,9 +81,7 @@ map <Leader>rc :Econtroller
 map <Leader>rm :!rm %
 map <Leader>rv :Eview 
 map <Leader>s :A<cr>
-map <Leader>tt :TestSuite<cr>
 map <Leader>v :vnew<cr>
-map <Leader>, :Rake test<cr>
 
 " Upcase previous word in insert mode
 inoremap <C-x>c <esc>bgUWea
@@ -142,8 +133,6 @@ map K <Nop>
 nmap k gk
 nmap j gj
 
-nnoremap <leader>. :CtrlPTag<cr>
-
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set history=500   " keep 500 lines of command line history
 set ruler   " show the cursor position all the time
@@ -179,6 +168,9 @@ set splitright
 " Set the tag file search order
 set tags=./tags;
 
+set shiftround " When at 3 spaces and I hit >>, go to 4, not 5.
+set nofoldenable " Say no to code folding
+
 " Use the colorscheme from above
 colorscheme jellybeans
 
@@ -205,10 +197,6 @@ highlight StatusLine ctermfg=blue ctermbg=yellow
 au FileType xml exe ":silent 1,$!xmllint --format --recover - 2>/dev/null"
 
 autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-
-set shiftround " When at 3 spaces and I hit >>, go to 4, not 5.
-
-set nofoldenable " Say no to code folding
 
 command! Q q " Bind :Q to :q
 command! Qall qall
