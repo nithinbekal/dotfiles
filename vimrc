@@ -14,6 +14,7 @@ Plugin 'c-brenn/phoenix.vim'
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'garbas/vim-snipmate'
 Plugin 'guns/vim-clojure-static'
+Plugin 'itchyny/lightline.vim'
 Plugin 'janko-m/vim-test'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
@@ -39,7 +40,6 @@ Plugin 'tpope/vim-projectionist'                " Needed by phoenix.vim
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-unimpaired'
-Plugin 'vim-airline/vim-airline'
 Plugin 'vim-ruby/vim-ruby'
 
 call vundle#end() " All of your Plugins must be added before this
@@ -121,8 +121,9 @@ map K <Nop>
 nmap k gk
 nmap j gj
 
-command! Q q " Bind :Q to :q
+command! Q    q         " Bind :Q to :q
 command! Qall qall
+command! Wq   wq
 
 
 set autoindent                  " always set autoindenting on
@@ -168,20 +169,6 @@ set ttimeout
 set ttimeoutlen=1
 
 colorscheme jellybeans
-
-let g:airline_mode_map = {
-    \ '__' : '-',
-    \ 'n'  : 'N',
-    \ 'i'  : 'I',
-    \ 'R'  : 'R',
-    \ 'c'  : 'C',
-    \ 'v'  : 'V',
-    \ 'V'  : 'V',
-    \ '' : 'V',
-    \ 's'  : 'S',
-    \ 'S'  : 'S',
-    \ '' : 'S',
-    \ }
 
 " Fuzzy finder: ignore stuff that can't be opened, and generated files
 let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**;rdoc/**"
