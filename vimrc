@@ -16,6 +16,7 @@ Plugin 'garbas/vim-snipmate'
 Plugin 'guns/vim-clojure-static'
 Plugin 'itchyny/lightline.vim'
 Plugin 'janko-m/vim-test'
+Plugin 'junegunn/goyo.vim'                      " Distraction free writing
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'lambdatoast/elm.vim'
@@ -58,6 +59,7 @@ map <leader>dd :Dash<cr>
 map <Leader>f :Ack 
 map <Leader>gac :Gcommit -m -a ""<LEFT>
 map <Leader>gc :Gcommit -m ""<LEFT>
+map <Leader>go :Goyo<cr>
 map <Leader>gs :Gstatus<CR>
 map <Leader>gw :!git add . && git commit -m 'WIP' && git push<cr>
 map <Leader>h :%s/
