@@ -38,7 +38,7 @@ export PATH=$PATH:$GOPATH/bin
 export NVM_DIR=$HOME/.nvm
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-export JAVA_HOME="/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home"
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home"
 
 export RUBYMOTION_ANDROID_SDK=/Users/nithin/.rubymotion-android/sdk
 export RUBYMOTION_ANDROID_NDK=/Users/nithin/.rubymotion-android/ndk
