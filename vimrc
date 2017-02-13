@@ -208,14 +208,18 @@ highlight SignColumn ctermbg=black
 " Format xml files
 autocmd FileType xml exe ":silent 1,$!xmllint --format --recover - 2>/dev/null"
 
-" Markdown
-autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-
 " When loading text files, wrap them and don't split up words.
 autocmd BufNewFile,BufRead *.txt setlocal lbr
 autocmd BufNewFile,BufRead *.txt setlocal nolist " Don't display whitespace
-autocmd BufNewFile,BufRead *.md  setlocal wrap
-autocmd BufNewFile,BufRead *.md  setlocal lbr
+
+" Markdown
+augroup MarkdownFiles
+  autocmd!
+  autocmd BufNewFile,BufRead *.md  setlocal wrap
+  autocmd BufNewFile,BufRead *.md  setlocal lbr
+  autocmd BufNewFile,BufRead          *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+  autocmd BufRead,BufNewFile,BufEnter *.{md,mdwn,mkd,mkdn,mark*} call MathAndLiquid()
+augroup END
 
 augroup haml
   autocmd!
@@ -288,9 +292,6 @@ function! MathAndLiquid()
     hi link highlight_block Function
     hi link math_block Function
 endfunction
-
-" Call everytime we open a Markdown file
-autocmd BufRead,BufNewFile,BufEnter *.md,*.markdown call MathAndLiquid()
 
 
 " ========================================================================
