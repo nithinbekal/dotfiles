@@ -1,6 +1,11 @@
 #!/bin/sh
 
-cd ~/Dropbox/blog
+if [ -z "$1" ]
+then
+  cd ~/Dropbox/blog
+else
+  cd $1
+fi
 
 tmux start-server
 
