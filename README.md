@@ -16,17 +16,7 @@ Before using Vim with this .vimrc, [Vundle](https://github.com/gmarik/Vundle.vim
     git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     vim +PluginInstall +qall
 
-To install [Ag](https://github.com/ggreer/the_silver_searcher) for
-[Ag.vim](https://github.com/rking/ag.vim) (apt-get won't work in Elementary OS
-Luna): 
-
-    sudo apt-get install -y automake pkg-config libpcre3-dev zlib1g-dev liblzma-dev
-    git clone https://github.com/ggreer/the_silver_searcher ag
-    cd ag
-    ./build.sh
-    sudo make install
-    cd ..
-    rm -rf ag
+- Install [Ag](https://github.com/ggreer/the_silver_searcher)
 
 ### Map Esc to Caps Lock (macOS)
 
