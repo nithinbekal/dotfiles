@@ -28,9 +28,20 @@ Luna):
     cd ..
     rm -rf ag
 
-### Map Esc to Caps Lock (OSX)
+### Map Esc to Caps Lock (macOS)
 
-* Install [Seil](https://pqrs.org/macosx/keyremap4macbook/pckeyboardhack.html.en) utility.
-* System Preferences > Keyboard > Modifier keys: Set Caps Lock to no action.
-* PCKeyboardHack: Change CapsLock key to 53 (ESC)
+Since macOS Sierra (10.12):
+
+- System Preferences > Keyboard > Modifier keys: Set Caps Lock to Escape.
+
+Older versions
+
+- System Preferences > Keyboard > Modifier keys: Set Caps Lock to no action.
+- Install [Seil](https://pqrs.org/macosx/keyremap4macbook/pckeyboardhack.html.en) utility.
+- PCKeyboardHack: Change CapsLock key to 53 (ESC)
+
+### iTerm Settings
+
+- Settings > Profiles > General > Working directory
+  - Set to "Reuse previous session's directory"
 
