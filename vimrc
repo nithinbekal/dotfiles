@@ -18,7 +18,7 @@ Plugin 'itchyny/lightline.vim'
 Plugin 'janko-m/vim-test'
 Plugin 'junegunn/goyo.vim'                      " Distraction free writing
 Plugin 'kchmck/vim-coffee-script'
-Plugin 'kien/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'lambdatoast/elm.vim'
 Plugin 'ludovicchabant/vim-gutentags'           " Generate tags on save
 Plugin 'MarcWeber/vim-addon-mw-utils'           " Needed by snipmate
