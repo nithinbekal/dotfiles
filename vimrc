@@ -57,42 +57,41 @@ let mapleader = ","
 
 map <leader>,   :CtrlP<cr>
 map <leader>.   :w<cr>:TestSuite<cr>
-map <leader>dd :Dash<cr>
-map <Leader>f :Ack 
+map <leader>dd  :Dash<cr>
+map <Leader>f   :Ack 
 map <Leader>gac :Gcommit -m -a ""<LEFT>
-map <Leader>gc :Gcommit -m ""<LEFT>
-map <Leader>go :Goyo<cr>
-map <Leader>gs :Gstatus<CR>
-map <Leader>gw :!git add . && git commit -m 'WIP' && git push<cr>
-map <Leader>h :%s/
-map <Leader>md :!mkdir -p 
-map <Leader>mv :call RenameFile()<cr>
-map <Leader>n :nohl<cr>
-map <Leader>q :bd<cr>
-map <Leader>rc :Econtroller 
-map <Leader>rm :!rm %
-map <Leader>rv :Eview 
-map <Leader>s :A<cr>
-map <Leader>v :vnew<cr>
+map <Leader>gc  :Gcommit -m ""<LEFT>
+map <Leader>go  :Goyo<cr>
+map <Leader>gs  :Gstatus<CR>
+map <Leader>gw  :!git add . && git commit -m 'WIP' && git push<cr>
+map <Leader>h   :%s/
+map <Leader>md  :!mkdir -p 
+map <Leader>mv  :call RenameFile()<cr>
+map <Leader>n   :nohl<cr>
+map <Leader>q   :bd<cr>
+map <Leader>rc  :Econtroller 
+map <Leader>rm  :!rm %
+map <Leader>rv  :Eview 
+map <Leader>s   :A<cr>
+map <Leader>v   :vnew<cr>
 
 " Upcase previous word in insert mode
 inoremap <C-x>c <esc>bgUWea
 
 " Vim
-map <Leader>vi :tabe ~/.vimrc<CR>
+map  <Leader>vi :tabe ~/.vimrc<CR>
 nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
-map <Leader>gt :tabe ~/Dropbox/todo/gtd.md<CR>
-map <Leader>gg :tabe ~/Dropbox/todo/work.md<CR>
+map  <Leader>gt :tabe ~/Dropbox/todo/gtd.md<CR>
+map  <Leader>gg :tabe ~/Dropbox/todo/work.md<CR>
 
 " Elm
-
 nnoremap <leader>el :ElmEvalLine<CR>
 vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
 nnoremap <leader>em :ElmMakeCurrentFile<CR>
 
 " Copy and paste in OSX
 vmap <F2> :w !pbcopy<CR><CR>
-map <F3> :r !pbpaste<CR>
+map  <F3> :r !pbpaste<CR>
 
 " Split navigation
 nnoremap <C-J> <C-W><C-J>
@@ -101,21 +100,21 @@ nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
 " Disable arrow keys
-map <up> <nop>
-map <down> <nop>
-map <left> <nop>
-map <right> <nop>
-imap <up> <nop>
-imap <down> <nop>
-imap <left> <nop>
+map  <up>    <nop>
+map  <down>  <nop>
+map  <left>  <nop>
+map  <right> <nop>
+imap <up>    <nop>
+imap <down>  <nop>
+imap <left>  <nop>
 imap <right> <nop>
 
 " Remapping C-s requires flow control to be disabled in .bash/.zshrc
-map <C-s> <esc>:w<CR>
+map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
-map <C-t> <esc>:tabnew<CR>
+map  <C-t> <esc>:tabnew<CR>
 
-" Disable Ex mode
+" Use Q to run macros
 map Q @q
 
 " Disable K looking stuff up
@@ -124,6 +123,8 @@ map K <Nop>
 " Let's be reasonable, shall we?
 nmap k gk
 nmap j gj
+
+inoremap <Tab> <C-P>
 
 command! Q    q         " Bind :Q to :q
 command! Qall qall
