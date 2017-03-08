@@ -116,7 +116,7 @@ imap <C-s> <esc>:w<CR>
 map <C-t> <esc>:tabnew<CR>
 
 " Disable Ex mode
-map Q <Nop>
+map Q @q
 
 " Disable K looking stuff up
 map K <Nop>
