@@ -11,6 +11,7 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 
 Plugin 'c-brenn/phoenix.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'garbas/vim-snipmate'
 Plugin 'guns/vim-clojure-static'
@@ -18,7 +19,6 @@ Plugin 'itchyny/lightline.vim'
 Plugin 'janko-m/vim-test'
 Plugin 'junegunn/goyo.vim'                      " Distraction free writing
 Plugin 'kchmck/vim-coffee-script'
-Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'lambdatoast/elm.vim'
 Plugin 'ludovicchabant/vim-gutentags'           " Generate tags on save
 Plugin 'MarcWeber/vim-addon-mw-utils'           " Needed by snipmate
