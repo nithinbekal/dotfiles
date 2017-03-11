@@ -124,8 +124,6 @@ map K <Nop>
 nmap k gk
 nmap j gj
 
-inoremap <Tab> <C-P>
-
 command! Q    q         " Bind :Q to :q
 command! Qall qall
 command! Wq   wq
