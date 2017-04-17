@@ -28,11 +28,11 @@ set expandtab                   " Tab settings - Use spaces to insert a tab
 set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
 set colorcolumn=80              " Show vertical bar to indicate 80 chars
 set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
-set hlsearch                    " Highlight search results
-set incsearch                   " Show search results as you type
+set hlsearch                    " Search: Highlight results
+set ignorecase smartcase        " Search: ignore case, unless uppercase chars given
+set incsearch                   " Search: Show results as you type
 set laststatus=2                " Always show status line
-set number                      " Show current line number, but use relative numbers elsewhere
-set relativenumber              " Use relative line numbers
+set relativenumber number       " Line numbers: Show current #, but use relative #s elsewhere
 set shiftround                  " Indentation: When at 3 spaces, >> takes to 4, not 5
 set shiftwidth=2                " Tab settings - Use 2 spaces for each indent level
 set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
