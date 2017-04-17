@@ -30,3 +30,4 @@ set softtabstop=2               " Tab settings - Count 2 spaces in editing opera
 let mapleader = ","
 
 map  <leader>gs   :Gstatus<cr>
+map  <leader>q    :bd<cr>
