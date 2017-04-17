@@ -9,11 +9,13 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 
 Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
+Plugin 'jceb/vim-orgmode'                 " Org mode
 Plugin 'mileszs/ack.vim'                  " Use Ag for search
 Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plugin 'tpope/vim-fugitive'               " Git wrapper
+Plugin 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 
 call vundle#end()
 
@@ -59,6 +61,7 @@ map  <leader>f    :Ack<space>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
+map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
 
 map K   <nop>
 map Q   @q
