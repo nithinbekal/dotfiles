@@ -25,3 +25,8 @@ set relativenumber              " Use relative line numbers
 set shiftwidth=2                " Tab settings - Use 2 spaces for each indent level
 set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
 
+" Leader key settings
+
+let mapleader = ","
+
+map  <leader>gs   :Gstatus<cr>
