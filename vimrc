@@ -84,6 +84,16 @@ nnoremap <C-l> <C-w><C-l>
 map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
 
+" Disable arrow keys
+map  <up>    <nop>
+imap <up>    <nop>
+map  <down>  <nop>
+imap <down>  <nop>
+map  <left>  <nop>
+imap <left>  <nop>
+map  <right> <nop>
+imap <right> <nop>
+
 " I often mistype Q and Wq
 command! Q  q
 command! Wq wq
