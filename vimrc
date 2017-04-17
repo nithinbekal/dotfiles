@@ -19,3 +19,9 @@ syntax on
 
 set laststatus=2 " Always show status line
 set relativenumber
+
+" Tab settings
+set shiftwidth=2
+set softtabstop=2
+set expandtab
+
