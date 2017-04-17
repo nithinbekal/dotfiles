@@ -62,6 +62,7 @@ map  <leader>gs   :Gstatus<cr>
 map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
 map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
+map  <leader>vn   :vnew<cr>:CtrlP<cr>
 
 map K   <nop>
 map Q   @q
@@ -69,10 +70,10 @@ map Q   @q
 vmap <F2> :w !pbcopy<CR><CR>
 map  <F3> :r !pbpaste<CR>
 
+nnoremap <C-h> <C-w><C-h>
 nnoremap <C-j> <C-w><C-j>
 nnoremap <C-k> <C-w><C-k>
 nnoremap <C-l> <C-w><C-l>
-nnoremap <C-h> <C-w><C-h>
 
 map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
