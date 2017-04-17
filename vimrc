@@ -17,7 +17,8 @@ filetype plugin indent on
 
 syntax on
 
-set laststatus=2 " Always show status line
+set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
+set laststatus=2                " Always show status line
 set relativenumber
 
 " Tab settings
