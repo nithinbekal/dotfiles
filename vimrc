@@ -10,6 +10,7 @@ Plugin 'gmarik/Vundle.vim'
 
 Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'mileszs/ack.vim'                  " Use Ag for search
+Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plugin 'tpope/vim-fugitive'               " Git wrapper
@@ -52,6 +53,9 @@ map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
 
 map Q   @q
+
+vmap <F2> :w !pbcopy<CR><CR>
+map  <F3> :r !pbpaste<CR>
 
 map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
