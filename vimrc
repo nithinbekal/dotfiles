@@ -51,3 +51,7 @@ map  <leader>q    :bd<cr>
 
 map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
+
+" I often mistype Q and Wq
+command! Q  q
+command! Wq wq
