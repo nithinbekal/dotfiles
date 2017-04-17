@@ -9,6 +9,7 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 
 Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
+Plugin 'mileszs/ack.vim'                  " Use Ag for search
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plugin 'tpope/vim-fugitive'               " Git wrapper
 
@@ -33,10 +34,15 @@ set softtabstop=2               " Tab settings - Count 2 spaces in editing opera
 set splitbelow                  " Open new split panes below
 set splitright                  " Open new split panes to the right
 
+
+let g:ackprg = 'ag --vimgrep'
+
+
 " Leader key settings
 
 let mapleader = ","
 
+map  <leader>f    :Ack<space>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
