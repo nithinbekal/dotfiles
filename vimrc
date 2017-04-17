@@ -60,6 +60,7 @@ map  <leader>gs   :Gstatus<cr>
 map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
 
+map K   <nop>
 map Q   @q
 
 vmap <F2> :w !pbcopy<CR><CR>
