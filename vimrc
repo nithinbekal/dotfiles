@@ -8,7 +8,8 @@ call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
 
-Plugin 'tpope/vim-fugitive' " Git wrapper
+Plugin 'nanotech/jellybeans.vim' " Jellybeans color scheme
+Plugin 'tpope/vim-fugitive'      " Git wrapper
 
 call vundle#end()
 
@@ -16,6 +17,8 @@ filetype plugin indent on
 " End of Vundle setup
 
 syntax on
+
+colorscheme jellybeans
 
 set expandtab                   " Tab settings - Use spaces to insert a tab
 set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
