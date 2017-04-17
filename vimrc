@@ -17,4 +17,5 @@ filetype plugin indent on
 
 syntax on
 
+set laststatus=2 " Always show status line
 set relativenumber
