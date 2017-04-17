@@ -48,3 +48,6 @@ map  <leader>f    :Ack<space>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
+
+map  <C-s> <esc>:w<CR>
+imap <C-s> <esc>:w<CR>
