@@ -69,6 +69,11 @@ map Q   @q
 vmap <F2> :w !pbcopy<CR><CR>
 map  <F3> :r !pbpaste<CR>
 
+nnoremap <C-j> <C-w><C-j>
+nnoremap <C-k> <C-w><C-k>
+nnoremap <C-l> <C-w><C-l>
+nnoremap <C-h> <C-w><C-h>
+
 map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
 
