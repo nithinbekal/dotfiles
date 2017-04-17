@@ -8,6 +8,8 @@ call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
 
+Plugin 'tpope/vim-fugitive' " Git wrapper
+
 call vundle#end()
 
 filetype plugin indent on
