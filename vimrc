@@ -23,6 +23,8 @@ colorscheme jellybeans
 set expandtab                   " Tab settings - Use spaces to insert a tab
 set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
 set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
+set hlsearch                    " Highlight search results
+set incsearch                   " Show search results as you type
 set laststatus=2                " Always show status line
 set relativenumber              " Use relative line numbers
 set shiftwidth=2                " Tab settings - Use 2 spaces for each indent level
@@ -35,4 +37,5 @@ set splitright                  " Open new split panes to the right
 let mapleader = ","
 
 map  <leader>gs   :Gstatus<cr>
+map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
