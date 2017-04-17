@@ -11,6 +11,7 @@ Plugin 'gmarik/Vundle.vim'
 Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'mileszs/ack.vim'                  " Use Ag for search
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
+Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plugin 'tpope/vim-fugitive'               " Git wrapper
 
 call vundle#end()
@@ -44,6 +45,7 @@ let g:ackprg = 'ag --vimgrep'
 
 let mapleader = ","
 
+map  <leader>dd   :Dash<cr>
 map  <leader>f    :Ack<space>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>n    :nohl<cr>
