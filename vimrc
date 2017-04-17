@@ -29,6 +29,7 @@ set hlsearch                    " Highlight search results
 set incsearch                   " Show search results as you type
 set laststatus=2                " Always show status line
 set relativenumber              " Use relative line numbers
+set shiftround                  " Indentation: When at 3 spaces, >> takes to 4, not 5
 set shiftwidth=2                " Tab settings - Use 2 spaces for each indent level
 set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
 set splitbelow                  " Open new split panes below
