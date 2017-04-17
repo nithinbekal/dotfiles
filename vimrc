@@ -56,6 +56,7 @@ highlight StatusLine ctermfg=white ctermbg=blue
 
 let mapleader = ","
 
+nmap <leader>bi   :source ~/.vimrc<cr>:PluginInstall<cr>
 map  <leader>dd   :Dash<cr>
 map  <leader>f    :Ack<space>
 map  <leader>gs   :Gstatus<cr>
@@ -63,6 +64,7 @@ map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
 map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
 map  <leader>rm   :!rm %
+map  <leader>vi   :tabe ~/.vimrc<cr>
 map  <leader>vn   :vnew<cr>:CtrlP<cr>
 
 map K   <nop>
