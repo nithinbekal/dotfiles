@@ -41,6 +41,10 @@ set splitright                  " Open new split panes to the right
 
 let g:ackprg = 'ag --vimgrep'
 
+" Status line configuration
+set statusline=%m\ %f
+set statusline+=\ %{fugitive#statusline()}
+set statusline+=%=%l/%L\ [%P]\ C:%c
 
 highlight StatusLine ctermfg=white ctermbg=blue
 
