@@ -8,8 +8,9 @@ call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
 
-Plugin 'nanotech/jellybeans.vim' " Jellybeans color scheme
-Plugin 'tpope/vim-fugitive'      " Git wrapper
+Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
+Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
+Plugin 'tpope/vim-fugitive'               " Git wrapper
 
 call vundle#end()
 
