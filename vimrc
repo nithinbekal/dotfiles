@@ -62,6 +62,7 @@ map  <leader>gs   :Gstatus<cr>
 map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
 map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
+map  <leader>rm   :!rm %
 map  <leader>vn   :vnew<cr>:CtrlP<cr>
 
 map K   <nop>
