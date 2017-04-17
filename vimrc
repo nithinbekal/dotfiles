@@ -10,6 +10,7 @@ Plugin 'gmarik/Vundle.vim'
 
 Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'jceb/vim-orgmode'                 " Org mode
+Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
 Plugin 'mileszs/ack.vim'                  " Use Ag for search
 Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
@@ -43,6 +44,8 @@ set splitright                  " Open new split panes to the right
 
 
 let g:ackprg = 'ag --vimgrep'
+
+let g:gutentags_cache_dir = '~/.tags_cache'
 
 " Status line configuration
 set statusline=%m\ %f
