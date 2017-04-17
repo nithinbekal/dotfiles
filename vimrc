@@ -15,6 +15,7 @@ Plugin 'mileszs/ack.vim'                  " Use Ag for search
 Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
+Plugin 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plugin 'tpope/vim-fugitive'               " Git wrapper
 Plugin 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plugin 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
