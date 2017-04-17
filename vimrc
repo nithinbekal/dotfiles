@@ -42,6 +42,9 @@ set splitright                  " Open new split panes to the right
 let g:ackprg = 'ag --vimgrep'
 
 
+highlight StatusLine ctermfg=white ctermbg=blue
+
+
 " Leader key settings
 
 let mapleader = ","
