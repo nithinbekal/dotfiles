@@ -23,6 +23,10 @@ echo "Linking ~/.gvimrc"
 rm "$HOME/.gvimrc"
 ln -s "$PWD/gvimrc" "$HOME/.gvimrc"
 
+echo "Linking ~/.railsrc"
+rm "$HOME/.railsrc"
+ln -s "$PWD/railsrc" "$HOME/.railsrc"
+
 echo "Linking ~/.spacemacs"
 rm "$HOME/.spacemacs"
 ln -s "$PWD/spacemacs" "$HOME/.spacemacs"
