@@ -42,6 +42,8 @@ set hlsearch                    " Search: Highlight results
 set ignorecase smartcase        " Search: ignore case, unless uppercase chars given
 set incsearch                   " Search: Show results as you type
 set laststatus=2                " Always show status line
+set list                        " Show tabs and trailing whitespace
+set listchars=tab:>-,trail:·    " Set chars to show for tabs or trailing whitespace
 set relativenumber number       " Line numbers: Show current #, but use relative #s elsewhere
 set shiftround                  " Indentation: When at 3 spaces, >> takes to 4, not 5
 set shiftwidth=2                " Tab settings - Use 2 spaces for each indent level
