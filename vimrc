@@ -76,6 +76,16 @@ let g:ctrlp_use_caching = 0
 let g:gutentags_cache_dir = '~/.tags_cache'
 
 
+" Create a directory for the current file if it does not exist.
+augroup Mkdir
+  autocmd!
+  autocmd BufWritePre *
+    \ if !isdirectory(expand("<afile>:p:h")) |
+        \ call mkdir(expand("<afile>:p:h"), "p") |
+    \ endif
+augroup END
+
+
 function! RenameFile()
   let old_name = expand('%')
   let new_name = input('New file name: ', expand('%'), 'file')
