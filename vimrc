@@ -76,6 +76,16 @@ let g:ctrlp_use_caching = 0
 let g:gutentags_cache_dir = '~/.tags_cache'
 
 
+function! RenameFile()
+  let old_name = expand('%')
+  let new_name = input('New file name: ', expand('%'), 'file')
+  if new_name != '' && new_name != old_name
+    exec ':saveas ' . new_name
+    exec ':silent !rm ' . old_name
+    redraw!
+  endif
+endfunction
+
 " Leader key settings
 
 let mapleader = ","
@@ -84,6 +94,7 @@ nmap <leader>bi   :source ~/.vimrc<cr>:PluginInstall<cr>
 map  <leader>dd   :Dash<cr>
 map  <leader>f    :Ack<space>
 map  <leader>gs   :Gstatus<cr>
+map  <leader>mv   :call RenameFile()<cr>
 map  <leader>n    :nohl<cr>
 map  <leader>q    :bd<cr>
 map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
