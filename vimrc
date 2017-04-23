@@ -50,6 +50,14 @@ set splitbelow                  " Open new split panes below
 set splitright                  " Open new split panes to the right
 
 
+" Status line configuration
+set statusline=%m\ %f
+set statusline+=\ %{fugitive#statusline()}
+set statusline+=%=%l/%L\ [%P]\ C:%c
+
+highlight StatusLine ctermfg=white ctermbg=blue
+
+
 " Enable extended matching with %
 runtime macros/matchit.vim
 
@@ -63,14 +71,6 @@ let g:ctrlp_use_caching = 0
 
 " Don't pollute all projects with tags file. Put them all on one place
 let g:gutentags_cache_dir = '~/.tags_cache'
-
-
-" Status line configuration
-set statusline=%m\ %f
-set statusline+=\ %{fugitive#statusline()}
-set statusline+=%=%l/%L\ [%P]\ C:%c
-
-highlight StatusLine ctermfg=white ctermbg=blue
 
 
 " Leader key settings
