@@ -15,8 +15,11 @@ Plugin 'mileszs/ack.vim'                  " Use Ag for search
 Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
+Plugin 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
 Plugin 'Townk/vim-autoclose'              " Insert matching pair () {} []
+Plugin 'tpope/vim-commentary'             " Toggle comments easily
 Plugin 'tpope/vim-fugitive'               " Git wrapper
+Plugin 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plugin 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plugin 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 
@@ -71,6 +74,7 @@ map  <leader>q    :bd<cr>
 map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
 map  <leader>rm   :!rm %
 map  <leader>vi   :tabe ~/.vimrc<cr>
+map  <leader>vs   :vsplit<cr>
 map  <leader>vn   :vnew<cr>:CtrlP<cr>
 
 map K   <nop>
