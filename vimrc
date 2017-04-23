@@ -9,6 +9,7 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 
 Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
+Plugin 'elixir-lang/vim-elixir'           " Elixir support
 Plugin 'jceb/vim-orgmode'                 " Org mode
 Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
 Plugin 'mileszs/ack.vim'                  " Use Ag for search
