@@ -52,7 +52,7 @@ set shiftwidth=2                " Tab settings - Use 2 spaces for each indent le
 set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
 set splitbelow                  " Open new split panes below
 set splitright                  " Open new split panes to the right
-set wildmode=list:longest       " Command mode tab completion - complete upto ambiguity
+set wildmode=list:full          " Command mode tab completion - complete upto ambiguity
 
 
 " Status line configuration
