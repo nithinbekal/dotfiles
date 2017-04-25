@@ -23,6 +23,7 @@ Plugin 'tpope/vim-fugitive'               " Git wrapper
 Plugin 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plugin 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plugin 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
+Plugin 'vim-ruby/vim-ruby'                " Ruby support
 
 call vundle#end()
 
