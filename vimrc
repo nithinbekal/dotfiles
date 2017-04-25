@@ -19,6 +19,7 @@ Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plugin 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
 Plugin 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plugin 'tpope/vim-commentary'             " Toggle comments easily
+Plugin 'tpope/vim-endwise'                " Add end after ruby blocks
 Plugin 'tpope/vim-fugitive'               " Git wrapper
 Plugin 'tpope/vim-rails'                  " Rails support
 Plugin 'tpope/vim-surround'               " Easily change quotes/bracket pairs
