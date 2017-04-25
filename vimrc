@@ -98,25 +98,6 @@ function! RenameFile()
   endif
 endfunction
 
-" Leader key settings
-
-let mapleader = ","
-
-nmap <leader>bi   :source ~/.vimrc<cr>:PluginInstall<cr>
-map  <leader>dd   :Dash<cr>
-map  <leader>f    :Ack<space>
-map  <leader>gs   :Gstatus<cr>
-map  <leader>mv   :call RenameFile()<cr>
-map  <leader>n    :nohl<cr>
-map  <leader>q    :bd<cr>
-map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
-map  <leader>rc   :Econtroller
-map  <leader>rm   :!rm %
-map  <leader>rv   :Eview
-map  <leader>s    :A<cr>
-map  <leader>vi   :tabe ~/.vimrc<cr>
-map  <leader>vs   :vsplit<cr>
-map  <leader>vn   :vnew<cr>:CtrlP<cr>
 
 map K   <nop>
 map Q   @q
@@ -145,3 +126,25 @@ imap <right> <nop>
 " I often mistype Q and Wq
 command! Q  q
 command! Wq wq
+
+
+" Leader key settings
+
+let mapleader = ","
+
+nmap <leader>bi   :source ~/.vimrc<cr>:PluginInstall<cr>
+map  <leader>dd   :Dash<cr>
+map  <leader>f    :Ack<space>
+map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
+map  <leader>gs   :Gstatus<cr>
+map  <leader>mv   :call RenameFile()<cr>
+map  <leader>n    :nohl<cr>
+map  <leader>q    :bd<cr>
+map  <leader>rc   :Econtroller
+map  <leader>rm   :!rm %
+map  <leader>rv   :Eview
+map  <leader>s    :A<cr>
+map  <leader>vi   :tabe ~/.vimrc<cr>
+map  <leader>vn   :vnew<cr>:CtrlP<cr>
+map  <leader>vs   :vsplit<cr>
+
