@@ -37,7 +37,7 @@ ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
 
 echo "Linking ~/.vim-snippets"
 rm "$HOME/.vim-snippets"
-ln -s "$PWD/vim-snippets" "$HOME/.vim-snippets"
+ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
 
 echo "Linking ~/.vimrc"
 rm "$HOME/.vimrc"
