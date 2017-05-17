@@ -17,3 +17,30 @@ snippet cla class .. end
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
 		${0}
 	end
+snippet rmod
+	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationRecord
+		${0}
+	end
+snippet rcon
+	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationController
+		${0}
+	end
+snippet rt
+	require 'test_helper'
+	
+	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ActiveSupport::TestCase
+		${0}
+	end
+snippet rtc
+	require 'test_helper'
+	
+	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ActionDispatch::IntegrationTest
+		${0}
+	end
+snippet rtsys
+	require 'application_system_test_case'
+	
+	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationSystemTestCase
+		${0}
+	end
+
