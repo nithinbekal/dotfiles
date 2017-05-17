@@ -10,13 +10,16 @@ Plugin 'gmarik/Vundle.vim'
 
 Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'elixir-lang/vim-elixir'           " Elixir support
+Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
 Plugin 'jceb/vim-orgmode'                 " Org mode
 Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
+Plugin 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plugin 'mileszs/ack.vim'                  " Use Ag for search
 Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plugin 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
+Plugin 'tomtom/tlib_vim'                  " Needed by snipmate
 Plugin 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plugin 'tpope/vim-commentary'             " Toggle comments easily
 Plugin 'tpope/vim-endwise'                " Add end after ruby blocks
