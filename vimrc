@@ -53,6 +53,7 @@ set shiftwidth=2                " Tab settings - Use 2 spaces for each indent le
 set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
 set splitbelow                  " Open new split panes below
 set splitright                  " Open new split panes to the right
+set tags=$HOME/.tags_cache      " Keep tags file in a single place
 set wildmode=list:full          " Command mode tab completion - complete upto ambiguity
 
 
@@ -146,6 +147,4 @@ map  <leader>rm   :!rm %
 map  <leader>rv   :Eview
 map  <leader>s    :A<cr>
 map  <leader>vi   :tabe ~/.vimrc<cr>
-map  <leader>vn   :vnew<cr>:CtrlP<cr>
-map  <leader>vs   :vsplit<cr>
-
+map  <leader>vv   :vnew<cr>
