@@ -1,3 +1,6 @@
+#! /bin/sh
+
+# Install the dotfiles to the correct paths
 
 echo "Linking ~/.ackrc"
 rm "$HOME/.ackrc"

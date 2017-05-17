@@ -7,7 +7,7 @@ This repo will contain the dot files I use to configure my system. The
 
     git clone git@github.com:nithinbekal/dotfiles.git
     cd dotfiles
-    rake install
+    bin/install
 
 ## Vim
 
