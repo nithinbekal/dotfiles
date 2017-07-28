@@ -35,3 +35,16 @@ Older versions
 - Settings > Profiles > General > Working directory
   - Set to "Reuse previous session's directory"
 
+### Other editors
+
+My config for VS Code and Sublime are in editors, but these are not
+automatically installed.
+
+VS Code has problems with repeated keystrokes with the vim plugin on MacOS, so
+this command needs to be run to fix that:
+
+```bash
+defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+```
+
+- [More details](https://wesleywiser.github.io/post/vscode-vim-repeat-osx/)
