@@ -1,0 +1,15 @@
+{
+	"color_scheme": "Packages/Boron Color Scheme/Boron.tmTheme",
+	"font_face": "Monaco",
+	"font_size": 12,
+	"ignored_packages":
+	[
+	],
+	"index_files": true,
+	"rulers":
+	[
+		119
+	],
+	"tab_size": 2,
+	"trim_trailing_white_space_on_save": true
+}
