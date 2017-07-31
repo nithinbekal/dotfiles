@@ -12,6 +12,8 @@ Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'elixir-lang/vim-elixir'           " Elixir support
 Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
 Plugin 'jceb/vim-orgmode'                 " Org mode
+Plugin 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
+Plugin 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
 Plugin 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plugin 'mileszs/ack.vim'                  " Use Ag for search
