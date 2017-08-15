@@ -12,6 +12,7 @@ Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'elixir-lang/vim-elixir'           " Elixir support
 Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
 Plugin 'jceb/vim-orgmode'                 " Org mode
+Plugin 'junegunn/fzf'                     " Fuzzy file search
 Plugin 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plugin 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
@@ -54,6 +55,7 @@ set list                        " Show tabs and trailing whitespace
 set listchars=tab:>-,trail:·    " Set chars to show for tabs or trailing whitespace
 set nofoldenable                " Disable code folding
 set relativenumber number       " Line numbers: Show current #, but use relative #s elsewhere
+set rtp+=/usr/local/opt/fzf     " Set fzf path
 set shiftround                  " Indentation: When at 3 spaces, >> takes to 4, not 5
 set shiftwidth=2                " Tab settings - Use 2 spaces for each indent level
 set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
