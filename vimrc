@@ -8,11 +8,12 @@ call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
 
-Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
+" Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'elixir-lang/vim-elixir'           " Elixir support
 Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
 Plugin 'jceb/vim-orgmode'                 " Org mode
-Plugin 'junegunn/fzf'                     " Fuzzy file search
+Plugin 'junegunn/fzf'                     " Basic fzf wrapper
+Plugin 'junegunn/fzf.vim'                 " Fuzzy file finder
 Plugin 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plugin 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
@@ -79,10 +80,6 @@ runtime macros/matchit.vim
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
-" CtrlP customization
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard', 'find %s -type f']
-let g:ctrlp_use_caching = 0
-
 " Don't pollute all projects with tags file. Put them all on one place
 let g:gutentags_cache_dir = '~/.tags_cache'
 
@@ -133,6 +130,9 @@ nnoremap <C-h> <C-w><C-h>
 nnoremap <C-j> <C-w><C-j>
 nnoremap <C-k> <C-w><C-k>
 nnoremap <C-l> <C-w><C-l>
+
+" Use fzf.vim for fuzzy file search
+map <C-p> :Files<cr>
 
 map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
