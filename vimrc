@@ -47,6 +47,7 @@ set expandtab                   " Tab settings - Use spaces to insert a tab
 set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
 set colorcolumn=80              " Show vertical bar to indicate 80 chars
 set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
+set grepprg=rg\ --vimgrep       " Use ripgrep for file search
 set hlsearch                    " Search: Highlight results
 set ignorecase smartcase        " Search: ignore case, unless uppercase chars given
 set incsearch                   " Search: Show results as you type
@@ -64,7 +65,6 @@ set splitright                  " Open new split panes to the right
 set tags=$HOME/.tags_cache      " Keep tags file in a single place
 set wildmode=list:full          " Command mode tab completion - complete upto ambiguity
 
-
 " Status line configuration
 set statusline=%m\ %f
 set statusline+=\ %{fugitive#statusline()}
@@ -76,9 +76,8 @@ highlight StatusLine ctermfg=white ctermbg=blue
 " Enable extended matching with %
 runtime macros/matchit.vim
 
-
 " Use ag for text search
-let g:ackprg = 'ag --vimgrep'
+let g:ackprg = 'rg --vimgrep'
 
 " CtrlP customization
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard', 'find %s -type f']
