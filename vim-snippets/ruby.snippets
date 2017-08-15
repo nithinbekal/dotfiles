@@ -43,4 +43,5 @@ snippet rtsys
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationSystemTestCase
 		${0}
 	end
-
+snippet pry
+	binding.pry
