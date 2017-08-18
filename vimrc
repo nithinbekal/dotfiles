@@ -167,7 +167,7 @@ let mapleader = ","
 nmap <leader>bi   :source ~/.vimrc<cr>:PluginInstall<cr>
 map  <leader>dd   :Dash<cr>
 map  <leader>f    :Ack<space>
-map  <leader>gg   :tabe ~/Dropbox/org/main.org<cr>
+map  <leader>gg   :tabe ~/Dropbox/notes/notes.md<cr>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>mv   :call RenameFile()<cr>
 map  <leader>n    :nohl<cr>
