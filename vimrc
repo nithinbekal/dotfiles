@@ -63,6 +63,7 @@ set shiftwidth=2                " Tab settings - Use 2 spaces for each indent le
 set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
 set splitbelow                  " Open new split panes below
 set splitright                  " Open new split panes to the right
+set t_Co=256                    " Use 256 colors in tmux
 set tags=$HOME/.tags_cache      " Keep tags file in a single place
 set wildmode=list:full          " Command mode tab completion - complete upto ambiguity
 
