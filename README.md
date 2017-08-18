@@ -28,12 +28,6 @@ Since macOS Sierra (10.12):
 
 - System Preferences > Keyboard > Modifier keys: Set Caps Lock to Escape.
 
-Older versions
-
-- System Preferences > Keyboard > Modifier keys: Set Caps Lock to no action.
-- Install [Seil](https://pqrs.org/macosx/keyremap4macbook/pckeyboardhack.html.en) utility.
-- PCKeyboardHack: Change CapsLock key to 53 (ESC)
-
 ### iTerm Settings
 
 - Preferences > General > Load preferences from custom folder or url
