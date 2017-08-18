@@ -37,14 +37,14 @@ Older versions
 
 ### Other editors
 
-My config for VS Code and Sublime are in editors, but these are not
+My config for VS Code and Sublime are in `editors/`, but these are not
 automatically installed.
 
-VS Code has problems with repeated keystrokes with the vim plugin on MacOS, so
-this command needs to be run to fix that:
+VS Code has problems with repeated keystrokes with the vim plugin on MacOS,
+([details](https://wesleywiser.github.io/post/vscode-vim-repeat-osx/))
+so this command needs to be run to fix that:
 
 ```bash
 defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 ```
 
-- [More details](https://wesleywiser.github.io/post/vscode-vim-repeat-osx/)
