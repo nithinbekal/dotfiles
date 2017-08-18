@@ -26,6 +26,7 @@ Plugin 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
 Plugin 'tomtom/tlib_vim'                  " Needed by snipmate
 Plugin 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plugin 'tpope/vim-commentary'             " Toggle comments easily
+Plugin 'tpope/vim-dispatch'
 Plugin 'tpope/vim-endwise'                " Add end after ruby blocks
 Plugin 'tpope/vim-fugitive'               " Git wrapper
 Plugin 'tpope/vim-rails'                  " Rails support
