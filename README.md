@@ -32,8 +32,8 @@ Older versions
 
 ### iTerm Settings
 
-- Settings > Profiles > General > Working directory
-  - Set to "Reuse previous session's directory"
+- Preferences > General > Load preferences from custom folder or url
+  - Set it to `dotfiles_path/items2/com.googlecode.iterm2.plist`
 
 ### Other editors
 
