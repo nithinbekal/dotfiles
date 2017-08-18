@@ -9,14 +9,18 @@ This repo will contain the dot files I use to configure my system. The
     cd dotfiles
     bin/install
 
-## Vim
+## Vimrc dependencies
 
 Before using Vim with this .vimrc, [Vundle](https://github.com/gmarik/Vundle.vim) needs to be installed:
 
     git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     vim +PluginInstall +qall
 
-- Install [Ag](https://github.com/ggreer/the_silver_searcher)
+The following tools need to be installed as well:
+
+- [ag](https://github.com/ggreer/the_silver_searcher)
+- [fzf](https://github.com/junegunn/fzf)
+- [ripgrep](https://github.com/BurntSushi/ripgrep)
 
 ### Map Esc to Caps Lock (macOS)
 
