@@ -8,6 +8,7 @@ call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
 
+Plugin 'airblade/vim-gitgutter'           " Show sign column for git diff
 Plugin 'elixir-lang/vim-elixir'           " Elixir support
 Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
 Plugin 'jceb/vim-orgmode'                 " Org mode
