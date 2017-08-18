@@ -5,9 +5,11 @@ This repo will contain the dot files I use to configure my system. The
 
 ## Install
 
-    git clone git@github.com:nithinbekal/dotfiles.git
-    cd dotfiles
-    bin/install
+```bash
+git clone git@github.com:nithinbekal/dotfiles.git
+cd dotfiles
+bin/install
+```
 
 ## Vimrc dependencies
 
