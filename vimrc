@@ -8,7 +8,6 @@ call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
 
-" Plugin 'ctrlpvim/ctrlp.vim'               " Fuzzy file search
 Plugin 'elixir-lang/vim-elixir'           " Elixir support
 Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
 Plugin 'jceb/vim-orgmode'                 " Org mode
