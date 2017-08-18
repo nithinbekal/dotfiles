@@ -1,3 +1,6 @@
+#! /bin/sh
+
+# Install the dotfiles to the correct paths
 
 echo "Linking ~/.ackrc"
 rm "$HOME/.ackrc"
@@ -23,6 +26,10 @@ echo "Linking ~/.gvimrc"
 rm "$HOME/.gvimrc"
 ln -s "$PWD/gvimrc" "$HOME/.gvimrc"
 
+echo "Linking ~/.railsrc"
+rm "$HOME/.railsrc"
+ln -s "$PWD/railsrc" "$HOME/.railsrc"
+
 echo "Linking ~/.spacemacs"
 rm "$HOME/.spacemacs"
 ln -s "$PWD/spacemacs" "$HOME/.spacemacs"
@@ -33,7 +40,7 @@ ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
 
 echo "Linking ~/.vim-snippets"
 rm "$HOME/.vim-snippets"
-ln -s "$PWD/vim-snippets" "$HOME/.vim-snippets"
+ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
 
 echo "Linking ~/.vimrc"
 rm "$HOME/.vimrc"

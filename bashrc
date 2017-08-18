@@ -127,3 +127,5 @@ source ~/.rvm/scripts/rvm
 
 export NVM_DIR="/Users/nithin/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+source $HOME/.env.local

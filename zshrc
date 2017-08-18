@@ -16,6 +16,8 @@ alias bx="bundle exec"
 alias dn="cd ~/Dropbox/notes"
 alias dnv="cd ~/Dropbox/notes && vim"
 alias e="emacs -nw"
+alias gbm="git branch -m"
+alias gsc="git checkout -b scratchpad"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias todo="vim ~/Dropbox/todo/gtd.md"
 alias v="vim"
@@ -45,3 +47,5 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Hom
 export RUBYMOTION_ANDROID_SDK=/Users/nithin/.rubymotion-android/sdk
 export RUBYMOTION_ANDROID_NDK=/Users/nithin/.rubymotion-android/ndk
 
+
+export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'

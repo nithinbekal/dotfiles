@@ -1,232 +1,90 @@
 
 " Vundle setup
+set nocompatible
+filetype off
 
-set nocompatible " Required by vundle
-filetype off     " Required by vundle
-
-" set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
 
-Plugin 'c-brenn/phoenix.vim'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'elixir-lang/vim-elixir'
-Plugin 'garbas/vim-snipmate'
-Plugin 'guns/vim-clojure-static'
-Plugin 'itchyny/lightline.vim'
-Plugin 'janko-m/vim-test'
-Plugin 'junegunn/goyo.vim'                      " Distraction free writing
-Plugin 'kchmck/vim-coffee-script'
-Plugin 'lambdatoast/elm.vim'
-Plugin 'ludovicchabant/vim-gutentags'           " Generate tags on save
-Plugin 'MarcWeber/vim-addon-mw-utils'           " Needed by snipmate
-Plugin 'mattn/emmet-vim'
-Plugin 'mileszs/ack.vim'
-Plugin 'mortice/pbcopy.vim'
-Plugin 'nanotech/jellybeans.vim'                " Color scheme
-Plugin 'rhysd/vim-crystal'
-Plugin 'rizzatti/dash.vim'
-Plugin 'slashmili/alchemist.vim'
-Plugin 'terryma/vim-multiple-cursors'
-Plugin 'tomtom/tlib_vim'                        " Needed by snipmate
-Plugin 'Townk/vim-autoclose'
-Plugin 'tpope/vim-bundler'
-Plugin 'tpope/vim-commentary'
+Plugin 'airblade/vim-gitgutter'           " Show sign column for git diff
+Plugin 'elixir-lang/vim-elixir'           " Elixir support
+Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
+Plugin 'jceb/vim-orgmode'                 " Org mode
+Plugin 'junegunn/fzf'                     " Basic fzf wrapper
+Plugin 'junegunn/fzf.vim'                 " Fuzzy file finder
+Plugin 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
+Plugin 'leafgarland/typescript-vim'       " Typescript syntax highlighting
+Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
+Plugin 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
+Plugin 'mileszs/ack.vim'                  " Use Ag for search
+Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
+Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
+Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
+Plugin 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
+Plugin 'tomtom/tlib_vim'                  " Needed by snipmate
+Plugin 'Townk/vim-autoclose'              " Insert matching pair () {} []
+Plugin 'tpope/vim-commentary'             " Toggle comments easily
 Plugin 'tpope/vim-dispatch'
-Plugin 'tpope/vim-endwise'
-Plugin 'tpope/vim-fireplace'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-projectionist'                " Needed by phoenix.vim
-Plugin 'tpope/vim-rails'
-Plugin 'tpope/vim-rake'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-unimpaired'
-Plugin 'vim-ruby/vim-ruby'
+Plugin 'tpope/vim-endwise'                " Add end after ruby blocks
+Plugin 'tpope/vim-fugitive'               " Git wrapper
+Plugin 'tpope/vim-rails'                  " Rails support
+Plugin 'tpope/vim-surround'               " Easily change quotes/bracket pairs
+Plugin 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
+Plugin 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
+Plugin 'vim-ruby/vim-ruby'                " Ruby support
 
-call vundle#end() " All of your Plugins must be added before this
+call vundle#end()
 
-set t_Co=256 " Needed for colors to work on gnome-terminal
+filetype plugin indent on
+" End of Vundle setup
 
-syntax on                 " Enable syntax highlighting
-filetype plugin indent on " Enable filetype-specific indenting and plugins
-
-
-let mapleader = ","
-
-map <leader>,   :CtrlP<cr>
-map <leader>.   :w<cr>:TestSuite<cr>
-map <leader>dd  :Dash<cr>
-map <Leader>f   :Ack 
-map <Leader>gac :Gcommit -m -a ""<LEFT>
-map <Leader>gc  :Gcommit -m ""<LEFT>
-map <Leader>go  :Goyo<cr>
-map <Leader>gs  :Gstatus<CR>
-map <Leader>gw  :!git add . && git commit -m 'WIP' && git push<cr>
-map <Leader>h   :%s/
-map <Leader>md  :!mkdir -p 
-map <Leader>mv  :call RenameFile()<cr>
-map <Leader>n   :nohl<cr>
-map <Leader>q   :bd<cr>
-map <Leader>rc  :Econtroller 
-map <Leader>rm  :!rm %
-map <Leader>rv  :Eview 
-map <Leader>s   :A<cr>
-map <Leader>v   :vnew<cr>
-
-" Upcase previous word in insert mode
-inoremap <C-x>c <esc>bgUWea
-
-" Vim
-map  <Leader>vi :tabe ~/.vimrc<CR>
-nmap <Leader>bi :source ~/.vimrc<cr>:PluginInstall<cr>
-map  <Leader>gt :tabe ~/Dropbox/todo/gtd.md<CR>
-map  <Leader>gg :tabe ~/Dropbox/todo/work.md<CR>
-
-" Elm
-nnoremap <leader>el :ElmEvalLine<CR>
-vnoremap <leader>es :<C-u>ElmEvalSelection<CR>
-nnoremap <leader>em :ElmMakeCurrentFile<CR>
-
-" Copy and paste in OSX
-vmap <F2> :w !pbcopy<CR><CR>
-map  <F3> :r !pbpaste<CR>
-
-" Split navigation
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
-
-" Disable arrow keys
-map  <up>    <nop>
-map  <down>  <nop>
-map  <left>  <nop>
-map  <right> <nop>
-imap <up>    <nop>
-imap <down>  <nop>
-imap <left>  <nop>
-imap <right> <nop>
-
-" Remapping C-s requires flow control to be disabled in .bash/.zshrc
-map  <C-s> <esc>:w<CR>
-imap <C-s> <esc>:w<CR>
-map  <C-t> <esc>:tabnew<CR>
-
-" Use Q to run macros
-map Q @q
-
-" Disable K looking stuff up
-map K <Nop>
-
-" Let's be reasonable, shall we?
-nmap k gk
-nmap j gj
-
-command! Q    q         " Bind :Q to :q
-command! Qall qall
-command! Wq   wq
-
-
-set autoindent                  " always set autoindenting on
-set backspace=indent,eol,start  " allow backspacing over everything in insert mode
-set backupdir=~/.tmp            " Don't clutter my dirs up with swp and tmp files
-set directory=~/.tmp            " Don't clutter my dirs up with swp and tmp files
-set et                          " Use the appropriate number of spaces to insert a tab
-set formatoptions-=or           " Don't add the comment prefix when I hit enter or o/O on a comment line.
-set gdefault                    " assume the /g flag on :s substitutions to replace all matches in a line
-set guioptions-=T               " Hide toolbar in GUI vim
-set history=500                 " keep 500 lines of command line history
-set laststatus=2                " Always show status line.
-set nofoldenable                " Say no to code folding
-set ruler                       " show the cursor position all the time
-set shiftround                  " When at 3 spaces and I hit >>, go to 4, not 5.
-set showcmd                     " display incomplete commands
-set splitbelow                  " Open new split panes below
-set splitright                  " Open new split panes to the right
-set tags=./tags;                " Set the tag file search order
-set timeoutlen=500              " Don't wait so long for the next keypress (particularly in ambigious Leader situations.
-set wildmenu                    " Better? completion on command line
-set wildmode=list:full          " What to do when I press 'wildchar'. Worth tweaking to see what feels right.
-
-set showmatch
-set nowrap
-set autoread
-set wmh=0
-set viminfo+=!
-set guifont=Monaco:h12
-set sw=2
-set smarttab
-set noincsearch
-set ignorecase smartcase
-set relativenumber
-set number
-set bg=light
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip
-set hlsearch
-
-" (Hopefully) removes the delay when hitting esc in insert mode
-set noesckeys
-set ttimeout
-set ttimeoutlen=1
+syntax on
 
 colorscheme jellybeans
 
-let g:ackprg = 'ag --vimgrep'
+set autoindent                  " Indent: Copy indent from current line when starting new line
+set expandtab                   " Tab settings - Use spaces to insert a tab
+set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
+set colorcolumn=80              " Show vertical bar to indicate 80 chars
+set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
+set grepprg=rg\ --vimgrep       " Use ripgrep for file search
+set hlsearch                    " Search: Highlight results
+set ignorecase smartcase        " Search: ignore case, unless uppercase chars given
+set incsearch                   " Search: Show results as you type
+set laststatus=2                " Always show status line
+set list                        " Show tabs and trailing whitespace
+set listchars=tab:>-,trail:·    " Set chars to show for tabs or trailing whitespace
+set nofoldenable                " Disable code folding
+set relativenumber number       " Line numbers: Show current #, but use relative #s elsewhere
+set rtp+=/usr/local/opt/fzf     " Set fzf path
+set shiftround                  " Indentation: When at 3 spaces, >> takes to 4, not 5
+set shiftwidth=2                " Tab settings - Use 2 spaces for each indent level
+set softtabstop=2               " Tab settings - Count 2 spaces in editing operations
+set splitbelow                  " Open new split panes below
+set splitright                  " Open new split panes to the right
+set t_Co=256                    " Use 256 colors in tmux
+set tags=$HOME/.tags_cache      " Keep tags file in a single place
+set wildmode=list:full          " Command mode tab completion - complete upto ambiguity
 
-" Fuzzy finder: ignore stuff that can't be opened, and generated files
-let g:fuzzy_ignore = "*.png;*.PNG;*.JPG;*.jpg;*.GIF;*.gif;vendor/**;coverage/**;tmp/**;rdoc/**"
+" Status line configuration
+set statusline=%m\ %f
+set statusline+=\ %{fugitive#statusline()}
+set statusline+=%=%l/%L\ [%P]\ C:%c
 
-" Write tags to one common dir
+highlight StatusLine ctermfg=white ctermbg=blue
+
+
+" Enable extended matching with %
+runtime macros/matchit.vim
+
+" Use ag for text search
+let g:ackprg = 'rg --vimgrep'
+
+" Don't pollute all projects with tags file. Put them all on one place
 let g:gutentags_cache_dir = '~/.tags_cache'
 
-" Disable folding markdown text
-let g:vim_markdown_folding_disabled=1
-
-" Faster Ctrl-P
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard', 'find %s -type f']
-let g:ctrlp_use_caching = 0
-
-" make test commands execute using dispatch.vim
-let test#strategy = "dispatch"
-
-runtime macros/matchit.vim " Enable built-in matchit plugin
-
-" Make it more obvious which paren I'm on
-highlight MatchParen cterm=none ctermbg=black ctermfg=yellow
-
-" Make the omnicomplete text readable
-highlight PmenuSel ctermfg=black
-
-" Highlight the status line
-highlight StatusLine ctermfg=blue ctermbg=yellow
-
-" Set gutter background to black
-highlight SignColumn ctermbg=black
-
-
-" Format xml files
-autocmd FileType xml exe ":silent 1,$!xmllint --format --recover - 2>/dev/null"
-
-" When loading text files, wrap them and don't split up words.
-autocmd BufNewFile,BufRead *.txt setlocal lbr
-autocmd BufNewFile,BufRead *.txt setlocal nolist " Don't display whitespace
-
-" Markdown
-augroup MarkdownFiles
-  autocmd!
-  autocmd BufNewFile,BufRead *.md  setlocal wrap
-  autocmd BufNewFile,BufRead *.md  setlocal lbr
-  autocmd BufNewFile,BufRead          *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-  autocmd BufRead,BufNewFile,BufEnter *.{md,mdwn,mkd,mkdn,mark*} call MathAndLiquid()
-augroup END
-
-augroup haml
-  autocmd!
-  " comments on hamls files with vim-commentary
-  autocmd FileType haml set commentstring=\/\ %s
-augroup END
 
 " Create a directory for the current file if it does not exist.
 augroup Mkdir
@@ -237,17 +95,6 @@ augroup Mkdir
     \ endif
 augroup END
 
-augroup Ruby
-  autocmd!
-
-  " autoindent with two spaces, always expand tabs
-  autocmd FileType ruby,eruby,yaml setlocal ai sw=2 sts=2 et
-  autocmd FileType ruby,eruby,yaml setlocal path+=lib
-  autocmd FileType ruby,eruby,yaml setlocal colorcolumn=80
-
-  " Remove trailing whitespace on save for ruby files.
-  autocmd BufWritePre *.rb :%s/\s\+$//e
-augroup END
 
 function! RenameFile()
   let old_name = expand('%')
@@ -259,6 +106,8 @@ function! RenameFile()
   endif
 endfunction
 
+
+" Used in Snipmate
 fun! SnippetFilename(...)
   let template = get(a:000, 0, "$1")
   let arg2 = get(a:000, 1, "")
@@ -272,57 +121,61 @@ fun! SnippetFilename(...)
   endif
 endf
 
-" From http://scottsievert.com/blog/2016/01/06/vim-jekyll-mathjax/
-function! MathAndLiquid()
-    "" Define certain regions
-    " Block math. Look for "$$[anything]$$"
-    syn region math start=/\$\$/ end=/\$\$/
-    " inline math. Look for "$[not $][anything]$"
-    syn match math_block '\$[^$].\{-}\$'
 
-    " Liquid single line. Look for "{%[anything]%}"
-    syn match liquid '{%.*%}'
-    " Liquid multiline. Look for "{%[anything]%}[anything]{%[anything]%}"
-    syn region highlight_block start='{% highlight .*%}' end='{%.*%}'
-    " Fenced code blocks, used in GitHub Flavored Markdown (GFM)
-    syn region highlight_block start='```' end='```'
+map K   <nop>
+map Q   @q
 
-    "" Actually highlight those regions.
-    hi link math Statement
-    hi link liquid Statement
-    hi link highlight_block Function
-    hi link math_block Function
-endfunction
+vmap <F2> :w !pbcopy<CR><CR>
+map  <F3> :r !pbpaste<CR>
+
+nnoremap <C-h> <C-w><C-h>
+nnoremap <C-j> <C-w><C-j>
+nnoremap <C-k> <C-w><C-k>
+nnoremap <C-l> <C-w><C-l>
+
+" Use fzf.vim for fuzzy file search
+map <C-p> :Files<cr>
+
+map  <C-s> <esc>:w<CR>
+imap <C-s> <esc>:w<CR>
+
+" Disable arrow keys
+map  <up>    <nop>
+imap <up>    <nop>
+map  <down>  <nop>
+imap <down>  <nop>
+map  <left>  <nop>
+imap <left>  <nop>
+map  <right> <nop>
+imap <right> <nop>
+
+" I often mistype Q and Wq
+command! Q  q
+command! Wq wq
+
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
 
 
-" ========================================================================
-" End of things set by me.
-" ========================================================================
+" Leader key settings
 
-" Only do this part when compiled with support for autocommands.
-if has("autocmd")
+let mapleader = ","
 
-  " Enable file type detection.
-  " Use the default filetype settings, so that mail gets 'tw' set to 72,
-  " 'cindent' is on in C files, etc.
-  " Also load indent files, to automatically do language-dependent indenting.
-  filetype plugin indent on
-
-  " Put these in an autocmd group, so that we can delete them easily.
-  augroup vimrcEx
-    au!
-
-    " For all text files set 'textwidth' to 78 characters.
-    autocmd FileType text setlocal textwidth=78
-
-    " When editing a file, always jump to the last known cursor position.
-    " Don't do it when the position is invalid or when inside an event handler
-    " (happens when dropping a file on gvim).
-    autocmd BufReadPost *
-          \ if line("'\"") > 0 && line("'\"") <= line("$") |
-          \   exe "normal g`\"" |
-          \ endif
-
-  augroup END
-
-endif " has("autocmd")
+nmap <leader>bi   :source ~/.vimrc<cr>:PluginInstall<cr>
+map  <leader>dd   :Dash<cr>
+map  <leader>f    :Ack<space>
+map  <leader>gg   :tabe ~/Dropbox/notes/notes.md<cr>
+map  <leader>gs   :Gstatus<cr>
+map  <leader>mv   :call RenameFile()<cr>
+map  <leader>n    :nohl<cr>
+map  <leader>q    :bd<cr>
+map  <leader>rc   :Econtroller
+map  <leader>rm   :!rm %
+map  <leader>rv   :Eview
+map  <leader>s    :A<cr>
+map  <leader>vi   :tabe ~/.vimrc<cr>
+map  <leader>vv   :vnew<cr>

@@ -1,0 +1,3 @@
+--database=postgresql
+--webpack
+--skip-spring

@@ -1,0 +1,12 @@
+{
+    "workbench.statusBar.visible": true,
+    "editor.minimap.enabled": false,
+    "workbench.colorTheme": "Jellybeams",
+    "vim.disableAnnoyingNeovimMessage": true,
+    "vim.enableNeovim": true,
+    "vim.leader": ",",
+    "editor.lineNumbers": "relative",
+    "window.zoomLevel": 0,
+    "editor.renderWhitespace": "boundary",
+    "editor.fontSize": 13
+}

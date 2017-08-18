@@ -7,7 +7,7 @@ This repo will contain the dot files I use to configure my system. The
 
     git clone git@github.com:nithinbekal/dotfiles.git
     cd dotfiles
-    rake install
+    bin/install
 
 ## Vim
 
@@ -32,6 +32,19 @@ Older versions
 
 ### iTerm Settings
 
-- Settings > Profiles > General > Working directory
-  - Set to "Reuse previous session's directory"
+- Preferences > General > Load preferences from custom folder or url
+  - Set it to `dotfiles_path/items2/com.googlecode.iterm2.plist`
 
+### Other editors
+
+My config for VS Code and Sublime are in editors, but these are not
+automatically installed.
+
+VS Code has problems with repeated keystrokes with the vim plugin on MacOS, so
+this command needs to be run to fix that:
+
+```bash
+defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+```
+
+- [More details](https://wesleywiser.github.io/post/vscode-vim-repeat-osx/)
