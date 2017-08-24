@@ -160,6 +160,8 @@ map  <leader>fa   :Ack<space>
 map  <leader>ff   :Rg<space>
 map  <leader>fw   "zyiw:exe "Rg ".@z.""<cr>
 map  <leader>gg   :tabe ~/Dropbox/notes/notes.md<cr>
+map  <leader>ghs  :GitGutterStageHunk<cr>:Gstatus<cr><C-n>D
+map  <leader>ghu  :GitGutterUndoHunk<cr>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>mv   :call RenameFile()<cr>
 map  <leader>n    :nohl<cr>
