@@ -1,46 +1,34 @@
 
-" Vundle setup
-set nocompatible
-filetype off
+call plug#begin('~/.vim/plugged')
 
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+Plug 'airblade/vim-gitgutter'           " Show sign column for git diff
+Plug 'elixir-lang/vim-elixir'           " Elixir support
+Plug 'garbas/vim-snipmate'              " Insert snippets using tab
+Plug 'jceb/vim-orgmode'                 " Org mode
+Plug 'junegunn/fzf'                     " Basic fzf wrapper
+Plug 'junegunn/fzf.vim'                 " Fuzzy file finder
+Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
+Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
+Plug 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
+Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
+Plug 'mileszs/ack.vim'                  " Use Ag for search
+Plug 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
+Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
+Plug 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
+Plug 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
+Plug 'tomtom/tlib_vim'                  " Needed by snipmate
+Plug 'Townk/vim-autoclose'              " Insert matching pair () {} []
+Plug 'tpope/vim-commentary'             " Toggle comments easily
+Plug 'tpope/vim-dispatch'               " Run commands in tmux pane
+Plug 'tpope/vim-endwise'                " Add end after ruby blocks
+Plug 'tpope/vim-fugitive'               " Git wrapper
+Plug 'tpope/vim-rails'                  " Rails support
+Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
+Plug 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
+Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
+Plug 'vim-ruby/vim-ruby'                " Ruby support
 
-Plugin 'gmarik/Vundle.vim'
-
-Plugin 'airblade/vim-gitgutter'           " Show sign column for git diff
-Plugin 'elixir-lang/vim-elixir'           " Elixir support
-Plugin 'garbas/vim-snipmate'              " Insert snippets using tab
-Plugin 'jceb/vim-orgmode'                 " Org mode
-Plugin 'junegunn/fzf'                     " Basic fzf wrapper
-Plugin 'junegunn/fzf.vim'                 " Fuzzy file finder
-Plugin 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
-Plugin 'leafgarland/typescript-vim'       " Typescript syntax highlighting
-Plugin 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
-Plugin 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
-Plugin 'mileszs/ack.vim'                  " Use Ag for search
-Plugin 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
-Plugin 'nanotech/jellybeans.vim'          " Jellybeans color scheme
-Plugin 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
-Plugin 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
-Plugin 'tomtom/tlib_vim'                  " Needed by snipmate
-Plugin 'Townk/vim-autoclose'              " Insert matching pair () {} []
-Plugin 'tpope/vim-commentary'             " Toggle comments easily
-Plugin 'tpope/vim-dispatch'
-Plugin 'tpope/vim-endwise'                " Add end after ruby blocks
-Plugin 'tpope/vim-fugitive'               " Git wrapper
-Plugin 'tpope/vim-rails'                  " Rails support
-Plugin 'tpope/vim-surround'               " Easily change quotes/bracket pairs
-Plugin 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
-Plugin 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
-Plugin 'vim-ruby/vim-ruby'                " Ruby support
-
-call vundle#end()
-
-filetype plugin indent on
-" End of Vundle setup
-
-syntax on
+call plug#end()
 
 colorscheme jellybeans
 
