@@ -28,6 +28,8 @@ ttyctl -f                                 # `Frozing' tty, so after any command 
 
 ssh-add &>/dev/null
 
+export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
 export PATH=~/.bin:$PATH
@@ -46,6 +48,3 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Hom
 
 export RUBYMOTION_ANDROID_SDK=/Users/nithin/.rubymotion-android/sdk
 export RUBYMOTION_ANDROID_NDK=/Users/nithin/.rubymotion-android/ndk
-
-
-export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
