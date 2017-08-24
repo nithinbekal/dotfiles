@@ -154,7 +154,7 @@ command! -bang -nargs=* Rg
 
 let mapleader = ","
 
-nmap <leader>bi   :source ~/.vimrc<cr>:PluginInstall<cr>
+map  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
 map  <leader>dd   :Dash<cr>
 map  <leader>fa   :Ack<space>
 map  <leader>ff   :Rg<space>
