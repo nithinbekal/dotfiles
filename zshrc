@@ -26,6 +26,10 @@ alias vim-swp-clear="rm -rf ~/.tmp/*.swp"
 alias vim="stty stop '' -ixoff ; mvim -v" # Allow vim to accept Ctrl+S
 ttyctl -f                                 # `Frozing' tty, so after any command terminal settings will be restored
 
+# Alt + left/right arrows
+bindkey "^[^[[D" backward-word
+bindkey "^[^[[C" forward-word
+
 ssh-add &>/dev/null
 
 export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
