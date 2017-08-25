@@ -15,7 +15,6 @@ Plug 'junegunn/fzf'                     " Basic fzf wrapper
 Plug 'junegunn/fzf.vim'                 " Fuzzy file finder
 Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
-Plug 'ludovicchabant/vim-gutentags'     " Automatic ctags generation
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plug 'mileszs/ack.vim'                  " Use Ag for search
 Plug 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
@@ -76,9 +75,6 @@ runtime macros/matchit.vim
 
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
-
-" Don't pollute all projects with tags file. Put them all on one place
-let g:gutentags_cache_dir = '~/.tags_cache'
 
 
 " Create a directory for the current file if it does not exist.
