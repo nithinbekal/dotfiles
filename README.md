@@ -11,12 +11,11 @@ cd dotfiles
 bin/install
 ```
 
-## Vimrc dependencies
+## Vim
 
-Before using Vim with this .vimrc, [Vundle](https://github.com/gmarik/Vundle.vim) needs to be installed:
-
-    git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-    vim +PluginInstall +qall
+I use [vim-plug](https://github.com/junegunn/vim-plug) for managing vim plugins.
+The vimrc automatically installs vim-plug
+and installs the plugins the first time.
 
 The following tools need to be installed as well:
 
