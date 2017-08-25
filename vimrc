@@ -11,7 +11,6 @@ call plug#begin('~/.vim/plugged')
 Plug 'airblade/vim-gitgutter'           " Show sign column for git diff
 Plug 'elixir-lang/vim-elixir'           " Elixir support
 Plug 'garbas/vim-snipmate'              " Insert snippets using tab
-Plug 'jceb/vim-orgmode'                 " Org mode
 Plug 'junegunn/fzf'                     " Basic fzf wrapper
 Plug 'junegunn/fzf.vim'                 " Fuzzy file finder
 Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
