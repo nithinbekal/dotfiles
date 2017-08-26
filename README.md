@@ -11,17 +11,25 @@ cd dotfiles
 bin/install
 ```
 
-## Vim
+## Dependencies
 
-I use [vim-plug](https://github.com/junegunn/vim-plug) for managing vim plugins.
-The vimrc automatically installs vim-plug
-and installs the plugins the first time.
-
-The following tools need to be installed as well:
+Vim needs these tools:
 
 - [ag](https://github.com/ggreer/the_silver_searcher)
 - [fzf](https://github.com/junegunn/fzf)
 - [ripgrep](https://github.com/BurntSushi/ripgrep)
+
+Tmux needs
+[reattach-to-user-namespace](https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard)
+to make sure pbcopy and pbpaste commands work properly.
+
+```bash
+brew install ag fzf ripgrep reattach-to-user-namespace
+```
+
+## Vim
+
+The vimrc automatically installs vim-plug and installs the plugins on first use.
 
 ### Map Esc to Caps Lock (macOS)
 
