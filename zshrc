@@ -20,11 +20,8 @@ alias gbm="git branch -m"
 alias gsc="git checkout -b scratchpad"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias todo="vim ~/Dropbox/todo/gtd.md"
-alias v="vim"
+alias v="nvim"
 alias vim-swp-clear="rm -rf ~/.tmp/*.swp"
-
-alias vim="stty stop '' -ixoff ; mvim -v" # Allow vim to accept Ctrl+S
-ttyctl -f                                 # `Frozing' tty, so after any command terminal settings will be restored
 
 # Alt + left/right arrows
 bindkey "^[^[[D" backward-word
