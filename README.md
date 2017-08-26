@@ -31,6 +31,21 @@ brew install ag fzf ripgrep reattach-to-user-namespace
 
 The vimrc automatically installs vim-plug and installs the plugins on first use.
 
+## Fonts
+
+vim-airline is configured to use powerline fonts to display non-ASCII characters.
+To get this to work, powerline fonts need to be installed.
+
+```bash
+git clone https://github.com/powerline/fonts.git /tmp/powerline-fonts
+/tmp/powerline-fonts/install
+rm -rf /tmp/powerline-fonts
+```
+
+Then, set a powerline font in Preferences > Profile > Text > Non-ASCII font.
+I use Menlo, which is not available in powerline fonts,
+but "Robot Mono for Powerline" works well with it.
+
 ### Map Esc to Caps Lock (macOS)
 
 Since macOS Sierra (10.12):
