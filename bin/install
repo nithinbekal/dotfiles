@@ -38,13 +38,14 @@ echo "Linking ~/.tmux.conf"
 rm "$HOME/.tmux.conf"
 ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
 
-echo "Linking ~/.vim-snippets"
-rm "$HOME/.vim-snippets"
-ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
-
 echo "Linking ~/.vimrc"
 rm "$HOME/.vimrc"
 ln -s "$PWD/vimrc" "$HOME/.vimrc"
+
+echo "Setting up Neovim config"
+mkdir -p $HOME/.config/nvim
+rm $HOME/.config/nvim/init.vim
+ln -s $PWD/init.vim $HOME/.config/nvim/init.vim
 
 echo "Linking ~/.zlogin"
 rm "$HOME/.zlogin"
@@ -59,5 +60,5 @@ rm -rf "$HOME/.bin"
 ln -s "$PWD/bin" "$HOME/.bin"
 
 echo "Moving snippets to ~/.vim/snippets"
-rm -rf $HOME/.vim/snippets
+rm $HOME/.vim/snippets
 ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
