@@ -37,7 +37,7 @@ To get this to work, powerline fonts need to be installed.
 
 ```bash
 git clone https://github.com/powerline/fonts.git /tmp/powerline-fonts
-/tmp/powerline-fonts/install
+/tmp/powerline-fonts/install.sh
 rm -rf /tmp/powerline-fonts
 ```
 
