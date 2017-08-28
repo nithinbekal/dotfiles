@@ -65,13 +65,6 @@ set t_Co=256                    " Use 256 colors in tmux
 set tags=$HOME/.tags_cache      " Keep tags file in a single place
 set wildmode=list:full          " Command mode tab completion - complete upto ambiguity
 
-" Status line configuration
-set statusline=%m\ %f
-set statusline+=\ %{fugitive#statusline()}
-set statusline+=%=%l/%L\ [%P]\ C:%c
-
-highlight StatusLine ctermfg=white ctermbg=blue
-
 
 " Enable extended matching with %
 runtime macros/matchit.vim
@@ -79,7 +72,7 @@ runtime macros/matchit.vim
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
-" mvii-airline customization
+" vim-airline customization
 let g:airline_theme = 'tomorrow'
 let g:airline_powerline_fonts = 1
 
