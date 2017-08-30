@@ -26,6 +26,10 @@ echo "Linking ~/.gvimrc"
 rm "$HOME/.gvimrc"
 ln -s "$PWD/gvimrc" "$HOME/.gvimrc"
 
+echo "Linking ~/.inputrc"
+rm $HOME/.inputrc
+ln -s $PWD/.inputrc $HOME
+
 echo "Linking ~/.railsrc"
 rm "$HOME/.railsrc"
 ln -s "$PWD/railsrc" "$HOME/.railsrc"
