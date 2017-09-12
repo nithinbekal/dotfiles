@@ -29,6 +29,9 @@ bindkey "^[^[[C" forward-word
 
 ssh-add &>/dev/null
 
+# Tmux changes the window title without this
+DISABLE_AUTO_TITLE="true"
+
 export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
 
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
