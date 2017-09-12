@@ -78,3 +78,27 @@ to use vi mode and add a couple of shortcuts in normal mode:
 C-n: execute next line (equivalent to typing "next" and hitting enter)
 C-s: step through the code (equivalent to typing "step" and hitting enter)
 ```
+
+### Example function for starting up a Rails project in tmux
+
+```bash
+function tmux-my-project {
+  cd my-project
+
+  tmux start-server
+
+  tmux new-session -d -s myproject -n main
+  tmux split-window -h -p 34
+
+  tmux new-window -n server
+  tmux select-pane -t 1
+  tmux send-keys "bundle exec rails server" C-m
+
+  tmux select-window -t 1
+  tmux select-pane -t 1
+
+  tmux send-keys "nvim" C-m
+
+  tmux -u attach-session -d -t myproject
+}
+```
