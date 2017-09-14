@@ -9,10 +9,15 @@ set menu-complete-display-prefix on
 set keymap vi-command
 
 # For Pry
-c: "icontinue\r\e"
-n: "inext\r\e"
-s: "istep\r\e"
-x: "iexit\r\e"
+$if Ruby
+  c: "icontinue\r\e"
+  m: "ishow-method "
+  n: "inext\r\e"
+  s: "istep\r\e"
+  w: "iwhereami\r\e"
+  x: "iexit\r\e"
+$endif
+
 
 # Type something and use up/down to search history using that
 "\e[A": history-search-backward
