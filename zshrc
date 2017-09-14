@@ -29,8 +29,10 @@ bindkey "^[^[[C" forward-word
 
 ssh-add &>/dev/null
 
+export EDITOR=vim
+
 # Tmux changes the window title without this
-DISABLE_AUTO_TITLE="true"
+export DISABLE_AUTO_TITLE="true"
 
 
 # FZF setup
@@ -43,14 +45,12 @@ export PATH="$PATH:/usr/local/opt/fzf/bin"
 [[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 
+export PATH=$PATH:$HOME/.bin
 
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
-export PATH=~/.bin:$PATH
 
-PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-
-export EDITOR=vim
+export PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
