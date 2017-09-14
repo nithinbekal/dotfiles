@@ -118,6 +118,11 @@ xmodmap -e "keycode 0x42 = Escape"
 # for tmux: export 256color
 [ -n "$TMUX" ] && export TERM=screen-256color
 
+# FZF setup
+export PATH="$PATH:/usr/local/opt/fzf/bin"
+[[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.bash" 2> /dev/null
+source "/usr/local/opt/fzf/shell/key-bindings.bash"
+
 export EDITOR=vim
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting

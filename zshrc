@@ -32,7 +32,17 @@ ssh-add &>/dev/null
 # Tmux changes the window title without this
 DISABLE_AUTO_TITLE="true"
 
+
+# FZF setup
+
 export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+
+# The config below is taken from ~/.fzf.zsh which was generated during shell
+# extension installation using /usr/local/opt/fzf/install
+export PATH="$PATH:/usr/local/opt/fzf/bin"
+[[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
+source "/usr/local/opt/fzf/shell/key-bindings.zsh"
+
 
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
