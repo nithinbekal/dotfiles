@@ -15,7 +15,6 @@ $if Ruby
   n: "inext\r\e"
   q: "iexit\r\e"
   s: "istep\r\e"
-  w: "iwhereami\r\e"
 $endif
 
 
