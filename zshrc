@@ -29,7 +29,7 @@ bindkey "^[^[[C" forward-word
 
 ssh-add &>/dev/null
 
-export EDITOR=vim
+export EDITOR=nvim
 
 # Tmux changes the window title without this
 export DISABLE_AUTO_TITLE="true"
