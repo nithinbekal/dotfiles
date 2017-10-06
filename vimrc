@@ -44,7 +44,7 @@ colorscheme jellybeans
 set autoindent                  " Indent: Copy indent from current line when starting new line
 set expandtab                   " Tab settings - Use spaces to insert a tab
 set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
-set colorcolumn=80              " Show vertical bar to indicate 80 chars
+set colorcolumn=80,120          " Show vertical bar to indicate 80/120 chars
 set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
 set grepprg=rg\ --vimgrep       " Use ripgrep for file search
 set hlsearch                    " Search: Highlight results
