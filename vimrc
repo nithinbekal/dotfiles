@@ -70,12 +70,14 @@ runtime macros/matchit.vim
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
-" Status line
-set statusline=\ %{fugitive#statusline()}
-set statusline+=%m\ %f
-set statusline+=%=%l,%c\ %L\㏑
 
-highlight StatusLine ctermfg=white ctermbg=blue
+" Status line (https://gabri.me/blog/diy-vim-statusline/)
+highlight StatusLine ctermbg=21 ctermfg=15
+
+set statusline=
+set statusline+=\ \ %{fugitive#head()}\ ›
+set statusline+=\ %f
+set statusline+=%=\ %y\ %l,%c\ \ \ %L
 
 
 " Create a directory for the current file if it does not exist.
