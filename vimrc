@@ -34,8 +34,6 @@ Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plug 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 
 call plug#end()
 
@@ -72,14 +70,13 @@ runtime macros/matchit.vim
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
-" vim-airline customization
-let g:airline_theme = 'tomorrow'
-let g:airline_powerline_fonts = 1
+" Status line
+set statusline=\ %{fugitive#statusline()}
+set statusline+=%m\ %f
+set statusline+=%=%l,%c\ %L\㏑
 
-if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
-endif
-let g:airline_symbols.space = "\ua0"
+highlight StatusLine ctermfg=white ctermbg=blue
+
 
 " Create a directory for the current file if it does not exist.
 augroup Mkdir
