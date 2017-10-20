@@ -34,8 +34,6 @@ Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plug 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 
 call plug#end()
 
@@ -72,14 +70,15 @@ runtime macros/matchit.vim
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
-" vim-airline customization
-let g:airline_theme = 'tomorrow'
-let g:airline_powerline_fonts = 1
 
-if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
-endif
-let g:airline_symbols.space = "\ua0"
+" Status line (https://gabri.me/blog/diy-vim-statusline/)
+highlight StatusLine ctermbg=21 ctermfg=15
+
+set statusline=
+set statusline+=\ \ %{fugitive#head()}\ ›
+set statusline+=\ %f
+set statusline+=%=\ %y\ %l,%c\ \ \ %L
+
 
 " Create a directory for the current file if it does not exist.
 augroup Mkdir
@@ -166,7 +165,7 @@ map  <leader>fa   :Ack<space>
 map  <leader>ff   :Rg<space>
 map  <leader>fw   "zyiw:exe "Rg ".@z.""<cr>
 map  <leader>gg   :tabe ~/Dropbox/notes/notes.md<cr>
-map  <leader>ghs  :GitGutterStageHunk<cr>:Gstatus<cr><C-n>D
+map  <leader>ghs  :GitGutterStageHunk<cr>
 map  <leader>ghu  :GitGutterUndoHunk<cr>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>mv   :call RenameFile()<cr>
