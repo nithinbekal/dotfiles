@@ -33,6 +33,7 @@ Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plug 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
+Plug 'rhysd/devdocs.vim'                " Lookup docs with devdocs
 
 call plug#end()
 
@@ -114,8 +115,8 @@ fun! SnippetFilename(...)
 endf
 
 
-map K   <nop>
-map Q   @q
+nmap K  <Plug>(devdocs-under-cursor)
+map  Q  @q
 
 nnoremap <C-h> <C-w><C-h>
 nnoremap <C-j> <C-w><C-j>
