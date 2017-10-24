@@ -41,13 +41,8 @@ colorscheme jellybeans
 
 set autoindent                  " Indent: Copy indent from current line when starting new line
 set expandtab                   " Tab settings - Use spaces to insert a tab
-<<<<<<< HEAD
-set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
-set colorcolumn=80,120          " Show vertical bar to indicate 80/120 chars
-=======
 set backupdir=~/.vim/tmp        " Don't clutter my dirs with swp/tmp files
-set colorcolumn=80              " Show vertical bar to indicate 80 chars
->>>>>>> 7ddb352187ab1937fae54c420beeb5a951b90226
+set colorcolumn=80,120          " Show vertical bar to indicate 80/120 chars
 set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
 set grepprg=rg\ --vimgrep       " Use ripgrep for file search
 set hlsearch                    " Search: Highlight results
