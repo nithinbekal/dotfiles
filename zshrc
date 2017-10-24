@@ -23,7 +23,7 @@ alias gsc="git checkout -b scratchpad"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias todo="vim ~/Dropbox/todo/gtd.md"
 alias v="nvim"
-alias vim-swp-clear="rm -rf ~/.tmp/*.swp"
+alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
 
 # Alt + left/right arrows
 bindkey "^[^[[D" backward-word
