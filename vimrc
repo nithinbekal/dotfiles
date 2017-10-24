@@ -18,7 +18,6 @@ Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plug 'mileszs/ack.vim'                  " Use Ag for search
-Plug 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plug 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plug 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
@@ -66,6 +65,7 @@ set wildmode=list:full          " Command mode tab completion - complete upto am
 
 " Enable extended matching with %
 runtime macros/matchit.vim
+
 
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
@@ -116,9 +116,6 @@ endf
 
 map K   <nop>
 map Q   @q
-
-vmap <F2> :w !pbcopy<CR><CR>
-map  <F3> :r !pbpaste<CR>
 
 nnoremap <C-h> <C-w><C-h>
 nnoremap <C-j> <C-w><C-j>
