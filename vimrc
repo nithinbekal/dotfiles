@@ -18,7 +18,6 @@ Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plug 'mileszs/ack.vim'                  " Use Ag for search
-Plug 'mortice/pbcopy.vim'               " Easy copy paste in terminal vim
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plug 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plug 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
@@ -34,6 +33,7 @@ Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plug 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
+Plug 'rhysd/devdocs.vim'                " Lookup docs with devdocs
 
 call plug#end()
 
@@ -41,8 +41,13 @@ colorscheme jellybeans
 
 set autoindent                  " Indent: Copy indent from current line when starting new line
 set expandtab                   " Tab settings - Use spaces to insert a tab
+<<<<<<< HEAD
 set backupdir=~/.tmp            " Don't clutter my dirs with swp/tmp files
 set colorcolumn=80,120          " Show vertical bar to indicate 80/120 chars
+=======
+set backupdir=~/.vim/tmp        " Don't clutter my dirs with swp/tmp files
+set colorcolumn=80              " Show vertical bar to indicate 80 chars
+>>>>>>> 7ddb352187ab1937fae54c420beeb5a951b90226
 set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
 set grepprg=rg\ --vimgrep       " Use ripgrep for file search
 set hlsearch                    " Search: Highlight results
@@ -67,17 +72,16 @@ set wildmode=list:full          " Command mode tab completion - complete upto am
 " Enable extended matching with %
 runtime macros/matchit.vim
 
+
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
 
-" Status line (https://gabri.me/blog/diy-vim-statusline/)
-highlight StatusLine ctermbg=21 ctermfg=15
-
+" Status line
 set statusline=
-set statusline+=\ \ %{fugitive#head()}\ ›
+set statusline+=\ %{fugitive#head()}\ #
 set statusline+=\ %f
-set statusline+=%=\ %y\ %l,%c\ \ \ %L
+set statusline+=%=\ %y\ %l,%c\ %L
 
 
 " Create a directory for the current file if it does not exist.
@@ -116,11 +120,8 @@ fun! SnippetFilename(...)
 endf
 
 
-map K   <nop>
-map Q   @q
-
-vmap <F2> :w !pbcopy<CR><CR>
-map  <F3> :r !pbpaste<CR>
+nmap K  <Plug>(devdocs-under-cursor)
+map  Q  @q
 
 nnoremap <C-h> <C-w><C-h>
 nnoremap <C-j> <C-w><C-j>
