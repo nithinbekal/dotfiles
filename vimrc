@@ -71,13 +71,11 @@ runtime macros/matchit.vim
 let g:ackprg = 'rg --vimgrep'
 
 
-" Status line (https://gabri.me/blog/diy-vim-statusline/)
-highlight StatusLine ctermbg=21 ctermfg=15
-
+" Status line
 set statusline=
-set statusline+=\ \ %{fugitive#head()}\ ›
+set statusline+=\ %{fugitive#head()}\ #
 set statusline+=\ %f
-set statusline+=%=\ %y\ %l,%c\ \ \ %L
+set statusline+=%=\ %y\ %l,%c\ %L
 
 
 " Create a directory for the current file if it does not exist.
