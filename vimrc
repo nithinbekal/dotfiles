@@ -166,6 +166,7 @@ map  <leader>ghu  :GitGutterUndoHunk<cr>
 map  <leader>gs   :Gstatus<cr>
 map  <leader>mv   :call RenameFile()<cr>
 map  <leader>n    :nohl<cr>
+map  <leader>pp   "+p
 map  <leader>q    :bd<cr>
 map  <leader>rc   :Econtroller
 map  <leader>rm   :!rm %
@@ -173,3 +174,4 @@ map  <leader>rv   :Eview
 map  <leader>s    :A<cr>
 map  <leader>vi   :tabe ~/.vimrc<cr>
 map  <leader>vv   :vnew<cr>
+vmap <leader>yy   "+y
