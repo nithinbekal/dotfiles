@@ -89,6 +89,10 @@ augroup Mkdir
 augroup END
 
 
+" Rebalance panes on resize
+autocmd VimResized * :wincmd =
+
+
 function! RenameFile()
   let old_name = expand('%')
   let new_name = input('New file name: ', expand('%'), 'file')
