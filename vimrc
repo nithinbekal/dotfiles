@@ -30,7 +30,6 @@ Plug 'tpope/vim-endwise'                " Add end after ruby blocks
 Plug 'tpope/vim-fugitive'               " Git wrapper
 Plug 'tpope/vim-rails'                  " Rails support
 Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
-Plug 'tpope/vim-speeddating'            " Inc/decrement dates - Needed by vim-orgmode
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
 Plug 'rhysd/devdocs.vim'                " Lookup docs with devdocs
