@@ -26,6 +26,7 @@ alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias todo="vim ~/Dropbox/todo/gtd.md"
 alias v="nvim"
 alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
+alias wiki="tmux new -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
 
 # Alt + left/right arrows
 bindkey "^[^[[D" backward-word
