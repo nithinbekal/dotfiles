@@ -24,6 +24,7 @@ Plug 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
 Plug 'thinca/vim-localrc'               " Add per project vimrc files
 Plug 'tomtom/tlib_vim'                  " Needed by snipmate
 Plug 'Townk/vim-autoclose'              " Insert matching pair () {} []
+Plug 'tpope/vim-bundler'
 Plug 'tpope/vim-commentary'             " Toggle comments easily
 Plug 'tpope/vim-dispatch'               " Run commands in tmux pane
 Plug 'tpope/vim-endwise'                " Add end after ruby blocks
