@@ -7,22 +7,24 @@ else
   cd $1
 fi
 
+session_name="$(basename "$PWD" | tr . -)"
+
 tmux start-server
 
-tmux new-session -d -s rails-app -n rails
-tmux split-window -t rails-app:rails -h
+tmux new-session -d -s "$session_name" -n rails
+tmux split-window -t "$session_name:rails -h
 
 tmux last-pane
-tmux resize-pane -R -t rails-app:rails.0 20
+tmux resize-pane -R -t "$session_name:rails.0 20
 
-tmux new-window -t rails-app:2 -n logs
+tmux new-window -t "$session_name:2 -n logs
 
-tmux send-keys -t rails-app:rails.0 "vim" C-m
-tmux send-keys -t rails-app:rails.1 "guard -c" C-m
-tmux send-keys -t rails-app:logs "foreman start" C-m
+tmux send-keys -t "$session_name:rails.0 "vim" C-m
+tmux send-keys -t "$session_name:rails.1 "guard -c" C-m
+tmux send-keys -t "$session_name:logs "foreman start" C-m
 
-tmux select-window -t rails-app:rails
-tmux select-pane -t rails-app:rails.0
+tmux select-window -t "$session_name:rails
+tmux select-pane -t "$session_name:rails.0
 
-tmux -u attach-session -d -t rails-app
+tmux -u attach-session -d -t "$session_name"
 
