@@ -186,6 +186,11 @@ map  <leader>vi   :tabe ~/.vimrc<cr>
 map  <leader>vv   :vnew<cr>
 vmap <leader>yy   "+y
 
+noremap  <leader>tt   :TestLast<cr>
+noremap  <leader>tn   :TestNearest<cr>
+noremap  <leader>ts   :TestSuite<cr>
+noremap  <leader>tf   :TestFile<cr>
+
 if has('nvim')
   tnoremap <C-o> <C-\><C-n>
 
