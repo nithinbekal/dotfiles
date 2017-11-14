@@ -14,6 +14,7 @@ Plug 'elixir-lang/vim-elixir'           " Elixir support
 Plug 'garbas/vim-snipmate'              " Insert snippets using tab
 Plug 'junegunn/fzf'                     " Basic fzf wrapper
 Plug 'junegunn/fzf.vim'                 " Fuzzy file finder
+Plug 'kassio/neoterm'
 Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
