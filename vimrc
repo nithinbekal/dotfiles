@@ -126,7 +126,7 @@ endf
 
 
 nmap K  <Plug>(devdocs-under-cursor)
-map  Q  @q
+noremap  Q  @q
 
 nnoremap <C-h> <C-w><C-h>
 nnoremap <C-j> <C-w><C-j>
@@ -165,31 +165,30 @@ command! -bang -nargs=* Rg
 
 let mapleader = ","
 
-map  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
-map  <leader>dd   :Dash<cr>
-map  <leader>fa   :Ack<space>
-map  <leader>ff   :Rg<space>
-map  <leader>fw   "zyiw:exe "Rg ".@z.""<cr>
-map  <leader>gg   :tabe ~/Dropbox/notes/notes.md<cr>
-map  <leader>ghs  :GitGutterStageHunk<cr>
-map  <leader>ghu  :GitGutterUndoHunk<cr>
-map  <leader>gs   :Gstatus<cr>
-map  <leader>mv   :call RenameFile()<cr>
-map  <leader>n    :nohl<cr>
-map  <leader>pp   "+p
-map  <leader>q    :bd<cr>
-map  <leader>rc   :Econtroller
-map  <leader>rm   :!rm %
-map  <leader>rv   :Eview
-map  <leader>s    :A<cr>
-map  <leader>vi   :tabe ~/.vimrc<cr>
-map  <leader>vv   :vnew<cr>
-vmap <leader>yy   "+y
-
+noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
+noremap  <leader>dd   :Dash<cr>
+noremap  <leader>fa   :Ack<space>
+noremap  <leader>ff   :Rg<space>
+noremap  <leader>fw   "zyiw:exe "Rg ".@z.""<cr>
+noremap  <leader>gg   :tabe ~/Dropbox/notes/notes.md<cr>
+noremap  <leader>ghs  :GitGutterStageHunk<cr>
+noremap  <leader>ghu  :GitGutterUndoHunk<cr>
+noremap  <leader>gs   :Gstatus<cr>
+noremap  <leader>mv   :call RenameFile()<cr>
+noremap  <leader>n    :nohl<cr>
+noremap  <leader>pp   "+p
+noremap  <leader>q    :bd<cr>
+noremap  <leader>rc   :Econtroller
+noremap  <leader>rm   :!rm %
+noremap  <leader>rv   :Eview
+noremap  <leader>s    :A<cr>
 noremap  <leader>tt   :TestLast<cr>
 noremap  <leader>tn   :TestNearest<cr>
 noremap  <leader>ts   :TestSuite<cr>
 noremap  <leader>tf   :TestFile<cr>
+noremap  <leader>vi   :tabe ~/.vimrc<cr>
+noremap  <leader>vv   :vnew<cr>
+vnoremap <leader>yy   "+y
 
 if has('nvim')
   tnoremap <C-o> <C-\><C-n>
