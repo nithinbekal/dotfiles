@@ -73,6 +73,10 @@ runtime macros/matchit.vim
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
+" Run tests in vertical neoterm pane
+let g:neoterm_position = 'vertical'
+let test#strategy = 'neoterm'
+
 
 " Status line
 set statusline=
