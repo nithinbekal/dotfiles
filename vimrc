@@ -179,3 +179,12 @@ map  <leader>s    :A<cr>
 map  <leader>vi   :tabe ~/.vimrc<cr>
 map  <leader>vv   :vnew<cr>
 vmap <leader>yy   "+y
+
+if has('nvim')
+  tnoremap <C-o> <C-\><C-n>
+
+  tnoremap <C-h> <C-\><C-n><C-w>h
+  tnoremap <C-j> <C-\><C-n><C-w>j
+  tnoremap <C-k> <C-\><C-n><C-w>k
+  tnoremap <C-l> <C-\><C-n><C-w>l
+endif
