@@ -77,6 +77,9 @@ let g:ackprg = 'rg --vimgrep'
 let g:neoterm_position = 'vertical'
 let test#strategy = 'neoterm'
 
+if filereadable('dev.yml')
+  let test#ruby#rails#executable = 'dev test'
+endif
 
 " Status line
 set statusline=
@@ -176,6 +179,7 @@ noremap  <leader>ghu  :GitGutterUndoHunk<cr>
 noremap  <leader>gs   :Gstatus<cr>
 noremap  <leader>mv   :call RenameFile()<cr>
 noremap  <leader>n    :nohl<cr>
+noremap  <leader>o    :only<cr>
 noremap  <leader>pp   "+p
 noremap  <leader>q    :bd<cr>
 noremap  <leader>rc   :Econtroller
