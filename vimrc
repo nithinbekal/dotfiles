@@ -201,4 +201,6 @@ if has('nvim')
   tnoremap <C-j> <C-\><C-n><C-w>j
   tnoremap <C-k> <C-\><C-n><C-w>k
   tnoremap <C-l> <C-\><C-n><C-w>l
+
+  tnoremap <leader>q  <C-\><C-n>:Tclose<cr>
 endif
