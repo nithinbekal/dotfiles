@@ -186,11 +186,11 @@ noremap  <leader>rc   :Econtroller
 noremap  <leader>rm   :!rm %
 noremap  <leader>rv   :Eview
 noremap  <leader>s    :A<cr>
-noremap  <leader>tt   :TestLast<cr>
+noremap  <leader>tf   :TestFile<cr>
 noremap  <leader>tn   :TestNearest<cr>
 noremap  <leader>to   :Ttoggle<cr>
 noremap  <leader>ts   :TestSuite<cr>
-noremap  <leader>tf   :TestFile<cr>
+noremap  <leader>tt   :TestLast<cr>
 noremap  <leader>vi   :tabe ~/.vimrc<cr>
 noremap  <leader>vv   :vnew<cr>
 vnoremap <leader>yy   "+y
