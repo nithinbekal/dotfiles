@@ -172,7 +172,7 @@ noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
 noremap  <leader>dd   :Dash<cr>
 noremap  <leader>fa   :Ack<space>
 noremap  <leader>ff   :Rg<space>
-noremap  <leader>fw   "zyiw:exe "Rg ".@z.""<cr>
+noremap  <leader>fw   :Rg <C-r><C-w>
 noremap  <leader>gg   :tabe ~/Dropbox/notes/notes.md<cr>
 noremap  <leader>ghs  :GitGutterStageHunk<cr>
 noremap  <leader>ghu  :GitGutterUndoHunk<cr>
