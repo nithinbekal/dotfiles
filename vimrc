@@ -32,6 +32,7 @@ Plug 'tpope/vim-dispatch'               " Run commands in tmux pane
 Plug 'tpope/vim-endwise'                " Add end after ruby blocks
 Plug 'tpope/vim-fugitive'               " Git wrapper
 Plug 'tpope/vim-rails'                  " Rails support
+Plug 'tpope/vim-rhubarb'                " Needed by fugitive for Gbrowse
 Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
