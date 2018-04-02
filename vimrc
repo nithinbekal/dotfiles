@@ -47,6 +47,7 @@ set expandtab                   " Tab settings - Use spaces to insert a tab
 set backupdir=~/.vim/tmp        " Don't clutter my dirs with swp/tmp files
 set colorcolumn=80,120          " Show vertical bar to indicate 80/120 chars
 set directory=~/.tmp            " Don't clutter my dirs with swp/tmp files
+set fillchars+=vert:│           " Make vertical separator a continuous line
 set grepprg=rg\ --vimgrep       " Use ripgrep for file search
 set hlsearch                    " Search: Highlight results
 set ignorecase smartcase        " Search: ignore case, unless uppercase chars given
