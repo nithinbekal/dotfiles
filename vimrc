@@ -71,6 +71,8 @@ set wildmode=list:full          " Command mode tab completion - complete upto am
 " Enable extended matching with %
 runtime macros/matchit.vim
 
+" Hide ~ in line number columns after end of buffer
+highlight EndOfBuffer ctermfg=bg
 
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
