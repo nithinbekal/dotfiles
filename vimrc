@@ -78,7 +78,7 @@ highlight EndOfBuffer ctermfg=bg
 let g:ackprg = 'rg --vimgrep'
 
 " Run tests in vertical neoterm pane
-let g:neoterm_position = 'vertical'
+let g:neoterm_default_mod = 'vertical'
 let test#strategy = 'neoterm'
 
 if filereadable('dev.yml')
