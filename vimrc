@@ -13,6 +13,7 @@ Plug 'christoomey/vim-tmux-navigator'   " Seamlessly navigate b/w vim and tmux
 Plug 'elixir-lang/vim-elixir'           " Elixir support
 Plug 'garbas/vim-snipmate'              " Insert snippets using tab
 Plug 'janko-m/vim-test'
+Plug 'jparise/vim-graphql'
 Plug 'junegunn/fzf'                     " Basic fzf wrapper
 Plug 'junegunn/fzf.vim'                 " Fuzzy file finder
 Plug 'kassio/neoterm'
