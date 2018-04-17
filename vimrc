@@ -173,6 +173,7 @@ command! -bang -nargs=* Rg
 
 let mapleader = ","
 
+noremap  <leader>,    :Files<cr>
 noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
 noremap  <leader>dd   :Dash<cr>
 noremap  <leader>fa   :Ack<space>
