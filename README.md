@@ -30,6 +30,18 @@ to make sure pbcopy and pbpaste commands work properly.
 brew install neovim ag fzf ripgrep reattach-to-user-namespace
 ```
 
+### Tmux
+
+**Battery status**:
+To setup battery status in tmux,
+the following is required:
+
+```bash
+wget https://raw.github.com/Goles/Battery/master/battery
+mv battery /usr/local/bin
+chmod u+x /usr/local/bin/battery
+```
+
 ## Fonts
 
 vim-airline is configured to use powerline fonts to display non-ASCII characters.
