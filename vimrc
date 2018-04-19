@@ -66,6 +66,7 @@ set splitbelow                  " Open new split panes below
 set splitright                  " Open new split panes to the right
 set t_Co=256                    " Use 256 colors in tmux
 set tags=$HOME/.tags_cache      " Keep tags file in a single place
+set updatetime=100              " Gitgutter waits this long to update hunk markers
 set wildmode=list:full          " Command mode tab completion - complete upto ambiguity
 
 
