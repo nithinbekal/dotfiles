@@ -26,6 +26,7 @@ alias grx="git rebase --abort"
 alias gs="git stash"
 alias gsc="git checkout -b scratchpad"
 alias gsp="git stash pop"
+alias notes="tmux new -s notes -c ~/Dropbox/notes  \; send-keys \"nvim index\" C-m"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias todo="vim ~/Dropbox/todo/gtd.md"
 alias v="nvim"
@@ -46,7 +47,7 @@ export DISABLE_AUTO_TITLE="true"
 
 # FZF setup
 
-export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
 
 # The config below is taken from ~/.fzf.zsh which was generated during shell
 # extension installation using /usr/local/opt/fzf/install
