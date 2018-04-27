@@ -39,6 +39,8 @@ Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
 Plug 'rhysd/devdocs.vim'                " Lookup docs with devdocs
 
+Plug 'vim-airline/vim-airline'
+
 call plug#end()
 
 colorscheme jellybeans
@@ -88,10 +90,10 @@ if filereadable('dev.yml')
 endif
 
 " Status line
-set statusline=
-set statusline+=\ %{fugitive#head()}\ #
-set statusline+=\ %f
-set statusline+=%=\ %y\ %l,%c\ %L
+" set statusline=
+" set statusline+=\ %{fugitive#head()}\ #
+" set statusline+=\ %f
+" set statusline+=%=\ %y\ %l,%c\ %L
 
 
 " Create a directory for the current file if it does not exist.
@@ -182,6 +184,7 @@ noremap  <leader>fa   :Ack<space>
 noremap  <leader>ff   :Rg<space>
 noremap  <leader>fw   :Rg <C-r><C-w>
 noremap  <leader>gg   :tabe ~/Dropbox/notes/index<cr>
+noremap  <leader>ghp  :!/opt/dev/bin/dev open pr<cr><cr>
 noremap  <leader>ghs  :GitGutterStageHunk<cr>
 noremap  <leader>ghu  :GitGutterUndoHunk<cr>
 noremap  <leader>gs   :Gstatus<cr>
