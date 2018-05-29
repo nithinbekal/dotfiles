@@ -144,9 +144,6 @@ nnoremap <C-j> <C-w><C-j>
 nnoremap <C-k> <C-w><C-k>
 nnoremap <C-l> <C-w><C-l>
 
-" Use fzf.vim for fuzzy file search
-map <C-p> :Files<cr>
-
 map  <C-s> <esc>:w<CR>
 imap <C-s> <esc>:w<CR>
 
