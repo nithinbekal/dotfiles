@@ -198,6 +198,7 @@ noremap  <leader>rm   :!rm %
 noremap  <leader>rv   :Eview
 noremap  <leader>s    :A<cr>
 noremap  <leader>tf   :TestFile<cr>
+noremap  <leader>tl   :T dev test --include-branch-commits<cr>
 noremap  <leader>tn   :TestNearest<cr>
 noremap  <leader>to   :Ttoggle<cr>
 noremap  <leader>ts   :TestSuite<cr>
