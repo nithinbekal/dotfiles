@@ -1,7 +1,5 @@
 
 snippet cla class .. end
-	# frozen_string_literal: true
-	
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
 		${0}
 	end
