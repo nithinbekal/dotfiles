@@ -1,5 +1,7 @@
 
 snippet cla class .. end
+	# frozen_string_literal: true
+	
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
 		${0}
 	end
@@ -27,26 +29,36 @@ snippet ife
 snippet pry
 	binding.pry
 snippet rcon
+	# frozen_string_literal: true
+	
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationController
 		${0}
 	end
 snippet rmod
+	# frozen_string_literal: true
+	
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationRecord
 		${0}
 	end
 snippet rt
+	# frozen_string_literal: true
+	
 	require 'test_helper'
 	
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ActiveSupport::TestCase
 		${0}
 	end
 snippet rtc
+	# frozen_string_literal: true
+	
 	require 'test_helper'
 	
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ActionDispatch::IntegrationTest
 		${0}
 	end
 snippet rtsys
+	# frozen_string_literal: true
+	
 	require 'application_system_test_case'
 	
 	class ${1:`substitute(SnippetFilename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ApplicationSystemTestCase
