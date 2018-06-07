@@ -4,8 +4,6 @@ ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="robbyrussell"
 DISABLE_AUTO_UPDATE="true"
 
-plugins=(git)
-
 source $ZSH/oh-my-zsh.sh
 source $HOME/.env.local
 
@@ -18,15 +16,6 @@ alias dnv="cd ~/Dropbox/notes && vim"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
 alias dotf="tmux new -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
 alias e="emacs -nw"
-alias gbm="git branch -m"
-alias gdm="git diff master"
-alias grc="git rebase --continue"
-alias grim="git rebase -i master"
-alias grm="git rebase master"
-alias grx="git rebase --abort"
-alias gs="git stash"
-alias gsc="git checkout -b scratchpad"
-alias gsp="git stash pop"
 alias notes="tmux new -s notes -c ~/Dropbox/notes  \; send-keys \"nvim index\" C-m"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias todo="vim ~/Dropbox/todo/gtd.md"
@@ -73,3 +62,37 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Hom
 
 export RUBYMOTION_ANDROID_SDK=/Users/nithin/.rubymotion-android/sdk
 export RUBYMOTION_ANDROID_NDK=/Users/nithin/.rubymotion-android/ndk
+
+# Git setup
+# Based on ohmyzsh git plugin:
+# https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh
+
+# Query/use custom command for `git`.
+zstyle -s ":vcs_info:git:*:-all-" "command" _omz_git_git_cmd
+: ${_omz_git_git_cmd:=git}
+
+# Git Aliases
+
+alias g='git'
+
+alias gb='git branch'
+alias gbd='git branch -d'
+alias gbm="git branch -m"
+alias gco='git checkout'
+alias gd='git diff'
+alias gdm="git diff master"
+alias ggpull='git pull origin $(git_current_branch)'
+alias ggpush='git push origin $(git_current_branch)'
+alias glg='git log --stat'
+alias glog='git log --oneline --decorate --graph'
+alias grc="git rebase --continue"
+alias grhh='git reset HEAD --hard'
+alias grim="git rebase -i master"
+alias grm="git rebase master"
+alias grx="git rebase --abort"
+alias gs="git stash"
+alias gsc="git checkout -b scratchpad"
+alias gsp="git stash pop"
+alias gst='git status'
+alias gsta='git stash save'
+alias gstp='git stash pop'
