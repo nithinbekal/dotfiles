@@ -198,12 +198,12 @@ noremap  <leader>rc   :Econtroller
 noremap  <leader>rm   :!rm %
 noremap  <leader>rv   :Eview
 noremap  <leader>s    :A<cr>
-noremap  <leader>tf   :TestFile<cr>
-noremap  <leader>tl   :T dev test --include-branch-commits<cr>
-noremap  <leader>tn   :TestNearest<cr>
+noremap  <leader>tf   :w<cr>:TestFile<cr>
+noremap  <leader>tl   :w<cr>:T dev test --include-branch-commits<cr>
+noremap  <leader>tn   :w<cr>:TestNearest<cr>
 noremap  <leader>to   :Ttoggle<cr>
-noremap  <leader>ts   :TestSuite<cr>
-noremap  <leader>tt   :TestLast<cr>
+noremap  <leader>ts   :w<cr>:TestSuite<cr>
+noremap  <leader>tt   :w<cr>:TestLast<cr>
 noremap  <leader>vi   :tabe ~/.vimrc<cr>
 noremap  <leader>vv   :vnew<cr>
 vnoremap <leader>yy   "+y
