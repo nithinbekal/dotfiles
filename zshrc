@@ -15,6 +15,7 @@ export LC_ALL="en_US.UTF-8"
 alias bx="bundle exec"
 alias dn="cd ~/Dropbox/notes"
 alias dnv="cd ~/Dropbox/notes && vim"
+alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
 alias dotf="tmux new -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
 alias e="emacs -nw"
 alias gbm="git branch -m"
