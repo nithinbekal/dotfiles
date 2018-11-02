@@ -37,7 +37,6 @@ Plug 'tpope/vim-rhubarb'                " Needed by fugitive for Gbrowse
 Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
 Plug 'vim-ruby/vim-ruby'                " Ruby support
-Plug 'rhysd/devdocs.vim'                " Lookup docs with devdocs
 
 Plug 'vim-airline/vim-airline'
 
@@ -139,7 +138,6 @@ fun! SnippetFilename(...)
 endf
 
 
-nmap K  <Plug>(devdocs-under-cursor)
 noremap  Q  @q
 
 nnoremap <C-h> <C-w><C-h>
