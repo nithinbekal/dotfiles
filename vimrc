@@ -82,6 +82,9 @@ highlight EndOfBuffer ctermfg=bg
 " Use ag for text search
 let g:ackprg = 'rg --vimgrep'
 
+let g:markdown_fenced_languages = ['ruby', 'elixir']
+let g:markdown_minlines = 100
+
 " Run tests in vertical neoterm pane
 let g:neoterm_default_mod = 'vertical'
 let test#strategy = 'neoterm'
