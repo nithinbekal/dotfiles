@@ -9,6 +9,7 @@ endif
 call plug#begin('~/.vim/plugged')
 
 Plug 'airblade/vim-gitgutter'           " Show sign column for git diff
+Plug 'bogado/file-line'                 " Open files using foo.rb:42 syntax
 Plug 'elixir-lang/vim-elixir'           " Elixir support
 Plug 'garbas/vim-snipmate'              " Insert snippets using tab
 Plug 'janko-m/vim-test'
