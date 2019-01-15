@@ -181,7 +181,7 @@ noremap  <leader>dd   :Dash<cr>
 noremap  <leader>fa   :Ack<space>
 noremap  <leader>ff   :Rg<space>
 noremap  <leader>fw   :Rg <C-r><C-w>
-noremap  <leader>gg   :tabe ~/Dropbox/notes/index<cr>
+noremap  <leader>gg   :tabe ~/Dropbox/notes/index.md<cr>
 noremap  <leader>ghp  :!/opt/dev/bin/dev open pr &<cr><cr>
 noremap  <leader>ghs  :GitGutterStageHunk<cr>
 noremap  <leader>ghu  :GitGutterUndoHunk<cr>
