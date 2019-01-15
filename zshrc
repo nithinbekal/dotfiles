@@ -96,3 +96,6 @@ alias gsp="git stash pop"
 alias gst='git status'
 alias gsta='git stash save'
 alias gstp='git stash pop'
+
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
