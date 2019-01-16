@@ -57,9 +57,6 @@ export NVM_DIR=$HOME/.nvm
 
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home"
 
-export RUBYMOTION_ANDROID_SDK=/Users/nithin/.rubymotion-android/sdk
-export RUBYMOTION_ANDROID_NDK=/Users/nithin/.rubymotion-android/ndk
-
 # Git setup
 # Based on ohmyzsh git plugin:
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh
