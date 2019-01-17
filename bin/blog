@@ -10,13 +10,11 @@ fi
 tmux start-server
 
 tmux new-session -d -s blog -n nvim
-tmux split-window -t blog:rails -h
+tmux send-keys "v" C-m
 
 tmux new-window -t blog:2 -n jekyll
-
-tmux send-keys -t blog:vim "vim" C-m
 tmux send-keys -t blog:jekyll "bundle exec jekyll serve --watch --incremental" C-m
 
-tmux select-window -t blog:vim
+tmux select-window -t 1
 
 tmux -u attach-session -d -t blog
