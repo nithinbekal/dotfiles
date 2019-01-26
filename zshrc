@@ -50,8 +50,6 @@ export PATH=$PATH:$HOME/.bin
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
 
-export PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home"
 
 # Git setup
