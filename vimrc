@@ -21,7 +21,6 @@ Plug 'kassio/neoterm'
 Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
-Plug 'mileszs/ack.vim'                  " Use Ag for search
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plug 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
 Plug 'terryma/vim-multiple-cursors'     " Sublime text style multiple cursors
