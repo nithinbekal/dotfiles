@@ -191,7 +191,8 @@ noremap  <leader>ghu  :GitGutterUndoHunk<cr>
 noremap  <leader>gs   :Gstatus<cr>
 noremap  <leader>hh   :split<cr>
 noremap  <leader>mv   :call RenameFile()<cr>
-noremap  <leader>n    :nohl<cr>
+noremap  <leader>nh   :nohl<cr>
+noremap  <leader>np   :set nopaste<cr>
 noremap  <leader>o    :only<cr>
 noremap  <leader>pp   "+p
 noremap  <leader>q    :bd<cr>
