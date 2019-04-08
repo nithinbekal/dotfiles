@@ -189,6 +189,7 @@ noremap  <leader>ghp  :!/opt/dev/bin/dev open pr &<cr><cr>
 noremap  <leader>ghs  :GitGutterStageHunk<cr>
 noremap  <leader>ghu  :GitGutterUndoHunk<cr>
 noremap  <leader>gs   :Gstatus<cr>
+noremap  <leader>hh   :split<cr>
 noremap  <leader>mv   :call RenameFile()<cr>
 noremap  <leader>n    :nohl<cr>
 noremap  <leader>o    :only<cr>
