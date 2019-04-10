@@ -62,7 +62,6 @@ zstyle -s ":vcs_info:git:*:-all-" "command" _omz_git_git_cmd
 
 alias g='git'
 
-alias gb='git branch'
 alias gbd='git branch -d'
 alias gbm="git branch -m"
 alias gco='git checkout'
@@ -77,11 +76,8 @@ alias grhh='git reset HEAD --hard'
 alias grim="git rebase -i master"
 alias grm="git rebase master"
 alias grx="git rebase --abort"
-alias gs="git stash"
-alias gsc="git checkout -b scratchpad"
-alias gsp="git stash pop"
 alias gst='git status'
-alias gsta='git stash save'
+alias gsta='git stash'
 alias gstp='git stash pop'
 
 gfco() { git fetch origin "$1" && git checkout "$1" }
