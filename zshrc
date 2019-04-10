@@ -83,5 +83,7 @@ alias gst='git status'
 alias gsta='git stash save'
 alias gstp='git stash pop'
 
+gfco() { git fetch origin "$1" && git checkout "$1" }
+
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
