@@ -10,6 +10,7 @@ source $HOME/.env.local
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
+alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
 alias dotf="tmux new -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
