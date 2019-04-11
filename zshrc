@@ -58,6 +58,8 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Hom
 zstyle -s ":vcs_info:git:*:-all-" "command" _omz_git_git_cmd
 : ${_omz_git_git_cmd:=git}
 
+git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
+
 # Git Aliases
 
 alias g='git'
@@ -69,6 +71,7 @@ alias gd='git diff'
 alias gdm="git diff master"
 alias ggpull='git pull origin $(git_current_branch)'
 alias ggpush='git push origin $(git_current_branch)'
+alias gfco='git_fetch_and_checkout'
 alias gfp='git push origin $(git_current_branch) --force-with-lease'
 alias glg='git log --stat'
 alias glog='git log --oneline --decorate --graph'
@@ -80,8 +83,6 @@ alias grx="git rebase --abort"
 alias gst='git status'
 alias gsta='git stash'
 alias gstp='git stash pop'
-
-gfco() { git fetch origin "$1" && git checkout "$1" }
 
 . $HOME/.asdf/asdf.sh
 . $HOME/.asdf/completions/asdf.bash
