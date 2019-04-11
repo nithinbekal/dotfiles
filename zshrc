@@ -69,6 +69,7 @@ alias gd='git diff'
 alias gdm="git diff master"
 alias ggpull='git pull origin $(git_current_branch)'
 alias ggpush='git push origin $(git_current_branch)'
+alias gfp='git push origin $(git_current_branch) --force-with-lease'
 alias glg='git log --stat'
 alias glog='git log --oneline --decorate --graph'
 alias grc="git rebase --continue"
