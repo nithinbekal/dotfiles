@@ -60,11 +60,25 @@ zstyle -s ":vcs_info:git:*:-all-" "command" _omz_git_git_cmd
 
 git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 
+function git-formatted-branches() {
+  git for-each-ref --sort=-committerdate --sort=-author  refs/heads/ \
+    --format='%(HEAD),%(refname:short),%(contents:subject),%(authorname),%(committerdate:relative)'\
+    | column -t -s ','
+}
+
+function git-group-formatted-branches() {
+  local name=$(git config --global user.name)
+  git-formatted-branches | grep "${name}"
+  echo '---'
+  git-formatted-branches | grep -v ${name}
+}
+
 # Git Aliases
 
 alias g='git'
 
 alias gbd='git branch -d'
+alias gbf="git-group-formatted-branches"
 alias gbm="git branch -m"
 alias gco='git checkout'
 alias gd='git diff'
