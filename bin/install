@@ -2,6 +2,8 @@
 
 # Install the dotfiles to the correct paths
 
+set -e
+
 echo "Linking ~/.ackrc"
 rm "$HOME/.ackrc"
 ln -s "$PWD/ackrc" "$HOME/.ackrc"
@@ -70,3 +72,8 @@ ln -s "$PWD/bin" "$HOME/.bin"
 echo "Moving snippets to ~/.vim/snippets"
 rm $HOME/.vim/snippets
 ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
+
+echo "Moving alacritty.yml to ~/.config/alacritty"
+mkdir -p $HOME/.config/alacritty
+rm -f $HOME/.config/alacritty/alacritty.yml
+ln -s "$PWD/alacritty.yml" "$HOME/.config/alacritty/alacritty.yml"
