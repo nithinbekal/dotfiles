@@ -91,6 +91,17 @@ if filereadable('dev.yml')
   let test#ruby#rails#executable = 'dev test'
 endif
 
+let g:gitgutter_sign_added = '•'
+let g:gitgutter_sign_modified = '•'
+let g:gitgutter_sign_removed = '•'
+let g:gitgutter_sign_removed_first_line = '•↑'
+let g:gitgutter_sign_modified_removed = '•'
+
+hi DiffAdd    ctermfg=148 ctermbg=NONE cterm=bold guifg=#f8f8f2 guibg=#46830c gui=bold
+hi DiffDelete ctermfg=197 ctermbg=NONE cterm=bold guifg=#8b0807 guibg=NONE    gui=NONE
+hi DiffChange ctermfg=208 ctermbg=NONE cterm=bold guifg=#f8f8f2 guibg=#243955 gui=NONE
+hi DiffText   ctermfg=231 ctermbg=24   cterm=bold guifg=#f8f8f2 guibg=#204a87 gui=bold
+
 " Status line
 " set statusline=
 " set statusline+=\ %{fugitive#head()}\ #
