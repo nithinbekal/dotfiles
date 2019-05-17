@@ -19,7 +19,6 @@ alias bx="bundle exec"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
 alias dotf="tmux new -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
 alias e="emacs -nw"
-alias notes="tmux new -s notes -c ~/Dropbox/notes  \; send-keys \"nvim index\" C-m"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias v="nvim"
 alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
