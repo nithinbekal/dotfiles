@@ -1,12 +1,16 @@
-# Path to your oh-my-zsh configuration.
-ZSH=$HOME/.oh-my-zsh
 
-ZSH_THEME="robbyrussell"
+# oh-my-zsh config
 DISABLE_AUTO_UPDATE="true"
+ZSH=$HOME/.oh-my-zsh
+ZSH_THEME="robbyrussell"
 
 source $ZSH/oh-my-zsh.sh
 source $HOME/.env.local
 
+export DISABLE_AUTO_TITLE="true" # Tmux changes the window title without this
+export EDITOR=nvim
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home"
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
@@ -27,28 +31,15 @@ bindkey "^[^[[C" forward-word
 
 ssh-add &>/dev/null
 
-export EDITOR=nvim
-
-# Tmux changes the window title without this
-export DISABLE_AUTO_TITLE="true"
-
-
-# FZF setup
-
-export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
-
-# The config below is taken from ~/.fzf.zsh which was generated during shell
+# This config is taken from ~/.fzf.zsh which was generated during shell
 # extension installation using /usr/local/opt/fzf/install
 export PATH="$PATH:/usr/local/opt/fzf/bin"
 [[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 
 export PATH=$PATH:$HOME/.bin
-
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
-
-export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home"
 
 # Git setup
 # Based on ohmyzsh git plugin:
