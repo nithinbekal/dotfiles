@@ -77,9 +77,6 @@ runtime macros/matchit.vim
 " Hide ~ in line number columns after end of buffer
 highlight EndOfBuffer ctermfg=bg
 
-" Use ag for text search
-let g:ackprg = 'rg --vimgrep'
-
 let g:markdown_fenced_languages = ['ruby', 'elixir']
 let g:markdown_minlines = 100
 
@@ -192,7 +189,6 @@ noremap  <leader>,    :Files<cr>
 noremap  <leader>bb   :Buffers<cr>
 noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
 noremap  <leader>dd   :Dash<cr>
-noremap  <leader>fa   :Ack<space>
 noremap  <leader>ff   :Rg<space>
 noremap  <leader>fw   :Rg <C-r><C-w>
 noremap  <leader>gbl  :Gblame<cr>
