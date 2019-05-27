@@ -17,12 +17,12 @@ export LC_ALL="en_US.UTF-8"
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
-alias dotf="tmux new -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
+alias dotf="tmux new -A -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
 alias e="emacs -nw"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias v="nvim"
 alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
-alias wiki="tmux new -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
+alias wiki="tmux new -A -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
 
 # Alt + left/right arrows
 bindkey "^[^[[D" backward-word
