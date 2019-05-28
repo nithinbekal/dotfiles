@@ -14,16 +14,6 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Hom
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
-alias bx="bundle exec"
-alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
-alias dotf="tmux new -A -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
-alias e="emacs -nw"
-alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
-alias v="nvim"
-alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
-alias wiki="tmux new -A -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
-
 ssh-add &>/dev/null
 
 # This config is taken from ~/.fzf.zsh which was generated during shell
@@ -59,10 +49,21 @@ function git-group-formatted-branches() {
   git-formatted-branches | grep -v ${name}
 }
 
+# Aliases
+
+alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
+alias bx="bundle exec"
+alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
+alias dotf="tmux new -A -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
+alias e="emacs -nw"
+alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
+alias v="nvim"
+alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
+alias wiki="tmux new -A -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
+
 # Git Aliases
 
 alias g='git'
-
 alias gbd='git branch -d'
 alias gbf="git-group-formatted-branches"
 alias gbm="git branch -m"
