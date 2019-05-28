@@ -24,10 +24,6 @@ alias v="nvim"
 alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
 alias wiki="tmux new -A -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
 
-# Alt + left/right arrows
-bindkey "^[^[[D" backward-word
-bindkey "^[^[[C" forward-word
-
 ssh-add &>/dev/null
 
 # This config is taken from ~/.fzf.zsh which was generated during shell
