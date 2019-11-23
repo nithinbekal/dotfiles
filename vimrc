@@ -209,6 +209,7 @@ noremap  <leader>rc   :Econtroller
 noremap  <leader>rm   :!rm %
 noremap  <leader>rv   :Eview
 noremap  <leader>s    :A<cr>
+noremap  <leader>tc   :Tclear<cr>
 noremap  <leader>tf   :w<cr>:TestFile<cr>
 noremap  <leader>tl   :w<cr>:T dev test --include-branch-commits<cr>
 noremap  <leader>tn   :w<cr>:TestNearest<cr>
