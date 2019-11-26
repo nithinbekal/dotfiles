@@ -30,19 +30,6 @@ export PATH=/usr/local/bin:$PATH
 
 git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 
-function git-formatted-branches() {
-  git for-each-ref --sort=-committerdate --sort=-author  refs/heads/ \
-    --format='%(HEAD),%(refname:short),%(contents:subject),%(authorname),%(committerdate:relative)'\
-    | column -t -s ','
-}
-
-function git-group-formatted-branches() {
-  local name=$(git config --global user.name)
-  git-formatted-branches | grep "${name}"
-  echo '---'
-  git-formatted-branches | grep -v ${name}
-}
-
 # Aliases
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
@@ -52,14 +39,12 @@ alias dotf="tmux new -A -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'
 alias e="emacs -nw"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias v="nvim"
-alias vim-swp-clear="rm -rf ~/.vim/tmp/*.swp"
 alias wiki="tmux new -A -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
 
 # Git Aliases
 
 alias g='git'
 alias gbd='git branch -d'
-alias gbf="git-group-formatted-branches"
 alias gbm="git branch -m"
 alias gco='git checkout'
 alias gd='git diff'
