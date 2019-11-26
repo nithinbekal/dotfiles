@@ -14,6 +14,8 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Hom
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
+export PROMPT='%B%F{240}%1~%f%b %F{red}ƛ '
+
 ssh-add &>/dev/null
 
 # This config is taken from ~/.fzf.zsh which was generated during shell
@@ -25,14 +27,6 @@ source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 export PATH=$PATH:$HOME/.bin
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
-
-# Git setup
-# Based on ohmyzsh git plugin:
-# https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/git/git.plugin.zsh
-
-# Query/use custom command for `git`.
-zstyle -s ":vcs_info:git:*:-all-" "command" _omz_git_git_cmd
-: ${_omz_git_git_cmd:=git}
 
 git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 
