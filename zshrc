@@ -14,7 +14,7 @@ export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Hom
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-export PROMPT='%B%F{240}%1~%f%b %F{red}ƛ%f '
+export PROMPT='%B%F{blue}%1~%f%b %F{red}ƛ%f '
 
 ssh-add &>/dev/null
 
