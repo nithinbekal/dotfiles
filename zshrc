@@ -34,11 +34,11 @@ git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
-alias dotf="tmux new -A -s dotfiles -c ~/.dotfiles  \; send-keys \"nvim -c 'FZF'\" C-m"
+alias dotf="cd ~/.dotfiles && nvim -c 'FZF'"
 alias e="emacs -nw"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias v="nvim"
-alias wiki="tmux new -A -s wiki -c ~/Dropbox/wiki \; send-keys \"nvim -c 'FZF'\" C-m"
+alias wiki="cd ~/Dropbox/wiki && nvim -c 'FZF'"
 
 # Git Aliases
 
