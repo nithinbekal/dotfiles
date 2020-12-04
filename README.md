@@ -81,16 +81,6 @@ so this command needs to be run to fix that:
 defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 ```
 
-### Pry Debugging
-
-I use pry for debugging Ruby programs, and I've set up an `.inputrc` file
-to use vi mode and add a couple of shortcuts in normal mode:
-
-```
-C-n: execute next line (equivalent to typing "next" and hitting enter)
-C-s: step through the code (equivalent to typing "step" and hitting enter)
-```
-
 ### Example function for starting up a Rails project in tmux
 
 ```bash
