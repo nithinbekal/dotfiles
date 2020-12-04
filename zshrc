@@ -25,6 +25,7 @@ source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 export PATH=$PATH:$HOME/.bin
 export PATH=$PATH:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/X11/bin:/usr/local/git/bin
 export PATH=/usr/local/bin:$PATH
+export PATH=/usr/local/smlnj/bin:$PATH
 
 git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 
