@@ -115,6 +115,14 @@ augroup Mkdir
     \ endif
 augroup END
 
+" Make sorbet sigs look like comments
+augroup format_ruby
+  autocmd Syntax ruby syn region sorbetSig start='sig {' end='}'
+  autocmd Syntax ruby hi def link sorbetSig Comment
+
+  autocmd Syntax ruby syn region sorbetSigDo start='sig do' end='end'
+  autocmd Syntax ruby hi def link sorbetSigDo Comment
+augroup END
 
 " Rebalance panes on resize
 autocmd VimResized * :wincmd =
