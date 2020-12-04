@@ -37,6 +37,7 @@ alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
 alias dotf="cd ~/.dotfiles && nvim -c 'FZF'"
 alias e="emacs -nw"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
+alias retag="ctags -R --exclude=public --exclude=app/assets/javascripts ."
 alias v="nvim"
 alias wiki="cd ~/Dropbox/wiki && nvim -c 'FZF'"
 
