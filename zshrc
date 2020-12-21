@@ -33,6 +33,7 @@ git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
+alias blog="cd ~/Dropbox/blog && nvim -c 'FZF'"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
 alias dotf="cd ~/.dotfiles && nvim -c 'FZF'"
 alias e="emacs -nw"
