@@ -35,9 +35,8 @@ Plug 'tpope/vim-rails'                  " Rails support
 Plug 'tpope/vim-rhubarb'                " Needed by fugitive for Gbrowse
 Plug 'tpope/vim-surround'               " Easily change quotes/bracket pairs
 Plug 'tpope/vim-unimpaired'             " Misc mappings like ]<space> or ]c
-Plug 'vim-ruby/vim-ruby'                " Ruby support
-
 Plug 'vim-airline/vim-airline'
+Plug 'vim-ruby/vim-ruby'                " Ruby support
 
 call plug#end()
 
