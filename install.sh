@@ -4,37 +4,35 @@
 
 set -e
 
-rm "$HOME/.bashrc"
-ln -s "$PWD/bashrc" "$HOME/.bashrc"
+echo "Installing oh-my-zsh"
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-rm "$HOME/.bin"
+rm -f "$HOME/.bin"
 ln -s "$PWD/bin" "$HOME/.bin"
 
-rm "$HOME/.ctags"
+rm -f "$HOME/.ctags"
 ln -s "$PWD/ctags" "$HOME/.ctags"
 
-rm "$HOME/.gemrc"
+rm -f "$HOME/.gemrc"
 ln -s "$PWD/gemrc" "$HOME/.gemrc"
 
-rm $HOME/.pryrc
+rm -f $HOME/.pryrc
 ln -s $PWD/.pryrc $HOME
 
-rm "$HOME/.railsrc"
+rm -f "$HOME/.railsrc"
 ln -s "$PWD/railsrc" "$HOME/.railsrc"
 
-rm "$HOME/.tmux.conf"
+rm -f "$HOME/.tmux.conf"
 ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
 
 rm "$HOME/.vimrc"
 ln -s "$PWD/vimrc" "$HOME/.vimrc"
 
-rm "$HOME/.zlogin"
-ln -s "$PWD/zlogin" "$HOME/.zlogin"
-
-rm "$HOME/.zshrc"
+rm -f "$HOME/.zshrc"
 ln -s "$PWD/zshrc" "$HOME/.zshrc"
 
-rm $HOME/.vim/snippets
+rm -rf $HOME/.vim/snippets
+mkdir $HOME/.vim/snippets
 ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
 
 echo "Setting up Neovim config"
