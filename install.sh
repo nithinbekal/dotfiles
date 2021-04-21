@@ -23,8 +23,8 @@ ln -s "$PWD/ctags" "$HOME/.ctags"
 rm -f "$HOME/.gemrc"
 ln -s "$PWD/gemrc" "$HOME/.gemrc"
 
-rm -f $HOME/.pryrc
-ln -s $PWD/.pryrc $HOME
+rm -f "$HOME/.pryrc"
+ln -s "$PWD/.pryrc" "$HOME/.pryrc"
 
 rm -f "$HOME/.railsrc"
 ln -s "$PWD/railsrc" "$HOME/.railsrc"
@@ -32,7 +32,7 @@ ln -s "$PWD/railsrc" "$HOME/.railsrc"
 rm -f "$HOME/.tmux.conf"
 ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
 
-rm "$HOME/.vimrc"
+rm -f "$HOME/.vimrc"
 ln -s "$PWD/vimrc" "$HOME/.vimrc"
 
 rm -f "$HOME/.zshrc"
