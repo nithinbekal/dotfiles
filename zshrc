@@ -65,8 +65,10 @@ alias gst='git status'
 alias gsta='git stash'
 alias gstp='git stash pop'
 
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
+if [ -f $HOME/.asdf/asdf.sh ]; then
+  . $HOME/.asdf/asdf.sh
+  . $HOME/.asdf/completions/asdf.bash
+fi
 
 if [ -e /Users/nithinbekal/.nix-profile/etc/profile.d/nix.sh ]; then . /Users/nithinbekal/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 
