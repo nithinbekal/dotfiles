@@ -69,3 +69,5 @@ alias gstp='git stash pop'
 . $HOME/.asdf/completions/asdf.bash
 
 if [ -e /Users/nithinbekal/.nix-profile/etc/profile.d/nix.sh ]; then . /Users/nithinbekal/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+
+[ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
