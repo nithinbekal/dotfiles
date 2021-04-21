@@ -9,7 +9,7 @@ if [ $SPIN ]; then
   sudo apt-get install -y ripgrep fzf neovim
 fi
 
-if [ ! $ZSH ]; then
+if [ ! -d $ZSH ]; then
   echo "Installing oh-my-zsh"
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
@@ -50,3 +50,5 @@ ln -s $PWD/init.vim $HOME/.config/nvim/init.vim
 echo "Installing plug for neovim"
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+
+echo "✅ Installation successful"
