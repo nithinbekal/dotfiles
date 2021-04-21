@@ -29,7 +29,6 @@ Plug 'tomtom/tlib_vim'                  " Needed by snipmate
 Plug 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plug 'tpope/vim-bundler'
 Plug 'tpope/vim-commentary'             " Toggle comments easily
-Plug 'tpope/vim-dispatch'               " Run commands in tmux pane
 Plug 'tpope/vim-endwise'                " Add end after ruby blocks
 Plug 'tpope/vim-fugitive'               " Git wrapper
 Plug 'tpope/vim-rails'                  " Rails support
