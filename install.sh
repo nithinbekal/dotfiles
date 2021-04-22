@@ -34,6 +34,7 @@ echo "▶︎ Linking .vim directory"
 
 rm -rf $HOME/.vim/snippets
 ln -s $PWD/.vim/snippets $HOME/.vim/snippets
+mkdir $HOME/.vim/tmp
 
 echo "▶︎ Setting up Neovim config"
 
