@@ -12,7 +12,7 @@ fi
 echo "▶︎ Moving utility scripts to ~/.bin"
 
 rm -f "$HOME/.bin"
-ln -s "$PWD/bin" "$HOME/.bin"
+ln -s "~/dotfiles/bin" "$HOME/.bin"
 
 echo "▶︎ Installing dotfiles"
 
@@ -22,7 +22,7 @@ for file in "${dotfiles[@]}"
 do
   echo "▶︎ Linking ${file}"
   rm -f $HOME/$file
-  ln -s $PWD/$file $HOME/$file
+  ln -s ~/dotfiles/$file $HOME/$file
 done
 
 if [ ! -d $ZSH ]; then
@@ -39,14 +39,14 @@ fi
 echo "▶︎ Linking .vim directory"
 
 rm -rf $HOME/.vim/snippets
-ln -s $PWD/.vim/snippets $HOME/.vim/snippets
+ln -s ~/dotfiles/.vim/snippets $HOME/.vim/snippets
 mkdir -p $HOME/.vim/tmp
 
 echo "▶︎ Setting up Neovim config"
 
 mkdir -p $HOME/.config/nvim
 rm -f $HOME/.config/nvim/init.vim
-ln -s $PWD/.config/nvim/init.vim $HOME/.config/nvim/init.vim
+ln -s ~/dotfiles/.config/nvim/init.vim $HOME/.config/nvim/init.vim
 
 echo "▶︎ Installing plug for neovim"
 
