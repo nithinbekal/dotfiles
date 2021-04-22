@@ -22,25 +22,22 @@ ln -s "$PWD/bin" "$HOME/.bin"
 echo "▶︎ Linking dotfiles"
 
 rm -f "$HOME/.ctags"
-ln -s "$PWD/ctags" "$HOME/.ctags"
+ln -s .ctags "$HOME/.ctags"
 
 rm -f "$HOME/.gemrc"
-ln -s "$PWD/gemrc" "$HOME/.gemrc"
+ln -s .gemrc "$HOME/.gemrc"
 
 rm -f "$HOME/.pryrc"
-ln -s "$PWD/.pryrc" "$HOME/.pryrc"
+ln -s .pryrc "$HOME/.pryrc"
 
 rm -f "$HOME/.railsrc"
-ln -s "$PWD/railsrc" "$HOME/.railsrc"
-
-rm -f "$HOME/.tmux.conf"
-ln -s "$PWD/tmux.conf" "$HOME/.tmux.conf"
+ln -s .railsrc "$HOME/.railsrc"
 
 rm -f "$HOME/.vimrc"
-ln -s "$PWD/vimrc" "$HOME/.vimrc"
+ln -s .vimrc "$HOME/.vimrc"
 
 rm -f "$HOME/.zshrc"
-ln -s "$PWD/zshrc" "$HOME/.zshrc"
+ln -s .zshrc "$HOME/.zshrc"
 
 rm -rf $HOME/.vim/snippets
 mkdir $HOME/.vim/snippets
