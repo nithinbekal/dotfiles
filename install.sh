@@ -19,36 +19,31 @@ echo "▶︎ Adding custom scripts to ~/.bin"
 rm -f "$HOME/.bin"
 ln -s "$PWD/bin" "$HOME/.bin"
 
-echo "▶︎ Linking dotfiles"
+echo "▶︎ Installing dotfiles"
 
-rm -f "$HOME/.ctags"
-ln -s .ctags "$HOME/.ctags"
+dotfiles=(.ctags .gemrc .pryrc .railsrc .vimrc .zshrc)
 
-rm -f "$HOME/.gemrc"
-ln -s .gemrc "$HOME/.gemrc"
+for file in "${dotfiles[@]}"
+do
+  echo "▶︎ Linking ${file}"
+  rm -f "$HOME/$file"
+  ln -s "$file" "$HOME/$file"
+done
 
-rm -f "$HOME/.pryrc"
-ln -s .pryrc "$HOME/.pryrc"
-
-rm -f "$HOME/.railsrc"
-ln -s .railsrc "$HOME/.railsrc"
-
-rm -f "$HOME/.vimrc"
-ln -s .vimrc "$HOME/.vimrc"
-
-rm -f "$HOME/.zshrc"
-ln -s .zshrc "$HOME/.zshrc"
+echo "▶︎ Installing vim snippets"
 
 rm -rf $HOME/.vim/snippets
 mkdir $HOME/.vim/snippets
 ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
 
-echo "Setting up Neovim config"
+echo "▶︎ Setting up Neovim config"
+
 mkdir -p $HOME/.config/nvim
 rm -f $HOME/.config/nvim/init.vim
 ln -s $PWD/init.vim $HOME/.config/nvim/init.vim
 
-echo "Installing plug for neovim"
+echo "▶︎ Installing plug for neovim"
+
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
