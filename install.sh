@@ -26,8 +26,8 @@ dotfiles=(.ctags .gemrc .pryrc .railsrc .vimrc .zshrc)
 for file in "${dotfiles[@]}"
 do
   echo "▶︎ Linking ${file}"
-  rm -f "$HOME/$file"
-  ln -s "$file" "$HOME/$file"
+  rm -f $HOME/$file
+  ln -s $PWD/$file $HOME/$file
 done
 
 echo "▶︎ Installing vim snippets"
