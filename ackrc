@@ -1,8 +1,0 @@
---type-add
-ruby=.haml,.feature,.scss,.coffee
---ignore-dir=log
---ignore-dir=tmp
---ignore-dir=vendor
---ignore-file=is:tags
---ignore-dir=deps
---ignore-dir=priv/static
