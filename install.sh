@@ -14,7 +14,7 @@ if [ ! -d $ZSH ]; then
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-echo "▶︎ Adding custom scripts to ~/.bin"
+echo "▶︎ Moving utility scripts to ~/.bin"
 
 rm -f "$HOME/.bin"
 ln -s "$PWD/bin" "$HOME/.bin"
