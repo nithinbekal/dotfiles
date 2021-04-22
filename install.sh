@@ -6,7 +6,7 @@ set -e
 
 if [ $SPIN ]; then
   echo "▶︎ Installing packages"
-  sudo apt-get install -y ripgrep fzf neovim
+  sudo apt-get install -y ripgrep neovim
 fi
 
 echo "▶︎ Moving utility scripts to ~/.bin"
@@ -28,6 +28,12 @@ done
 if [ ! -d $ZSH ]; then
   echo "▶︎ Installing oh-my-zsh"
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+if [ $SPIN ]; then
+  echo "▶︎ Installing fzf from github"
+  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+  ~/.fzf/install
 fi
 
 echo "▶︎ Linking .vim directory"
