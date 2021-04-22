@@ -30,11 +30,10 @@ do
   ln -s $PWD/$file $HOME/$file
 done
 
-echo "▶︎ Installing vim snippets"
+echo "▶︎ Linking .vim directory"
 
-rm -rf $HOME/.vim/snippets
-mkdir $HOME/.vim/snippets
-ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
+rm -rf $HOME/.vim
+ln -s $PWD/.vim $HOME/.vim
 
 echo "▶︎ Setting up Neovim config"
 
