@@ -5,17 +5,21 @@
 set -e
 
 if [ $SPIN ]; then
-  echo "Installing packages"
+  echo "▶︎ Installing packages"
   sudo apt-get install -y ripgrep fzf neovim
 fi
 
 if [ ! -d $ZSH ]; then
-  echo "Installing oh-my-zsh"
+  echo "▶︎ Installing oh-my-zsh"
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
+echo "▶︎ Adding custom scripts to ~/.bin"
+
 rm -f "$HOME/.bin"
 ln -s "$PWD/bin" "$HOME/.bin"
+
+echo "▶︎ Linking dotfiles"
 
 rm -f "$HOME/.ctags"
 ln -s "$PWD/ctags" "$HOME/.ctags"
