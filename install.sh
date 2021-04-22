@@ -9,11 +9,6 @@ if [ $SPIN ]; then
   sudo apt-get install -y ripgrep fzf neovim
 fi
 
-if [ ! -d $ZSH ]; then
-  echo "▶︎ Installing oh-my-zsh"
-  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
-
 echo "▶︎ Moving utility scripts to ~/.bin"
 
 rm -f "$HOME/.bin"
@@ -29,6 +24,11 @@ do
   rm -f $HOME/$file
   ln -s $PWD/$file $HOME/$file
 done
+
+if [ ! -d $ZSH ]; then
+  echo "▶︎ Installing oh-my-zsh"
+  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
 
 echo "▶︎ Linking .vim directory"
 
