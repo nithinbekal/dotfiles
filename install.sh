@@ -44,7 +44,7 @@ ln -s "$PWD/vim-snippets" "$HOME/.vim/snippets"
 
 echo "Setting up Neovim config"
 mkdir -p $HOME/.config/nvim
-rm $HOME/.config/nvim/init.vim
+rm -f $HOME/.config/nvim/init.vim
 ln -s $PWD/init.vim $HOME/.config/nvim/init.vim
 
 echo "Installing plug for neovim"
