@@ -9,7 +9,6 @@ source $ZSH/oh-my-zsh.sh
 export DISABLE_AUTO_TITLE="true" # Tmux changes the window title without this
 export EDITOR=nvim
 export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
-export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home"
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
