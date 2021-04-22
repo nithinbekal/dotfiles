@@ -40,7 +40,7 @@ echo "▶︎ Setting up Neovim config"
 
 mkdir -p $HOME/.config/nvim
 rm -f $HOME/.config/nvim/init.vim
-ln -s $PWD/init.vim $HOME/.config/nvim/init.vim
+ln -s $PWD/.config/nvim/init.vim $HOME/.config/nvim/init.vim
 
 echo "▶︎ Installing plug for neovim"
 
