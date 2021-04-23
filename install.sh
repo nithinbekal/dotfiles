@@ -4,7 +4,7 @@ set -e
 
 if [ $SPIN ]; then
   echo "▶︎ Installing packages"
-  sudo apt-get install -y ripgrep neovim
+  sudo apt-get install -y neovim ripgrep universal-ctags
 fi
 
 echo "▶︎ Moving utility scripts to ~/.bin"
