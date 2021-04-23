@@ -1,6 +1,4 @@
-#! /bin/sh
-
-# Install the dotfiles to the correct paths
+#! /bin/bash
 
 set -e
 
