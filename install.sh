@@ -28,7 +28,7 @@ if [ ! -d $ZSH ]; then
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-if [ $SPIN ]; then
+if [ $SPIN ] && [ ! -d ~/.fzf ]; then
   echo "▶︎ Installing fzf from github"
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
   ~/.fzf/install --no-key-bindings --no-completion --no-update-rc
