@@ -23,10 +23,8 @@ do
   ln -s ~/dotfiles/$file $HOME/$file
 done
 
-if [ ! -d $ZSH ]; then
-  echo "▶︎ Installing oh-my-zsh"
-  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
+echo "▶︎ Installing oh-my-zsh"
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 if [ $SPIN ] && [ ! -d ~/.fzf ]; then
   echo "▶︎ Installing fzf from github"
