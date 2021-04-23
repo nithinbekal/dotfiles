@@ -12,6 +12,13 @@ echo "▶︎ Moving utility scripts to ~/.bin"
 rm -f "$HOME/.bin"
 ln -s "~/dotfiles/bin" "$HOME/.bin"
 
+echo "▶︎ Installing oh-my-zsh"
+if [ -d ~/.oh-my-zsh ]; then
+  "Found ~/.oh-my-zsh - skipping this step"
+else
+  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
 echo "▶︎ Installing dotfiles"
 
 dotfiles=(.ctags .gemrc .pryrc .railsrc .vimrc .zshrc)
@@ -22,9 +29,6 @@ do
   rm -f $HOME/$file
   ln -s ~/dotfiles/$file $HOME/$file
 done
-
-echo "▶︎ Installing oh-my-zsh"
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 if [ $SPIN ] && [ ! -d ~/.fzf ]; then
   echo "▶︎ Installing fzf from github"
