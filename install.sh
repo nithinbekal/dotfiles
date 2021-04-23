@@ -14,7 +14,7 @@ ln -s "~/dotfiles/bin" "$HOME/.bin"
 
 echo "▶︎ Installing oh-my-zsh"
 if [ -d ~/.oh-my-zsh ]; then
-  "Found ~/.oh-my-zsh - skipping this step"
+  echo "Found ~/.oh-my-zsh - skipping this step"
 else
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
