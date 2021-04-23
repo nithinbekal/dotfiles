@@ -35,7 +35,7 @@ alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | colu
 alias bx="bundle exec"
 alias blog="cd ~/Dropbox/blog && nvim -c 'FZF'"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
-alias dotf="cd ~/.dotfiles && nvim -c 'FZF'"
+alias dotf="cd ~/dotfiles && nvim -c 'FZF'"
 alias e="emacs -nw"
 alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
 alias retag="ctags -R --exclude=public --exclude=app/assets/javascripts ."
