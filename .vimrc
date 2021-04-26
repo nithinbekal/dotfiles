@@ -192,6 +192,7 @@ command! -bang -nargs=* Rg
 let mapleader = ","
 
 noremap  <leader>,    :Files<cr>
+noremap  <leader>.    :w<cr>:TestLast<cr>
 noremap  <leader>bb   :Buffers<cr>
 noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
 noremap  <leader>dd   :Dash<cr>
