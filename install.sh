@@ -38,14 +38,12 @@ fi
 
 echo "▶︎ Linking .vim directory"
 
-rm -rf $HOME/.vim/snippets
-ln -s ~/dotfiles/.vim/snippets $HOME/.vim/snippets
 mkdir -p $HOME/.vim/tmp
+ln -s ~/dotfiles/.vim/snippets $HOME/.vim/snippets
 
 echo "▶︎ Setting up Neovim config"
 
 mkdir -p $HOME/.config/nvim
-rm -f $HOME/.config/nvim/init.vim
 ln -s ~/dotfiles/.config/nvim/init.vim $HOME/.config/nvim/init.vim
 
 echo "▶︎ Installing plug for neovim"
