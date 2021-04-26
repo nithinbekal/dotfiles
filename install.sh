@@ -30,12 +30,6 @@ do
   ln -s ~/dotfiles/$file $HOME/$file
 done
 
-if [ $SPIN ] && [ ! -d ~/.fzf ]; then
-  echo "▶︎ Installing fzf from github"
-  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-  ~/.fzf/install --no-key-bindings --no-completion --no-update-rc
-fi
-
 echo "▶︎ Linking .vim directory"
 
 mkdir -p $HOME/.vim/tmp
