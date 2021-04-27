@@ -9,8 +9,8 @@ fi
 
 echo "▶︎ Moving utility scripts to ~/.bin"
 
-rm -f "$HOME/.bin"
-ln -s "~/dotfiles/bin" "$HOME/.bin"
+rm -f "~/.bin"
+ln -s "~/dotfiles/bin" "~/.bin"
 
 echo "▶︎ Installing oh-my-zsh"
 if [ -d ~/.oh-my-zsh ]; then
@@ -26,19 +26,19 @@ dotfiles=(.ctags .gemrc .pryrc .railsrc .vimrc .zshrc)
 for file in "${dotfiles[@]}"
 do
   echo "▶︎ Linking ${file}"
-  rm -f $HOME/$file
-  ln -s ~/dotfiles/$file $HOME/$file
+  rm -f ~/$file
+  ln -s ~/dotfiles/$file ~/$file
 done
 
 echo "▶︎ Linking .vim directory"
 
-mkdir -p $HOME/.vim/tmp
-ln -s ~/dotfiles/.vim/snippets $HOME/.vim/snippets
+mkdir -p ~/.vim/tmp
+ln -s ~/dotfiles/.vim/snippets ~/.vim/snippets
 
 echo "▶︎ Setting up Neovim config"
 
-mkdir -p $HOME/.config/nvim
-ln -s ~/dotfiles/.config/nvim/init.vim $HOME/.config/nvim/init.vim
+mkdir -p ~/.config/nvim
+ln -s ~/dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim
 
 echo "▶︎ Installing plug for neovim"
 
