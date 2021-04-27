@@ -221,7 +221,7 @@ noremap  <leader>tn   :w<cr>:TestNearest<cr>
 noremap  <leader>to   :Ttoggle<cr>
 noremap  <leader>ts   :w<cr>:TestSuite<cr>
 noremap  <leader>tt   :w<cr>:TestLast<cr>
-noremap  <leader>ty   :w<cr>:T dev typecheck<cr>
+noremap  <leader>ty   :w<cr>:T srb typecheck<cr>
 noremap  <leader>vi   :tabe ~/.vimrc<cr>
 noremap  <leader>vv   :vnew<cr>
 vnoremap <leader>yy   "+y
