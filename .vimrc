@@ -193,8 +193,8 @@ noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
 noremap  <leader>dd   :Dash<cr>
 noremap  <leader>ff   :Rg<space>
 noremap  <leader>fw   :Rg <C-r><C-w>
-noremap  <leader>gbl  :Gblame<cr>
-noremap  <leader>gbr  :Gbrowse<cr>
+noremap  <leader>gbl  :Git blame<cr>
+noremap  <leader>gbr  :GBrowse<cr>
 noremap  <leader>gg   :tabe ~/Dropbox/scratchpad.md<cr>
 noremap  <leader>ghp  :!/opt/dev/bin/dev open pr &<cr><cr>
 noremap  <leader>ghs  :GitGutterStageHunk<cr>
