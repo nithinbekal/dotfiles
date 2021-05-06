@@ -82,9 +82,9 @@ let g:markdown_minlines = 100
 let g:neoterm_default_mod = 'vertical'
 let test#strategy = 'neoterm'
 
-if filereadable('dev.yml')
-  let test#ruby#rails#executable = 'dev test'
-endif
+" if filereadable('dev.yml')
+"   let test#ruby#rails#executable = 'dev test'
+" endif
 
 let g:gitgutter_sign_added = '•'
 let g:gitgutter_sign_modified = '•'
