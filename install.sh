@@ -9,8 +9,8 @@ fi
 
 echo "▶︎ Moving utility scripts to ~/.bin"
 
-rm -f "~/.bin"
-ln -s "~/dotfiles/bin" "~/.bin"
+rm -f ~/.bin
+ln -s ~/dotfiles/bin ~/.bin
 
 echo "▶︎ Installing oh-my-zsh"
 if [ -d ~/.oh-my-zsh ]; then
