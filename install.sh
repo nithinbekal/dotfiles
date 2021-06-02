@@ -7,11 +7,6 @@ if [ $SPIN ]; then
   sudo apt-get install -y neovim ripgrep universal-ctags
 fi
 
-echo "▶︎ Moving utility scripts to ~/.bin"
-
-rm -f ~/.bin
-ln -s ~/dotfiles/bin ~/.bin
-
 echo "▶︎ Installing oh-my-zsh"
 if [ -d ~/.oh-my-zsh ]; then
   echo "Found ~/.oh-my-zsh - skipping this step"
