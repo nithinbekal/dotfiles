@@ -22,7 +22,7 @@ Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
-Plug 'rizzatti/dash.vim'                " Documentation lookup using Dash.app
+Plug 'rhysd/devdocs.vim'
 Plug 'thinca/vim-localrc'               " Add per project vimrc files
 Plug 'tomtom/tlib_vim'                  " Needed by snipmate
 Plug 'Townk/vim-autoclose'              " Insert matching pair () {} []
@@ -173,6 +173,8 @@ command! Wq wq
 noremap <silent> j gj
 noremap <silent> k gk
 
+nmap K <Plug>(devdocs-under-cursor)
+
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
   \   'rg --column --line-number --no-heading --color=always '.shellescape(<q-args>), 1,
@@ -189,7 +191,6 @@ noremap  <leader>,    :Files<cr>
 noremap  <leader>.    :w<cr>:TestLast<cr>
 noremap  <leader>bb   :Buffers<cr>
 noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
-noremap  <leader>dd   :Dash<cr>
 noremap  <leader>ff   :Rg<space>
 noremap  <leader>fw   :Rg <C-r><C-w>
 noremap  <leader>gbl  :Git blame<cr>
