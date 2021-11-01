@@ -199,7 +199,7 @@ noremap  <leader>gg   :tabe ~/Dropbox/scratchpad.md<cr>
 noremap  <leader>ghp  :!/opt/dev/bin/dev open pr &<cr><cr>
 noremap  <leader>ghs  :GitGutterStageHunk<cr>
 noremap  <leader>ghu  :GitGutterUndoHunk<cr>
-noremap  <leader>gs   :Gstatus<cr>
+noremap  <leader>gs   :Git<cr>
 noremap  <leader>mv   :call RenameFile()<cr>
 noremap  <leader>nh   :nohl<cr>
 noremap  <leader>o    :only<cr>
