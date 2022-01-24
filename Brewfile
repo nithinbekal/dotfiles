@@ -1,3 +1,0 @@
-
-brew 'neovim'
-brew 'tmux'

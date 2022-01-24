@@ -28,12 +28,12 @@ done
 echo "▶︎ Linking .vim directory"
 
 mkdir -p ~/.vim/tmp
-ln -s ~/dotfiles/.vim/snippets ~/.vim/snippets
+ln -sf ~/dotfiles/.vim/snippets ~/.vim/snippets
 
 echo "▶︎ Setting up Neovim config"
 
 mkdir -p ~/.config/nvim
-ln -s ~/dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim
+ln -sf ~/dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim
 
 echo "▶︎ Installing plug for neovim"
 
@@ -44,6 +44,19 @@ if [[ "$SPIN" = 1 ]]
 then
   echo "▶︎ Running repo specific setup scripts"
   . ~/data/setup.sh
+fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  if ! which brew > /dev/null; then
+    echo "▶︎ Installing homebrew"
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  fi;
+
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/nithin/.zprofile
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+
+  echo "▶︎ Installing via brew"
+  brew install neovim fzf ripgrep
 fi
 
 echo "✅ Installation successful"
