@@ -27,6 +27,7 @@ done
 
 echo "▶︎ Linking .vim directory"
 
+mkdir -p ~/.vim
 mkdir -p ~/.vim/tmp
 ln -sf ~/dotfiles/.vim/snippets ~/.vim/snippets
 
