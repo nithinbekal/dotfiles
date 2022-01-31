@@ -1,5 +1,0 @@
-#!/bin/bash
-# http://terminallinux.org/p/76/
-
-$@ > /dev/null 2>&1 &
-disown $!
