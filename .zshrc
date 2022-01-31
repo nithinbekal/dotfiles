@@ -23,7 +23,6 @@ if [ ! $SPIN ]; then
   source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 fi
 
-export PATH=$PATH:$HOME/dotfiles/bin
 export PATH=/usr/local/bin:$PATH
 export PATH=/usr/local/smlnj/bin:$PATH
 
