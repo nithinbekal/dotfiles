@@ -11,21 +11,6 @@ cd dotfiles
 ./install.sh
 ```
 
-## Vim
-
-My editor of choice is vim, and I use Neovim from the terminal.
-
-My setup depends on
-[Neovim](http://neovim.io),
-[ag](https://github.com/ggreer/the_silver_searcher),
-[fzf](https://github.com/junegunn/fzf)
-and
-[ripgrep](https://github.com/BurntSushi/ripgrep).
-
-```bash
-brew install neovim ag fzf ripgrep
-```
-
 ### Map Esc to Caps Lock (macOS)
 
 Since macOS Sierra (10.12):
