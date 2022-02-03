@@ -14,15 +14,6 @@ export LC_ALL="en_US.UTF-8"
 
 ssh-add &>/dev/null
 
-# This config is taken from ~/.fzf.zsh which was generated during shell
-# extension installation using /usr/local/opt/fzf/install
-export PATH="$PATH:/usr/local/opt/fzf/bin"
-
-if [ ! $SPIN ]; then
-  [[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
-  source "/usr/local/opt/fzf/shell/key-bindings.zsh"
-fi
-
 export PATH=/usr/local/bin:$PATH
 export PATH=/usr/local/smlnj/bin:$PATH
 
@@ -75,6 +66,10 @@ alias grx="git rebase --abort"
 alias gst='git status'
 alias gsta='git stash'
 alias gstp='git stash pop'
+
+if [ -f $HOME/.fzf.zsh ]; then
+  . $HOME/.fzf.zsh
+fi
 
 if [ -f $HOME/.asdf/asdf.sh ]; then
   . $HOME/.asdf/asdf.sh
