@@ -19,9 +19,9 @@ export PATH=/usr/local/smlnj/bin:$PATH
 
 git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 
-# USAGE: gchurn --since='6 months ago' .
+# USAGE: git-churn --since='6 months ago' .
 #
-git_churn() {
+git-churn() {
   git log --all -M -C --name-only --format='format:' "$@" \
     | sort \
     | grep -v '^$' \
@@ -48,7 +48,6 @@ alias wiki="cd ~/Dropbox/wiki && nvim -c 'FZF'"
 alias g='git'
 alias gbd='git branch -d'
 alias gbm="git branch -m"
-alias gchurn='git_churn'
 alias gco='git checkout'
 alias gd='git diff'
 alias gdm="git diff master"
