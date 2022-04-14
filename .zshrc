@@ -75,12 +75,6 @@ if [ -f $HOME/.asdf/asdf.sh ]; then
   . $HOME/.asdf/completions/asdf.bash
 fi
 
-# Automatically preserve and restore the state of workspace even when you quit
-# your terminal or shut down your MacBook
-if [ $SPIN ]; then
-  if [ "$TMUX" = "" ]; then tmux new -As0; fi
-fi
-
 if [ -e /Users/nithinbekal/.nix-profile/etc/profile.d/nix.sh ]; then . /Users/nithinbekal/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 
 [ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
