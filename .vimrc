@@ -11,17 +11,14 @@ call plug#begin('~/.vim/plugged')
 Plug 'airblade/vim-gitgutter'           " Show sign column for git diff
 Plug 'bogado/file-line'                 " Open files using foo.rb:42 syntax
 Plug 'elixir-lang/vim-elixir'           " Elixir support
-Plug 'garbas/vim-snipmate'              " Insert snippets using tab
 Plug 'janko-m/vim-test'
 Plug 'jparise/vim-graphql'
 Plug 'junegunn/fzf'                     " Basic fzf wrapper
 Plug 'junegunn/fzf.vim'                 " Fuzzy file finder
 Plug 'kassio/neoterm'
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
-Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plug 'rhysd/devdocs.vim'
-Plug 'tomtom/tlib_vim'                  " Needed by snipmate
 Plug 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plug 'tpope/vim-bundler'
 Plug 'tpope/vim-commentary'             " Toggle comments easily
@@ -93,8 +90,6 @@ hi DiffDelete ctermfg=197 ctermbg=NONE cterm=bold guifg=#8b0807 guibg=NONE    gu
 hi DiffChange ctermfg=208 ctermbg=NONE cterm=bold guifg=#f8f8f2 guibg=#243955 gui=NONE
 hi DiffText   ctermfg=231 ctermbg=24   cterm=bold guifg=#f8f8f2 guibg=#204a87 gui=bold
 
-let g:snipMate = { 'snippet_version' : 1 }
-
 " Create a directory for the current file if it does not exist.
 augroup Mkdir
   autocmd!
@@ -126,22 +121,6 @@ function! RenameFile()
     redraw!
   endif
 endfunction
-
-
-" Used in Snipmate
-fun! SnippetFilename(...)
-  let template = get(a:000, 0, "$1")
-  let arg2 = get(a:000, 1, "")
-
-  let basename = expand('%:t:r')
-
-  if basename == ''
-    return arg2
-  else
-    return substitute(template, '$1', basename, 'g')
-  endif
-endf
-
 
 noremap  Q  @q
 
