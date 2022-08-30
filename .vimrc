@@ -22,7 +22,6 @@ Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plug 'rhysd/devdocs.vim'
-Plug 'thinca/vim-localrc'               " Add per project vimrc files
 Plug 'tomtom/tlib_vim'                  " Needed by snipmate
 Plug 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plug 'tpope/vim-bundler'
