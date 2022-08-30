@@ -18,7 +18,6 @@ Plug 'junegunn/fzf'                     " Basic fzf wrapper
 Plug 'junegunn/fzf.vim'                 " Fuzzy file finder
 Plug 'junegunn/goyo.vim'                " Distraction free writing
 Plug 'kassio/neoterm'
-Plug 'kchmck/vim-coffee-script'         " Coffeescript syntax higlighting
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'MarcWeber/vim-addon-mw-utils'     " Needed by snipmate
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
