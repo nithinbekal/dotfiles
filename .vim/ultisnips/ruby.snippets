@@ -1,0 +1,60 @@
+
+global !p
+
+def classname(snip):
+  snip.rv = snip.basename.title().replace('_', '')
+
+def write_instance_vars(arglist, snip):
+  args = str(arglist).split(',')
+
+  for arg in args:
+    name = arg.strip().replace(':', ' ').split(' ', 1)[0]
+    if name:
+      snip += '    @{} = {}'.format(name, name)
+    else:
+      snip += ''
+
+endglobal
+
+snippet cla
+class ${1:`!p classname(snip)`}
+  ${0}
+end
+endsnippet
+
+snippet clai
+class ${1:`!p classname(snip)`}
+  def initialize($2)`!p write_instance_vars(t[2], snip)`$0
+  end
+end
+endsnippet
+
+snippet def
+def ${1}
+  ${0}
+end
+endsnippet
+
+snippet defi "def initialize ..."
+def initialize($1)`!p write_instance_vars(t[1], snip)`$0
+end
+endsnippet
+
+snippet fsl
+# frozen_string_literal: true
+endsnippet
+
+snippet mc
+# typed: true
+# frozen_string_literal: true
+endsnippet
+
+snippet mod
+module $1 do
+  ${0:${VISUAL}}
+end
+endsnippet
+
+snippet pry
+binding.pry
+endsnippet

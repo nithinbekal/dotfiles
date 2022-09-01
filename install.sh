@@ -30,6 +30,8 @@ echo "▶︎ Linking .vim directory"
 mkdir -p ~/.vim
 mkdir -p ~/.vim/tmp
 
+ln -sf ~/dotfiles/.vim/ultisnips ~/.vim/ultisnips
+
 echo "▶︎ Setting up Neovim config"
 
 mkdir -p ~/.config/nvim

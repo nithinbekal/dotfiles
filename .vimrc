@@ -19,6 +19,7 @@ Plug 'kassio/neoterm'
 Plug 'leafgarland/typescript-vim'       " Typescript syntax highlighting
 Plug 'nanotech/jellybeans.vim'          " Jellybeans color scheme
 Plug 'rhysd/devdocs.vim'
+Plug 'SirVer/ultisnips'                 " Snippets
 Plug 'Townk/vim-autoclose'              " Insert matching pair () {} []
 Plug 'tpope/vim-bundler'
 Plug 'tpope/vim-commentary'             " Toggle comments easily
