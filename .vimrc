@@ -113,6 +113,12 @@ augroup END
 autocmd VimResized * :wincmd =
 
 
+function! FindAndReplaceAll()
+  let orig = input('Original string')
+  let new = input('New string')
+  exec 'silent grep ' . orig . ' | silent cfdo %s/' .  orig . '/' . new . '/ | write'
+endfunction
+
 function! RenameFile()
   let old_name = expand('%')
   let new_name = input('New file name: ', expand('%'), 'file')
@@ -170,6 +176,7 @@ noremap  <leader>bb   :Buffers<cr>
 noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
 noremap  <leader>fd   :Rg def <C-r><C-w><cr>
 noremap  <leader>ff   :Rg<space>
+noremap  <leader>fr   :call FindAndReplaceAll()<cr>
 noremap  <leader>fw   :Rg <C-r><C-w>
 noremap  <leader>fW   :Rg \b<C-r><C-w>\b
 noremap  <leader>gbl  :Git blame<cr>
