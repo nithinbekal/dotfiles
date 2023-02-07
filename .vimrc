@@ -168,6 +168,7 @@ noremap  <leader>,    :Files<cr>
 noremap  <leader>.    :w<cr>:TestLast<cr>
 noremap  <leader>bb   :Buffers<cr>
 noremap  <leader>bi   :source ~/.vimrc<cr>:PlugInstall<cr>
+noremap  <leader>fd   :Rg def <C-r><C-w><cr>
 noremap  <leader>ff   :Rg<space>
 noremap  <leader>fw   :Rg <C-r><C-w>
 noremap  <leader>fW   :Rg \b<C-r><C-w>\b
