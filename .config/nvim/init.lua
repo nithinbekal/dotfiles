@@ -82,6 +82,7 @@ require("lazy").setup({
   'tpope/vim-rhubarb',      -- Needed by fugitive for Gbrowse
   'tpope/vim-surround',     -- Easily change quotes/bracket pairs
   'tpope/vim-unimpaired',   -- Misc mappings like ]<space> or ]c
+  'vim-ruby/vim-ruby',
   'vim-test/vim-test',
   'wsdjeg/vim-fetch',
 })
