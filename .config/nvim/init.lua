@@ -101,3 +101,11 @@ vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
 vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
 
+-- Git
+vim.keymap.set('n', '<leader>gbl', ':Git blame<cr>', { desc = 'Git blame' })
+vim.keymap.set('n', '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
+vim.keymap.set('n', '<leader>ghp', ':!/opt/dev/bin/dev open pr &<cr><cr>', { desc = 'Github PR' })
+vim.keymap.set('n', '<leader>ghs', ':Gitsigns stage_hunk<cr>', { desc = 'Git stage hunk' })
+vim.keymap.set('n', '<leader>ghu', ':Gitsigns undo_stage_hunk<cr>', { desc = 'Git unstage hunk' })
+vim.keymap.set('n', '<leader>gs', ':Git<cr>', { desc = 'Git status' })
+
