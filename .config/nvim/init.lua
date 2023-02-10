@@ -60,6 +60,7 @@ require("lazy").setup({
     config = function() require('gitsigns').setup() end,
   },
 
+  'Townk/vim-autoclose',
   'vim-test/vim-test',
   'wsdjeg/vim-fetch',
 })
