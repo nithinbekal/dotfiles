@@ -61,6 +61,14 @@ require("lazy").setup({
   },
 
   'Townk/vim-autoclose',
+  'tpope/vim-bundler',
+  'tpope/vim-commentary',   -- Toggle comments easily
+  'tpope/vim-endwise',      -- Add end after ruby blocks
+  'tpope/vim-fugitive',     -- Git wrapper
+  'tpope/vim-rails',        -- Rails support
+  'tpope/vim-rhubarb',      -- Needed by fugitive for Gbrowse
+  'tpope/vim-surround',     -- Easily change quotes/bracket pairs
+  'tpope/vim-unimpaired',   -- Misc mappings like ]<space> or ]c
   'vim-test/vim-test',
   'wsdjeg/vim-fetch',
 })
