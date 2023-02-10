@@ -53,6 +53,7 @@ require("lazy").setup({
   },
 
   'ibhagwan/fzf-lua',
+  'kassio/neoterm',
 
   {
     'lewis6991/gitsigns.nvim',
