@@ -55,7 +55,11 @@ require("lazy").setup({
   },
 
   'ibhagwan/fzf-lua',
-  'kassio/neoterm',
+
+  {
+    'kassio/neoterm',
+    config = function() vim.g.neoterm_default_mod = 'vertical' end,
+  },
 
   {
     'lewis6991/gitsigns.nvim',
@@ -86,9 +90,15 @@ require("lazy").setup({
   'tpope/vim-surround',     -- Easily change quotes/bracket pairs
   'tpope/vim-unimpaired',   -- Misc mappings like ]<space> or ]c
   'vim-ruby/vim-ruby',
-  'vim-test/vim-test',
+
+  {
+    'vim-test/vim-test',
+    config = function() vim.g['test#strategy'] = 'neoterm' end,
+  },
+
   'wsdjeg/vim-fetch',
 })
+
 
 -- User commands
 
