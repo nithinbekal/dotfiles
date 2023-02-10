@@ -75,6 +75,7 @@ require("lazy").setup({
     end,
   },
 
+  'rhysd/devdocs.vim',
   'Townk/vim-autoclose',
   'tpope/vim-bundler',
   'tpope/vim-commentary',   -- Toggle comments easily
@@ -112,6 +113,8 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- FZF
 vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
+
+vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
 
 -- Git
 vim.keymap.set('n', '<leader>gbl', ':Git blame<cr>', { desc = 'Git blame' })
