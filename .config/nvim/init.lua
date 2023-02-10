@@ -45,3 +45,10 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+require("lazy").setup({
+  {
+    'navarasu/onedark.nvim',
+    lazy = false,
+    config = function() vim.cmd([[colorscheme onedark]]) end,
+  },
+})
