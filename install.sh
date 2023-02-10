@@ -36,7 +36,6 @@ echo "▶︎ Setting up Neovim config"
 
 mkdir -p ~/.config/nvim
 ln -sf ~/dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim
-ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
 
 echo "▶︎ Installing plug for neovim"
 
@@ -49,7 +48,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   fi;
 
-  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/nithin/.zprofile
   eval "$(/opt/homebrew/bin/brew shellenv)"
 
   echo "▶︎ Installing via brew"
