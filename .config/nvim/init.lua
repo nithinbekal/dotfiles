@@ -86,3 +86,12 @@ require("lazy").setup({
   'vim-test/vim-test',
   'wsdjeg/vim-fetch',
 })
+
+-- Key mappings
+
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { noremap = true })
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { noremap = true })
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { noremap = true })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { noremap = true })
+
+vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
