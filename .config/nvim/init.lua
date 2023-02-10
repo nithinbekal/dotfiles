@@ -51,4 +51,5 @@ require("lazy").setup({
     lazy = false,
     config = function() vim.cmd([[colorscheme onedark]]) end,
   },
+  'wsdjeg/vim-fetch',
 })
