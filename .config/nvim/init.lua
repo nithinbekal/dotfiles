@@ -105,6 +105,10 @@ vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k', { noremap = true })
 vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l', { noremap = true })
 vim.keymap.set('t', '<C-o>', '<C-\\><C-n>', { noremap = true })
 
+-- Remap for dealing with word wrap
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
 -- FZF
 vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
