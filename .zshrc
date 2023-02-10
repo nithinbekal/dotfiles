@@ -34,14 +34,10 @@ git-churn() {
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
-alias blog="cd ~/Dropbox/blog && nvim -c 'FZF'"
+alias blog="cd ~/src/nithinbekal.github.io"
 alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
-alias dotf="cd ~/dotfiles && nvim -c 'FZF'"
-alias e="emacs -nw"
-alias profile-emacs="emacs -nw -Q -l ~/.emacs.d/profile.el -f profile-dotemacs"
-alias retag="ctags -R --exclude=public --exclude=app/assets/javascripts ."
+alias dotf="cd ~/dotfiles"
 alias v="nvim"
-alias wiki="cd ~/Dropbox/wiki && nvim -c 'FZF'"
 
 # Git Aliases
 
