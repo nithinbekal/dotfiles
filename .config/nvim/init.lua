@@ -28,3 +28,20 @@ vim.opt.incsearch = true              -- Show results as you type
 vim.opt.ignorecase = true             -- Ignore case
 vim.opt.smartcase = true              -- unless uppercase chars are given
 
+-- Plugin manager: lazy.nvim
+
+-- Install lazy.nvim if not installed already
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  print('Installing lazy.nvim plugin manager')
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
