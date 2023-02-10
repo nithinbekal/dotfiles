@@ -60,6 +60,19 @@ require("lazy").setup({
     config = function() require('gitsigns').setup() end,
   },
 
+  {
+    'nvim-lualine/lualine.nvim',
+    config = function() require('lualine').setup({
+      options = {
+        icons_enabled = false,
+        theme = 'auto',
+        component_separators = '|',
+        section_separators = '',
+      }
+    })
+    end,
+  },
+
   'Townk/vim-autoclose',
   'tpope/vim-bundler',
   'tpope/vim-commentary',   -- Toggle comments easily
