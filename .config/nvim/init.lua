@@ -109,3 +109,20 @@ vim.keymap.set('n', '<leader>ghs', ':Gitsigns stage_hunk<cr>', { desc = 'Git sta
 vim.keymap.set('n', '<leader>ghu', ':Gitsigns undo_stage_hunk<cr>', { desc = 'Git unstage hunk' })
 vim.keymap.set('n', '<leader>gs', ':Git<cr>', { desc = 'Git status' })
 
+vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'Disable search highlight' })
+vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
+vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
+vim.keymap.set('n', '<leader>q', ':bd<cr>', { desc = 'Close buffer' })
+
+-- Terminal and testing
+vim.keymap.set('n', '<leader>tc', ':Tclear<cr>', { desc = 'Toggle terminal' })
+vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
+vim.keymap.set('n', '<leader>tl', ':w<cr>:T dev test --include-branch-commits<cr>', { desc = 'Test local changes' })
+vim.keymap.set('n', '<leader>tn', ':w<cr>:TestNearest<cr>', { desc = 'Test current file' })
+vim.keymap.set('n', '<leader>to', ':vertical Ttoggle<cr>', { desc = 'Toggle terminal' })
+vim.keymap.set('n', '<leader>ts', ':w<cr>:TestSuite<cr>', { desc = 'Test suite' })
+vim.keymap.set('n', '<leader>tt', ':w<cr>:TestLast<cr>', { desc = 'Rerun last test' })
+vim.keymap.set('n', '<leader>ty', ':w<cr>:srb typecheck<cr>', { desc = 'Sorbet typecheck' })
+
+vim.keymap.set('n', '<leader>vv', ':vnew<cr>', { desc = 'New vertical split' })
+vim.keymap.set('n', '<leader>yy', '"+y', { desc = 'Copy to clipboard' })
