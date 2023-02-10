@@ -55,5 +55,6 @@ require("lazy").setup({
     'lewis6991/gitsigns.nvim',
     config = function() require('gitsigns').setup() end,
   },
+  'vim-test/vim-test',
   'wsdjeg/vim-fetch',
 })
