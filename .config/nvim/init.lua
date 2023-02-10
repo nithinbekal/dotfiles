@@ -98,6 +98,14 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { noremap = true })
 
 vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
 
+-- Terminal navigation
+vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h', { noremap = true })
+vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j', { noremap = true })
+vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k', { noremap = true })
+vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l', { noremap = true })
+vim.keymap.set('t', '<C-o>', '<C-\\><C-n>', { noremap = true })
+
+-- FZF
 vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
 
