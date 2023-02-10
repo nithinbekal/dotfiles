@@ -28,6 +28,8 @@ vim.opt.incsearch = true              -- Show results as you type
 vim.opt.ignorecase = true             -- Ignore case
 vim.opt.smartcase = true              -- unless uppercase chars are given
 
+vim.g.mapleader = ','
+
 -- Plugin manager: lazy.nvim
 
 -- Install lazy.nvim if not installed already
@@ -95,3 +97,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { noremap = true })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { noremap = true })
 
 vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
+
+vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
+vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
+
