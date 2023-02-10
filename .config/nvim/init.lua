@@ -51,10 +51,14 @@ require("lazy").setup({
     lazy = false,
     config = function() vim.cmd([[colorscheme onedark]]) end,
   },
+
+  'ibhagwan/fzf-lua',
+
   {
     'lewis6991/gitsigns.nvim',
     config = function() require('gitsigns').setup() end,
   },
+
   'vim-test/vim-test',
   'wsdjeg/vim-fetch',
 })
