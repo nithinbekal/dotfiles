@@ -90,6 +90,12 @@ require("lazy").setup({
   'wsdjeg/vim-fetch',
 })
 
+-- User commands
+
+-- commonly mistyped commands
+vim.api.nvim_create_user_command('Q', 'q', {})
+vim.api.nvim_create_user_command('Wq', 'wq', {})
+
 -- Key mappings
 
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { noremap = true })
