@@ -6,7 +6,6 @@ ZSH_THEME="jaischeema"
 
 source $ZSH/oh-my-zsh.sh
 
-export DISABLE_AUTO_TITLE="true" # Tmux changes the window title without this
 export EDITOR=nvim
 export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
 export LANG="en_US.UTF-8"
