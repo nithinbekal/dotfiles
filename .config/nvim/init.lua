@@ -48,12 +48,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  {
-    'navarasu/onedark.nvim',
-    lazy = false,
-    config = function() vim.cmd([[colorscheme onedark]]) end,
-  },
-
   'ibhagwan/fzf-lua',
 
   {
@@ -64,6 +58,12 @@ require("lazy").setup({
   {
     'lewis6991/gitsigns.nvim',
     config = function() require('gitsigns').setup() end,
+  },
+
+  {
+    'navarasu/onedark.nvim',
+    lazy = false,
+    config = function() vim.cmd([[colorscheme onedark]]) end,
   },
 
   {
