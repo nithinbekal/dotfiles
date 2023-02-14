@@ -67,6 +67,11 @@ require("lazy").setup({
   },
 
   {
+    'neoclide/coc.nvim',
+    branch = 'release',
+  },
+
+  {
     'nvim-lualine/lualine.nvim',
     config = function() require('lualine').setup({
       options = {
