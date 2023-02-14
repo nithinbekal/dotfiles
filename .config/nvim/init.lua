@@ -120,6 +120,9 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { noremap = true })
 
 vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
 
+vim.keymap.set('n', ']c', ':Gitsigns next_hunk<cr>')
+vim.keymap.set('n', '[c', ':Gitsigns prev_hunk<cr>')
+
 -- Terminal navigation
 vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h', { noremap = true })
 vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j', { noremap = true })
