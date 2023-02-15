@@ -113,18 +113,17 @@ vim.api.nvim_create_user_command('Wq', 'wq', {})
 
 -- Keymaps: Navigation
 
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { noremap = true })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { noremap = true })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { noremap = true })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { noremap = true })
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>')
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>')
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>')
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>')
 
--- Keymaps: Terminal navigation
-
-vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h', { noremap = true })
-vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j', { noremap = true })
-vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k', { noremap = true })
-vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l', { noremap = true })
-vim.keymap.set('t', '<C-o>', '<C-\\><C-n>', { noremap = true })
+-- Terminal navigation
+vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h')
+vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j')
+vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k')
+vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l')
+vim.keymap.set('t', '<C-o>', '<C-\\><C-n>')
 
 -- Keymaps: FZF
 
@@ -148,14 +147,17 @@ vim.keymap.set('n', '[c', ':Gitsigns prev_hunk<cr>')
 
 -- Keymaps: Terminal and testing
 
-vim.keymap.set('n', '<leader>tc', ':Tclear<cr>', { desc = 'Toggle terminal' })
+vim.keymap.set('n', '<leader>tc', ':Tclear<cr>', { desc = 'Clear terminal' })
+vim.keymap.set('n', '<leader>to', ':vertical Ttoggle<cr>', { desc = 'Toggle terminal' })
+
+-- Keymaps: Testing
+
 vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
 vim.keymap.set('n', '<leader>tl', ':w<cr>:T dev test --include-branch-commits<cr>', { desc = 'Test local changes' })
 vim.keymap.set('n', '<leader>tn', ':w<cr>:TestNearest<cr>', { desc = 'Test current file' })
-vim.keymap.set('n', '<leader>to', ':vertical Ttoggle<cr>', { desc = 'Toggle terminal' })
 vim.keymap.set('n', '<leader>ts', ':w<cr>:TestSuite<cr>', { desc = 'Test suite' })
 vim.keymap.set('n', '<leader>tt', ':w<cr>:TestLast<cr>', { desc = 'Rerun last test' })
-vim.keymap.set('n', '<leader>ty', ':w<cr>:srb typecheck<cr>', { desc = 'Sorbet typecheck' })
+vim.keymap.set('n', '<leader>ty', ':w<cr>:T srb typecheck<cr>', { desc = 'Sorbet typecheck' })
 
 -- Keymaps: miscellaneous
 
