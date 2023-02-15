@@ -149,6 +149,8 @@ vim.keymap.set('n', '<leader>ghu', ':Gitsigns undo_stage_hunk<cr>', { desc = 'Gi
 vim.keymap.set('n', '<leader>ghr', ':Gitsigns reset_hunk<cr>', { desc = 'Git reset hunk' })
 vim.keymap.set('n', '<leader>gs', ':Git<cr>', { desc = 'Git status' })
 
+vim.keymap.set({'o', 'x'}, 'ac', ':<C-U>Gitsigns select_hunk<CR>') -- Text object for git hunks
+
 vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'Disable search highlight' })
 vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
 vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
