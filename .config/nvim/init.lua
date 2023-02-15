@@ -166,6 +166,8 @@ vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = tr
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
 vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
+vim.keymap.set('n', '<leader>mv', ':CocCommand workspace.renameCurrentFile<cr>',
+  { desc = 'Rename current file' })
 vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'Disable search highlight' })
 vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
 vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
