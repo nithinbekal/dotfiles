@@ -107,40 +107,32 @@ require("lazy").setup({
 
 -- User commands
 
--- commonly mistyped commands
+-- Commonly mistyped commands
 vim.api.nvim_create_user_command('Q', 'q', {})
 vim.api.nvim_create_user_command('Wq', 'wq', {})
 
--- Key mappings
+-- Keymaps: Navigation
 
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { noremap = true })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { noremap = true })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { noremap = true })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { noremap = true })
 
-vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
+-- Keymaps: Terminal navigation
 
-vim.keymap.set('n', ']c', ':Gitsigns next_hunk<cr>')
-vim.keymap.set('n', '[c', ':Gitsigns prev_hunk<cr>')
-
--- Terminal navigation
 vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h', { noremap = true })
 vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j', { noremap = true })
 vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k', { noremap = true })
 vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l', { noremap = true })
 vim.keymap.set('t', '<C-o>', '<C-\\><C-n>', { noremap = true })
 
--- Remap for dealing with word wrap
-vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+-- Keymaps: FZF
 
--- FZF
 vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
 
-vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
+-- Keymaps: Git
 
--- Git
 vim.keymap.set('n', '<leader>gbl', ':Git blame<cr>', { desc = 'Git blame' })
 vim.keymap.set('n', '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
 vim.keymap.set('n', '<leader>ghp', ':!/opt/dev/bin/dev open pr &<cr><cr>', { desc = 'Github PR' })
@@ -151,12 +143,11 @@ vim.keymap.set('n', '<leader>gs', ':Git<cr>', { desc = 'Git status' })
 
 vim.keymap.set({'o', 'x'}, 'ac', ':<C-U>Gitsigns select_hunk<CR>') -- Text object for git hunks
 
-vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'Disable search highlight' })
-vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
-vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
-vim.keymap.set('n', '<leader>q', ':bd<cr>', { desc = 'Close buffer' })
+vim.keymap.set('n', ']c', ':Gitsigns next_hunk<cr>')
+vim.keymap.set('n', '[c', ':Gitsigns prev_hunk<cr>')
 
--- Terminal and testing
+-- Keymaps: Terminal and testing
+
 vim.keymap.set('n', '<leader>tc', ':Tclear<cr>', { desc = 'Toggle terminal' })
 vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
 vim.keymap.set('n', '<leader>tl', ':w<cr>:T dev test --include-branch-commits<cr>', { desc = 'Test local changes' })
@@ -166,5 +157,18 @@ vim.keymap.set('n', '<leader>ts', ':w<cr>:TestSuite<cr>', { desc = 'Test suite' 
 vim.keymap.set('n', '<leader>tt', ':w<cr>:TestLast<cr>', { desc = 'Rerun last test' })
 vim.keymap.set('n', '<leader>ty', ':w<cr>:srb typecheck<cr>', { desc = 'Sorbet typecheck' })
 
+-- Keymaps: miscellaneous
+
+vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
+
+-- Remap for dealing with word wrap
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
+vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'Disable search highlight' })
+vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
+vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
+vim.keymap.set('n', '<leader>q', ':bd<cr>', { desc = 'Close buffer' })
 vim.keymap.set('n', '<leader>vv', ':vnew<cr>', { desc = 'New vertical split' })
 vim.keymap.set('n', '<leader>yy', '"+y', { desc = 'Copy to clipboard' })
