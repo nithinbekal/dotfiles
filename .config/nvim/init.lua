@@ -60,11 +60,7 @@ require("lazy").setup({
     config = function() require('gitsigns').setup() end,
   },
 
-  {
-    'navarasu/onedark.nvim',
-    lazy = false,
-    config = function() vim.cmd([[colorscheme onedark]]) end,
-  },
+  'navarasu/onedark.nvim',
 
   {
     'neoclide/coc.nvim',
@@ -103,6 +99,8 @@ require("lazy").setup({
 
   'wsdjeg/vim-fetch',
 })
+
+vim.cmd.colorscheme('onedark')
 
 
 -- User commands
