@@ -127,6 +127,8 @@ vim.keymap.set('t', '<C-o>', '<C-\\><C-n>')
 
 vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
+vim.keymap.set('n', '<leader>ff', require ('fzf-lua').grep, { desc = 'Grep' })
+vim.keymap.set('n', '<leader>fw', require ('fzf-lua').grep_cword, { desc = 'Grep for word under cursor' })
 
 -- Keymaps: Git
 
