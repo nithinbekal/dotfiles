@@ -3,7 +3,7 @@
 -- Setting options
 
 vim.opt.autoindent = true             -- Indent: Copy indent from current line when starting new line
-vim.opt.colorcolumn = '80,120'        -- Show vertical bar to indicate 80/120 chars
+vim.opt.colorcolumn = '120'           -- Show vertical bar to indicate 120 chars
 vim.opt.cursorline = true             -- Highlight the cursor line
 vim.opt.expandtab = true              -- Use spaces to insert a tab
 vim.opt.fillchars = 'eob: '           -- Hide ~ in line number column after end of buffer
