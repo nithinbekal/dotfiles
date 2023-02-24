@@ -50,6 +50,13 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   'ibhagwan/fzf-lua',
 
+  'junegunn/fzf',
+
+  {
+    'junegunn/fzf.vim',
+    build = ":call fzf#install()",
+  },
+
   {
     'kassio/neoterm',
     config = function() vim.g.neoterm_default_mod = 'vertical' end,
