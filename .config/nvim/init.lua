@@ -143,10 +143,17 @@ vim.keymap.set('t', '<C-o>', '<C-\\><C-n>')
 
 -- Keymaps: FZF
 
-vim.keymap.set('n', '<leader>,', require('fzf-lua').files, { desc = 'Find files' })
-vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers, { desc = 'Find buffers' })
-vim.keymap.set('n', '<leader>ff', require ('fzf-lua').grep, { desc = 'Grep' })
-vim.keymap.set('n', '<leader>fw', require ('fzf-lua').grep_cword, { desc = 'Grep for word under cursor' })
+vim.keymap.set('n', '<leader>,',  ':Files<cr>')
+vim.keymap.set('n', '<leader>bb', ':Buffers<cr>')
+vim.keymap.set('n', '<leader>fd', ':Rg def <C-r><C-w><cr>')
+vim.keymap.set('n', '<leader>ff', ':Rg ')
+vim.keymap.set('n', '<leader>fw', ':Rg <C-r><C-w>')
+vim.keymap.set('n', '<leader>fW', ':Rg \\b<C-r><C-w>\\b')
+
+vim.keymap.set('n', '<leader>l,', require('fzf-lua').files, { desc = 'Find files' })
+vim.keymap.set('n', '<leader>lbb', require('fzf-lua').buffers, { desc = 'Find buffers' })
+vim.keymap.set('n', '<leader>lff', require ('fzf-lua').grep, { desc = 'Grep' })
+vim.keymap.set('n', '<leader>lfw', require ('fzf-lua').grep_cword, { desc = 'Grep for word under cursor' })
 
 -- Keymaps: Git
 
