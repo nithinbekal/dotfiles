@@ -67,7 +67,7 @@ require("lazy").setup({
     config = function() require('gitsigns').setup() end,
   },
 
-  'navarasu/onedark.nvim',
+  'nanotech/jellybeans.vim',
 
   {
     'neoclide/coc.nvim',
@@ -107,7 +107,7 @@ require("lazy").setup({
   'wsdjeg/vim-fetch',
 })
 
-vim.cmd.colorscheme('onedark')
+vim.cmd.colorscheme('jellybeans')
 
 
 function _G.show_docs()
