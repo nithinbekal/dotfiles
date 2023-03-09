@@ -82,6 +82,7 @@ require("lazy").setup({
         theme = 'auto',
         component_separators = '|',
         section_separators = '',
+        path = 1, -- show relative file path
       }
     })
     end,
