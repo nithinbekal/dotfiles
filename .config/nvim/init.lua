@@ -196,8 +196,10 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
 vim.keymap.set('n', '<leader>mv', ':CocCommand workspace.renameCurrentFile<cr>',
   { desc = 'Rename current file' })
+vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'No highlight' })
 vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
 vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
 vim.keymap.set('n', '<leader>q', ':bd<cr>', { desc = 'Close buffer' })
+vim.keymap.set('n', '<leader>rm', ':!rm %', { desc = 'Remove file' })
 vim.keymap.set('n', '<leader>vv', ':vnew<cr>', { desc = 'New vertical split' })
 vim.keymap.set('n', '<leader>yy', '"+y', { desc = 'Copy to clipboard' })
