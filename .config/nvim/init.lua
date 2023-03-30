@@ -178,6 +178,7 @@ vim.keymap.set('n', '<leader>to', ':vertical Ttoggle<cr>', { desc = 'Toggle term
 
 -- Keymaps: Testing
 
+vim.keymap.set('n', '<leader>s', ':A<cr>', { desc = 'Toggle test and code files' })
 vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
 vim.keymap.set('n', '<leader>tl', ':w<cr>:T dev test --include-branch-commits<cr>', { desc = 'Test local changes' })
 vim.keymap.set('n', '<leader>tn', ':w<cr>:TestNearest<cr>', { desc = 'Test current file' })
