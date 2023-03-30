@@ -110,6 +110,30 @@ require("lazy").setup({
 
 vim.cmd.colorscheme('jellybeans')
 
+-- coc.nvim config
+
+vim.keymap.set("n", "[g", "<Plug>(coc-diagnostic-prev)", {silent = true})
+vim.keymap.set("n", "]g", "<Plug>(coc-diagnostic-next)", {silent = true})
+
+vim.keymap.set("n", "gd", "<Plug>(coc-definition)", {silent = true})
+
+function _G.check_back_space()
+    local col = vim.fn.col('.') - 1
+    return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') ~= nil
+end
+
+local opts = {noremap = true, expr = true, replace_keycodes = false}
+
+vim.keymap.set("i", "<TAB>",
+  [[coc#pum#visible() ? coc#pum#next(1) : v:lua.check_back_space() ? "<TAB>" : coc#refresh()]], opts)
+
+vim.keymap.set("i", "<S-TAB>", [[coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"]], opts)
+
+-- Make <CR> to accept selected completion item or notify coc.nvim to format
+-- <C-g>u breaks current undo, please make your own choice
+vim.keymap.set("i", "<cr>",
+  [[coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"]], opts)
+
 
 function _G.show_docs()
     local cw = vim.fn.expand('<cword>')
@@ -121,7 +145,10 @@ function _G.show_docs()
         vim.api.nvim_command('!' .. vim.o.keywordprg .. ' ' .. cw)
     end
 end
+
 vim.keymap.set("n", "K", '<CMD>lua _G.show_docs()<CR>', {silent = true})
+
+
 -- User commands
 
 -- Commonly mistyped commands
