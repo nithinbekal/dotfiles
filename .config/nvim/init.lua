@@ -159,7 +159,7 @@ vim.keymap.set('n', '<leader>lfw', require ('fzf-lua').grep_cword, { desc = 'Gre
 -- Keymaps: Git
 
 vim.keymap.set('n', '<leader>gbl', ':Git blame<cr>', { desc = 'Git blame' })
-vim.keymap.set('n', '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
+vim.keymap.set({ 'n', 'v'}, '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
 vim.keymap.set('n', '<leader>ghp', ':!/opt/dev/bin/dev open pr &<cr><cr>', { desc = 'Github PR' })
 vim.keymap.set('n', '<leader>ghs', ':Gitsigns stage_hunk<cr>', { desc = 'Git stage hunk' })
 vim.keymap.set('n', '<leader>ghu', ':Gitsigns undo_stage_hunk<cr>', { desc = 'Git undo stage hunk' })
