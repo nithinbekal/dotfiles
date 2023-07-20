@@ -35,7 +35,7 @@ ln -sf ~/dotfiles/.vim/ultisnips ~/.vim/ultisnips
 echo "▶︎ Setting up Neovim config"
 
 mkdir -p ~/.config/nvim
-ln -sf ~/dotfiles/.config/nvim/init.vim ~/.config/nvim/init.vim
+ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
 
 echo "▶︎ Installing plug for neovim"
 
