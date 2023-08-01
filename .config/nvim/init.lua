@@ -116,6 +116,7 @@ vim.keymap.set("n", "[g", "<Plug>(coc-diagnostic-prev)", {silent = true})
 vim.keymap.set("n", "]g", "<Plug>(coc-diagnostic-next)", {silent = true})
 
 vim.keymap.set("n", "gd", "<Plug>(coc-definition)", {silent = true})
+vim.keymap.set("n", "gr", "<Plug>(coc-references)", {silent = true})
 
 function _G.check_back_space()
     local col = vim.fn.col('.') - 1
