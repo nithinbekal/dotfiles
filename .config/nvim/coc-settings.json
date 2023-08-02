@@ -1,0 +1,11 @@
+{
+  "suggest.selection": "first",
+   "languageserver": {
+      "sorbet": {
+        "command": "bundle",
+        "args": ["exec", "srb", "tc", "--lsp"],
+        "filetypes": ["ruby"]
+      }
+  },
+  "snippets.ultisnips.pythonPrompt": false
+}

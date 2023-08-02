@@ -36,11 +36,11 @@ echo "▶︎ Setting up Neovim config"
 
 mkdir -p ~/.config/nvim
 ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
+ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 
-echo "▶︎ Installing plug for neovim"
+echo "▶︎ Installing lazy.nvim for neovim"
 
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+nvim -c 'q'
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if ! which brew > /dev/null; then
