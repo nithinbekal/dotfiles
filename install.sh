@@ -60,7 +60,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 
   current_status "Installing via brew"
-  brew install neovim fzf ripgrep
+  brew install -q neovim fzf ripgrep
 fi
 
 current_status "Installation successful 🚀"
