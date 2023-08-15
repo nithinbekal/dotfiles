@@ -6,6 +6,12 @@ current_status() {
   printf "\e[32m✔\e[0m %s\n" "$1"
 }
 
+link_file() {
+  local src=$1 dst=$2
+  mkdir -p "$(dirname "$dst")"
+  ln -sf "$src" "$dst"
+}
+
 if [ $SPIN ]; then
   current_status "Installing packages"
   sudo apt-get install -y neovim ripgrep
@@ -26,7 +32,7 @@ for file in "${dotfiles[@]}"
 do
   current_status "Linking ${file}"
   rm -f ~/$file
-  ln -s ~/dotfiles/$file ~/$file
+  link_file ~/dotfiles/$file ~/$file
 done
 
 current_status "Linking .vim directory"
@@ -34,13 +40,12 @@ current_status "Linking .vim directory"
 mkdir -p ~/.vim
 mkdir -p ~/.vim/tmp
 
-ln -sf ~/dotfiles/.vim/ultisnips ~/.vim/ultisnips
+link_file ~/dotfiles/.vim/ultisnips ~/.vim/ultisnips
 
 current_status "Setting up Neovim config"
 
-mkdir -p ~/.config/nvim
-ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
-ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
+link_file ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
+link_file ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 
 current_status "Installing lazy.nvim for neovim"
 
