@@ -3,7 +3,7 @@
 set -e
 
 current_status() {
-  printf "\e[32m✔\e[0m %s\n" "$1"
+  printf "\e[33m⭑\e[0m %s\n" "$1"
 }
 
 link_file() {
