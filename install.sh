@@ -4,7 +4,7 @@ set -e
 
 if [ $SPIN ]; then
   echo "▶︎ Installing packages"
-  sudo apt-get install -y neovim ripgrep universal-ctags
+  sudo apt-get install -y neovim ripgrep
 fi
 
 echo "▶︎ Installing oh-my-zsh"
