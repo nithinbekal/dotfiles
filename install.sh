@@ -40,8 +40,6 @@ current_status "Linking .vim directory"
 mkdir -p ~/.vim
 mkdir -p ~/.vim/tmp
 
-link_file ~/dotfiles/.vim/ultisnips ~/.vim/ultisnips
-
 current_status "Setting up Neovim config"
 
 link_file ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
