@@ -13,9 +13,6 @@ export LC_ALL="en_US.UTF-8"
 
 ssh-add &>/dev/null
 
-export PATH=/usr/local/bin:$PATH
-export PATH=/usr/local/smlnj/bin:$PATH
-
 git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
 
 # USAGE: git-churn --since='6 months ago' .
