@@ -67,7 +67,12 @@ require("lazy").setup({
     config = function() require('gitsigns').setup() end,
   },
 
-  'nanotech/jellybeans.vim',
+  {
+    'Mofiqul/vscode.nvim',
+    config = function()
+      require('vscode').load()
+    end,
+  },
 
   {
     'neoclide/coc.nvim',
@@ -79,7 +84,7 @@ require("lazy").setup({
     config = function() require('lualine').setup({
       options = {
         icons_enabled = false,
-        theme = 'auto',
+        theme = 'vscode',
         component_separators = '|',
         section_separators = '',
         path = 1, -- show relative file path
@@ -107,8 +112,6 @@ require("lazy").setup({
 
   'wsdjeg/vim-fetch',
 })
-
-vim.cmd.colorscheme('jellybeans')
 
 -- coc.nvim config
 
