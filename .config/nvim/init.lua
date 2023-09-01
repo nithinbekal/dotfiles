@@ -151,7 +151,12 @@ require("lazy").setup({
     end,
   },
 
-  'rhysd/devdocs.vim',
+  {
+    'rhysd/devdocs.vim',
+    config = function()
+      vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
+    end,
+  }
   'Townk/vim-autoclose',
   'tpope/vim-bundler',
   'tpope/vim-commentary',   -- Toggle comments easily
@@ -233,7 +238,6 @@ vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
-vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
 vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'No highlight' })
 vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
 vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
