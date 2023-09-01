@@ -59,7 +59,17 @@ require("lazy").setup({
     end,
   },
 
-  'junegunn/fzf',
+  {
+    'junegunn/fzf',
+    config = function()
+      vim.keymap.set('n', '<leader>,',  ':Files<cr>')
+      vim.keymap.set('n', '<leader>bb', ':Buffers<cr>')
+      vim.keymap.set('n', '<leader>fd', ':Rg def <C-r><C-w><cr>')
+      vim.keymap.set('n', '<leader>ff', ':Rg ')
+      vim.keymap.set('n', '<leader>fw', ':Rg <C-r><C-w>')
+      vim.keymap.set('n', '<leader>fW', ':Rg \\b<C-r><C-w>\\b')
+    end,
+  },
 
   {
     'junegunn/fzf.vim',
@@ -206,15 +216,6 @@ vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j')
 vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k')
 vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l')
 vim.keymap.set('t', '<C-o>', '<C-\\><C-n>')
-
--- Keymaps: FZF
-
-vim.keymap.set('n', '<leader>,',  ':Files<cr>')
-vim.keymap.set('n', '<leader>bb', ':Buffers<cr>')
-vim.keymap.set('n', '<leader>fd', ':Rg def <C-r><C-w><cr>')
-vim.keymap.set('n', '<leader>ff', ':Rg ')
-vim.keymap.set('n', '<leader>fw', ':Rg <C-r><C-w>')
-vim.keymap.set('n', '<leader>fW', ':Rg \\b<C-r><C-w>\\b')
 
 -- Keymaps: Terminal and testing
 
