@@ -156,7 +156,17 @@ require("lazy").setup({
   'tpope/vim-bundler',
   'tpope/vim-commentary',   -- Toggle comments easily
   'tpope/vim-endwise',      -- Add end after ruby blocks
-  'tpope/vim-fugitive',     -- Git wrapper
+
+  {
+    'tpope/vim-fugitive',
+    config = function()
+      vim.keymap.set('n', '<leader>gbl', ':Git blame<cr>', { desc = 'Git blame' })
+      vim.keymap.set({ 'n', 'v'}, '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
+      vim.keymap.set('n', '<leader>ghp', ':!/opt/dev/bin/dev open pr &<cr><cr>', { desc = 'Github PR' })
+      vim.keymap.set('n', '<leader>gs', ':Git<cr>', { desc = 'Git status' })
+    end,
+  },
+
   'tpope/vim-rails',        -- Rails support
   'tpope/vim-rhubarb',      -- Needed by fugitive for Gbrowse
   'tpope/vim-surround',     -- Easily change quotes/bracket pairs
@@ -199,13 +209,6 @@ vim.keymap.set('n', '<leader>fd', ':Rg def <C-r><C-w><cr>')
 vim.keymap.set('n', '<leader>ff', ':Rg ')
 vim.keymap.set('n', '<leader>fw', ':Rg <C-r><C-w>')
 vim.keymap.set('n', '<leader>fW', ':Rg \\b<C-r><C-w>\\b')
-
--- Keymaps: Git
-
-vim.keymap.set('n', '<leader>gbl', ':Git blame<cr>', { desc = 'Git blame' })
-vim.keymap.set({ 'n', 'v'}, '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
-vim.keymap.set('n', '<leader>ghp', ':!/opt/dev/bin/dev open pr &<cr><cr>', { desc = 'Github PR' })
-vim.keymap.set('n', '<leader>gs', ':Git<cr>', { desc = 'Git status' })
 
 -- Keymaps: Terminal and testing
 
