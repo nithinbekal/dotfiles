@@ -218,7 +218,7 @@ local plugins = {
 }
 
 if vim.env.SPIN == "1" then
-  table.append(plugins, "Shopify/spin-hud")
+  table.insert(plugins, "Shopify/spin-hud")
 end
 
 require("lazy").setup(plugins)
