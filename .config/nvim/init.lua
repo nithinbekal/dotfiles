@@ -47,7 +47,7 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({
+local plugins = {
   {
     'ibhagwan/fzf-lua',
     config = function()
@@ -215,7 +215,13 @@ require("lazy").setup({
   },
 
   'wsdjeg/vim-fetch',
-})
+}
+
+if vim.env.SPIN == "1" then
+  table.append(plugins, "Shopify/spin-hud")
+end
+
+require("lazy").setup(plugins)
 
 -- User commands
 
