@@ -48,7 +48,16 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  'ibhagwan/fzf-lua',
+  {
+    'ibhagwan/fzf-lua',
+    config = function()
+      local fzf_lua = require('fzf-lua')
+      vim.keymap.set('n', '<leader>l,', fzf_lua.files, { desc = 'Find files' })
+      vim.keymap.set('n', '<leader>lbb', fzf_lua.buffers, { desc = 'Find buffers' })
+      vim.keymap.set('n', '<leader>lff', fzf_lua.grep, { desc = 'Grep' })
+      vim.keymap.set('n', '<leader>lfw', fzf_lua.grep_cword, { desc = 'Grep for word under cursor' })
+    end,
+  }
 
   'junegunn/fzf',
 
@@ -190,11 +199,6 @@ vim.keymap.set('n', '<leader>fd', ':Rg def <C-r><C-w><cr>')
 vim.keymap.set('n', '<leader>ff', ':Rg ')
 vim.keymap.set('n', '<leader>fw', ':Rg <C-r><C-w>')
 vim.keymap.set('n', '<leader>fW', ':Rg \\b<C-r><C-w>\\b')
-
-vim.keymap.set('n', '<leader>l,', require('fzf-lua').files, { desc = 'Find files' })
-vim.keymap.set('n', '<leader>lbb', require('fzf-lua').buffers, { desc = 'Find buffers' })
-vim.keymap.set('n', '<leader>lff', require ('fzf-lua').grep, { desc = 'Grep' })
-vim.keymap.set('n', '<leader>lfw', require ('fzf-lua').grep_cword, { desc = 'Grep for word under cursor' })
 
 -- Keymaps: Git
 
