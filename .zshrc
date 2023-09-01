@@ -26,6 +26,22 @@ git-churn() {
     | awk 'BEGIN {print "count\tfile"} {print $1 "\t" $2}'
 }
 
+# Usage:
+#       prs foo # opens PRs from foo
+#       prs     # opens my PRs
+#
+prs() {
+  local author=${1:-nithinbekal}
+  open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${author}+org%3Ashopify+archived%3Afalse+-repo%3Ashopify%2Ftheme-app-audit"
+}
+
+# Spin up current branch
+#
+function sucb() {
+  local current_branch=$(git rev-parse --abbrev-ref HEAD)
+  spin up shopify --name ${current_branch} -c shopify.branch=${current_branch}
+}
+
 # Aliases
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
