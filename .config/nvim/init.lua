@@ -223,34 +223,29 @@ end
 
 require("lazy").setup(plugins)
 
--- User commands
-
 -- Commonly mistyped commands
 vim.api.nvim_create_user_command('Q', 'q', {})
 vim.api.nvim_create_user_command('Wq', 'wq', {})
 
 -- Keymaps: Navigation
-
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>')
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>')
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>')
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>')
 
--- Terminal navigation
+-- Keymaps: Terminal
 vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-w>h')
 vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j')
 vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k')
 vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l')
 vim.keymap.set('t', '<C-o>', '<C-\\><C-n>')
 
--- Keymaps: miscellaneous
-
-vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
-
--- Remap for dealing with word wrap
+-- Keymaps: Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
+-- Keymaps: misc
+vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
 vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'No highlight' })
 vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
 vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
