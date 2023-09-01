@@ -183,7 +183,13 @@ require("lazy").setup({
     end,
   },
 
-  'tpope/vim-rails',        -- Rails support
+  {
+    'tpope/vim-rails',        -- Rails support
+    config = function()
+      vim.keymap.set('n', '<leader>s', ':A<cr>', { desc = 'Toggle test and code files' })
+    end,
+  },
+
   'tpope/vim-rhubarb',      -- Needed by fugitive for Gbrowse
   'tpope/vim-surround',     -- Easily change quotes/bracket pairs
   'tpope/vim-unimpaired',   -- Misc mappings like ]<space> or ]c
@@ -224,7 +230,6 @@ vim.keymap.set('n', '<leader>to', ':vertical Ttoggle<cr>', { desc = 'Toggle term
 
 -- Keymaps: Testing
 
-vim.keymap.set('n', '<leader>s', ':A<cr>', { desc = 'Toggle test and code files' })
 vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
 vim.keymap.set('n', '<leader>tl', ':w<cr>:T dev test --include-branch-commits<cr>', { desc = 'Test local changes' })
 vim.keymap.set('n', '<leader>tn', ':w<cr>:TestNearest<cr>', { desc = 'Test current file' })
