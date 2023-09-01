@@ -57,7 +57,7 @@ require("lazy").setup({
       vim.keymap.set('n', '<leader>lff', fzf_lua.grep, { desc = 'Grep' })
       vim.keymap.set('n', '<leader>lfw', fzf_lua.grep_cword, { desc = 'Grep for word under cursor' })
     end,
-  }
+  },
 
   'junegunn/fzf',
 
@@ -156,7 +156,8 @@ require("lazy").setup({
     config = function()
       vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
     end,
-  }
+  },
+
   'Townk/vim-autoclose',
   'tpope/vim-bundler',
   'tpope/vim-commentary',   -- Toggle comments easily
