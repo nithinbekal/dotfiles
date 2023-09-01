@@ -204,7 +204,14 @@ require("lazy").setup({
 
   {
     'vim-test/vim-test',
-    config = function() vim.g['test#strategy'] = 'neoterm' end,
+    config = function()
+      vim.g['test#strategy'] = 'neoterm'
+
+      vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
+      vim.keymap.set('n', '<leader>tn', ':w<cr>:TestNearest<cr>', { desc = 'Test current file' })
+      vim.keymap.set('n', '<leader>ts', ':w<cr>:TestSuite<cr>', { desc = 'Test suite' })
+      vim.keymap.set('n', '<leader>tt', ':w<cr>:TestLast<cr>', { desc = 'Rerun last test' })
+    end,
   },
 
   'wsdjeg/vim-fetch',
@@ -229,13 +236,6 @@ vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-w>j')
 vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-w>k')
 vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-w>l')
 vim.keymap.set('t', '<C-o>', '<C-\\><C-n>')
-
--- Keymaps: Testing
-
-vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
-vim.keymap.set('n', '<leader>tn', ':w<cr>:TestNearest<cr>', { desc = 'Test current file' })
-vim.keymap.set('n', '<leader>ts', ':w<cr>:TestSuite<cr>', { desc = 'Test suite' })
-vim.keymap.set('n', '<leader>tt', ':w<cr>:TestLast<cr>', { desc = 'Rerun last test' })
 
 -- Keymaps: miscellaneous
 
