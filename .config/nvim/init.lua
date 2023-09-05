@@ -197,6 +197,8 @@ end
 
 require("lazy").setup(plugins)
 
+-- LSP setup
+
 local on_attach = function()
   vim.keymap.set('n', "K", vim.lsp.buf.hover, { desc = "Hover documentation" })
   vim.keymap.set('n', "gf", vim.lsp.buf.definition, { desc = "Go to definition" })
@@ -209,6 +211,8 @@ local servers = {
 }
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
 local mason_lspconfig = require("mason-lspconfig")
 
 mason_lspconfig.setup {
@@ -225,6 +229,8 @@ mason_lspconfig.setup_handlers {
     }
   end
 }
+
+-- Autocomplete setup
 
 local cmp = require("cmp")
 local luasnip = require("luasnip")
