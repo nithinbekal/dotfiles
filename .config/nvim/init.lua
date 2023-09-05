@@ -60,25 +60,20 @@ local plugins = {
 
   {
     'ibhagwan/fzf-lua',
-    config = function()
-      local fzf_lua = require('fzf-lua')
-      vim.keymap.set('n', '<leader>l,', fzf_lua.files, { desc = 'Find files' })
-      vim.keymap.set('n', '<leader>lbb', fzf_lua.buffers, { desc = 'Find buffers' })
-      vim.keymap.set('n', '<leader>lff', fzf_lua.grep, { desc = 'Grep' })
-      vim.keymap.set('n', '<leader>lfw', fzf_lua.grep_cword, { desc = 'Grep for word under cursor' })
-    end,
+    keys = {
+      { "<leader>,", ":FzfLua files<cr>", desc = "Find files" },
+      { "<leader>bb", ":FzfLua buffers<cr>", desc = "Find buffers" },
+      { "<leader>ff", ":FzfLua grep<cr>", desc = "Grep" },
+      { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
+      { "<leader>fW", ":FzfLua grep_cWORD<cr>", desc = "Grep for word under cursor" },
+    },
   },
 
   {
     'junegunn/fzf',
-    config = function()
-      vim.keymap.set('n', '<leader>,',  ':Files<cr>')
-      vim.keymap.set('n', '<leader>bb', ':Buffers<cr>')
-      vim.keymap.set('n', '<leader>fd', ':Rg def <C-r><C-w><cr>')
-      vim.keymap.set('n', '<leader>ff', ':Rg ')
-      vim.keymap.set('n', '<leader>fw', ':Rg <C-r><C-w>')
-      vim.keymap.set('n', '<leader>fW', ':Rg \\b<C-r><C-w>\\b')
-    end,
+    keys = {
+      { "n", "<leader>fd", ":Rg def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
+    },
   },
 
   {
