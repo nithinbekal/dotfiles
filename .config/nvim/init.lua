@@ -130,15 +130,17 @@ local plugins = {
 
   {
     'nvim-lualine/lualine.nvim',
-    config = function() require('lualine').setup({
-      options = {
-        icons_enabled = false,
-        theme = 'vscode',
-        component_separators = '|',
-        section_separators = '',
-        path = 1, -- show relative file path
-      }
-    })
+    dependencies = {
+      { 'nvim-tree/nvim-web-devicons', opt = true },
+    },
+    config = function()
+      require('lualine').setup({
+        options = {
+          icons_enabled = true,
+          theme = 'vscode',
+          path = 1, -- show relative file path
+        }
+      })
     end,
   },
 
