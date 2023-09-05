@@ -49,6 +49,16 @@ vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
   {
+    'hrsh7th/nvim-cmp',
+    dependencies = {
+      'L3MON4D3/LuaSnip',
+      'saadparwaiz1/cmp_luasnip',
+      'hrsh7th/cmp-nvim-lsp',
+      'rafamadriz/friendly-snippets',
+    },
+  },
+
+  {
     'ibhagwan/fzf-lua',
     config = function()
       local fzf_lua = require('fzf-lua')
@@ -111,47 +121,11 @@ local plugins = {
   },
 
   {
-    'neoclide/coc.nvim',
-    branch = 'release',
-    config = function()
-      vim.keymap.set("n", "[g", "<Plug>(coc-diagnostic-prev)", {silent = true})
-      vim.keymap.set("n", "]g", "<Plug>(coc-diagnostic-next)", {silent = true})
-      vim.keymap.set("n", "gd", "<Plug>(coc-definition)", {silent = true})
-      vim.keymap.set("n", "gr", "<Plug>(coc-references)", {silent = true})
-
-      function _G.check_back_space()
-        local col = vim.fn.col('.') - 1
-        return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') ~= nil
-      end
-
-      local opts = {noremap = true, expr = true, replace_keycodes = false}
-
-      vim.keymap.set("i", "<TAB>",
-        [[coc#pum#visible() ? coc#pum#next(1) : v:lua.check_back_space() ? "<TAB>" : coc#refresh()]], opts)
-
-      vim.keymap.set("i", "<S-TAB>", [[coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"]], opts)
-
-      -- Make <CR> to accept selected completion item or notify coc.nvim to format
-      -- <C-g>u breaks current undo, please make your own choice
-      vim.keymap.set("i", "<cr>",
-        [[coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"]], opts)
-
-      function _G.show_docs()
-        local cw = vim.fn.expand('<cword>')
-        if vim.fn.index({'vim', 'help'}, vim.bo.filetype) >= 0 then
-          vim.api.nvim_command('h ' .. cw)
-        elseif vim.api.nvim_eval('coc#rpc#ready()') then
-          vim.fn.CocActionAsync('doHover')
-        else
-          vim.api.nvim_command('!' .. vim.o.keywordprg .. ' ' .. cw)
-        end
-      end
-
-      vim.keymap.set("n", "K", '<CMD>lua _G.show_docs()<CR>', {silent = true})
-
-      vim.keymap.set('n', '<leader>mv', ':CocCommand workspace.renameCurrentFile<cr>',
-        { desc = 'Rename current file' })
-    end,
+    'neovim/nvim-lspconfig',
+    dependencies = {
+      { 'williamboman/mason.nvim', config = true },
+      'williamboman/mason-lspconfig.nvim',
+    },
   },
 
   {
@@ -223,6 +197,98 @@ end
 
 require("lazy").setup(plugins)
 
+-- LSP setup
+
+local on_attach = function()
+  vim.keymap.set('n', "K", vim.lsp.buf.hover, { desc = "Hover documentation" })
+  vim.keymap.set('n', "gf", vim.lsp.buf.definition, { desc = "Go to definition" })
+  vim.keymap.set('n', "gr", vim.lsp.buf.references, { desc = "Go to references" })
+end
+
+local servers = {
+  ruby_ls = {},
+  sorbet = {},
+}
+
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+local mason_lspconfig = require("mason-lspconfig")
+
+mason_lspconfig.setup {
+  ensure_installed = vim.tbl_keys(servers),
+}
+
+mason_lspconfig.setup_handlers {
+  function(server_name)
+    require("lspconfig")[server_name].setup {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = servers[server_name],
+      filetypes = (servers[server_name] or {}).filetypes,
+    }
+  end
+}
+
+-- Autocomplete setup
+
+local cmp = require("cmp")
+local luasnip = require("luasnip")
+
+require("luasnip.loaders.from_vscode").lazy_load()
+luasnip.config.setup {}
+
+cmp.setup {
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert {
+    ['<C-n>'] = cmp.mapping.select_next_item(),
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete {},
+    ['<CR>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    },
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_locally_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.locally_jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+  },
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+  },
+}
+
+function renameFile()
+  local old_name = vim.fn.expand('%')
+  local new_name = vim.fn.input('New file name: ', vim.fn.expand('%'), 'file')
+  if new_name ~= '' and new_name ~= old_name then
+    vim.cmd(':saveas ' .. new_name)
+    vim.cmd(':silent !rm ' .. old_name)
+    vim.cmd('redraw!')
+  end
+end
+
 -- Commonly mistyped commands
 vim.api.nvim_create_user_command('Q', 'q', {})
 vim.api.nvim_create_user_command('Wq', 'wq', {})
@@ -246,6 +312,7 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 
 -- Keymaps: misc
 vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
+vim.keymap.set('n', '<leader>mv', renameFile, { desc = 'Rename file' })
 vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'No highlight' })
 vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
 vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
