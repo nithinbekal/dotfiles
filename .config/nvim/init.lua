@@ -279,6 +279,15 @@ cmp.setup {
   },
 }
 
+function renameFile()
+  local old_name = vim.fn.expand('%')
+  local new_name = vim.fn.input('New file name: ', vim.fn.expand('%'), 'file')
+  if new_name ~= '' and new_name ~= old_name then
+    vim.cmd(':saveas ' .. new_name)
+    vim.cmd(':silent !rm ' .. old_name)
+    vim.cmd('redraw!')
+  end
+end
 
 -- Commonly mistyped commands
 vim.api.nvim_create_user_command('Q', 'q', {})
@@ -303,6 +312,7 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 
 -- Keymaps: misc
 vim.keymap.set({ '', 'i' }, '<C-s>', '<esc>:w<cr>')
+vim.keymap.set('n', '<leader>mv', renameFile, { desc = 'Rename file' })
 vim.keymap.set('n', '<leader>nh', ':nohl<cr>', { desc = 'No highlight' })
 vim.keymap.set('n', '<leader>o', ':only<cr>', { desc = 'Only keep current pane' })
 vim.keymap.set('n', '<leader>pp', '"+p', { desc = 'Paste from clipboard' })
