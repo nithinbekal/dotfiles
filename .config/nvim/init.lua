@@ -72,7 +72,7 @@ local plugins = {
   {
     'junegunn/fzf',
     keys = {
-      { "n", "<leader>fd", ":Rg def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
+      { "<leader>fd", ":Rg def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
     },
   },
 
