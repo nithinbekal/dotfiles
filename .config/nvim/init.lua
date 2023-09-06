@@ -163,10 +163,10 @@ local plugins = {
   },
 
   {
-    'tpope/vim-rails',        -- Rails support
-    config = function()
-      vim.keymap.set('n', '<leader>s', ':A<cr>', { desc = 'Toggle test and code files' })
-    end,
+    'tpope/vim-rails',
+    keys = {
+      { "<leader>s", ":A<cr>", desc = 'Toggle test and code files' },
+    },
   },
 
   'tpope/vim-rhubarb',      -- Needed by fugitive for Gbrowse
