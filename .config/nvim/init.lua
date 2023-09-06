@@ -140,9 +140,9 @@ local plugins = {
 
   {
     'rhysd/devdocs.vim',
-    config = function()
-      vim.keymap.set('n', '<leader>dd', '<Plug>(devdocs-under-cursor)', { desc = 'Open devdocs.io' })
-    end,
+    keys = {
+      { "<leader>dd", "<Plug>(devdocs-under-cursor)", desc = "Open devdocs.io" },
+    }
   },
 
   'Townk/vim-autoclose',
