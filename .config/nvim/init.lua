@@ -83,14 +83,13 @@ local plugins = {
 
   {
     'kassio/neoterm',
-    config = function()
-      vim.g.neoterm_default_mod = 'vertical'
-
-      vim.keymap.set('n', '<leader>tc', ':Tclear<cr>', { desc = 'Clear terminal' })
-      vim.keymap.set('n', '<leader>to', ':vertical Ttoggle<cr>', { desc = 'Toggle terminal' })
-      vim.keymap.set('n', '<leader>tl', ':w<cr>:T dev test --include-branch-commits<cr>', { desc = 'Test local changes' })
-      vim.keymap.set('n', '<leader>ty', ':w<cr>:T srb typecheck<cr>', { desc = 'Sorbet typecheck' })
-    end,
+    config = function() vim.g.neoterm_default_mod = "vertical" end,
+    keys = {
+      { "<leader>tc", ":Tclear<cr>", desc = "Clear terminal" },
+      { "<leader>to", ":Ttoggle<cr>", desc = "Toggle terminal" },
+      { "<leader>tl", ":w<cr>:T dev test --include-branch-commits<cr>", desc = "Test local changes" },
+      { "<leader>ty", ":w<cr>:T srb typecheck<cr>", desc = "Sorbet typecheck" },
+    },
   },
 
   {
