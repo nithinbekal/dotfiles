@@ -84,6 +84,7 @@ local plugins = {
   {
     'kassio/neoterm',
     config = function() vim.g.neoterm_default_mod = "vertical" end,
+    lazy = false,
     keys = {
       { "<leader>tc", ":Tclear<cr>", desc = "Clear terminal" },
       { "<leader>to", ":Ttoggle<cr>", desc = "Toggle terminal" },
@@ -176,14 +177,13 @@ local plugins = {
 
   {
     'vim-test/vim-test',
-    config = function()
-      vim.g['test#strategy'] = 'neoterm'
-
-      vim.keymap.set('n', '<leader>tf', ':w<cr>:TestFile<cr>', { desc = 'Test current file' })
-      vim.keymap.set('n', '<leader>tn', ':w<cr>:TestNearest<cr>', { desc = 'Test current file' })
-      vim.keymap.set('n', '<leader>ts', ':w<cr>:TestSuite<cr>', { desc = 'Test suite' })
-      vim.keymap.set('n', '<leader>tt', ':w<cr>:TestLast<cr>', { desc = 'Rerun last test' })
-    end,
+    config = function() vim.g['test#strategy'] = 'neoterm' end,
+    keys = {
+      { "<leader>tf", ":w<cr>:TestFile<cr>", desc = 'Test current file' },
+      { "<leader>tn", ":w<cr>:TestNearest<cr>", desc = 'Test current file' },
+      { "<leader>ts", ":w<cr>:TestSuite<cr>", desc = 'Test suite' },
+      { "<leader>tt", ":w<cr>:TestLast<cr>", desc = 'Rerun last test' },
+    },
   },
 
   'wsdjeg/vim-fetch',
