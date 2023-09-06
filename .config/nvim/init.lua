@@ -153,11 +153,13 @@ local plugins = {
   {
     'tpope/vim-fugitive',
     config = function()
-      vim.keymap.set('n', '<leader>gbl', ':Git blame<cr>', { desc = 'Git blame' })
       vim.keymap.set({ 'n', 'v'}, '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
-      vim.keymap.set('n', '<leader>ghp', ':!/opt/dev/bin/dev open pr &<cr><cr>', { desc = 'Github PR' })
-      vim.keymap.set('n', '<leader>gs', ':Git<cr>', { desc = 'Git status' })
     end,
+    keys = {
+      { "<leader>gbl", ":Git blame<cr>", desc = "Git blame" },
+      { "<leader>ghp", ":!/opt/dev/bin/dev open pr &<cr><cr>", desc = "Github PR" },
+      { "<leader>gs", ":Git<cr>", desc = "Git status" },
+    },
   },
 
   {
