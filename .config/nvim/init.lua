@@ -209,13 +209,9 @@ local on_attach = function()
   vim.keymap.set('n', "gr", vim.lsp.buf.references, { desc = "Go to references" })
 end
 
-local lspconfig = require("lspconfig")
-
 local servers = {
   ruby_ls = {},
-  sorbet = {
-    root_dir = lspconfig.util.root_pattern("sorbet/config"),
-  },
+  sorbet = {},
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -236,7 +232,7 @@ mason_lspconfig.setup {
 
 mason_lspconfig.setup_handlers {
   function(server_name)
-    lspconfig[server_name].setup {
+    require("lspconfig")[server_name].setup {
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
