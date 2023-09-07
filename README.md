@@ -17,6 +17,17 @@ Since macOS Sierra (10.12):
 
 - System Preferences > Keyboard > Modifier keys: Set Caps Lock to Escape.
 
+### Fonts
+
+I use Fira Code, patched by [Nerd Fonts](https://www.nerdfonts.com/).
+To install it:
+
+```bash
+brew tap homebrew/cask-fonts
+brew install font-fira-code-nerd-font
+```
+
+
 ### VS Code and Sublime
 
 My config for VS Code and Sublime are in `editors/`, but these are not
