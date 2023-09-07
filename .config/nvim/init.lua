@@ -152,10 +152,12 @@ local plugins = {
     }
   },
 
-  'Townk/vim-autoclose',
-  'tpope/vim-bundler',
-  'tpope/vim-commentary',   -- Toggle comments easily
-  'tpope/vim-endwise',      -- Add end after ruby blocks
+  { "Townk/vim-autoclose", ft = { "ruby", "eruby" } },
+  { "tpope/vim-bundler", ft = { "ruby", "eruby" } },
+
+  "tpope/vim-commentary",
+
+  { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
 
   {
     'tpope/vim-fugitive',
@@ -177,7 +179,8 @@ local plugins = {
 
   'tpope/vim-surround',     -- Easily change quotes/bracket pairs
   'tpope/vim-unimpaired',   -- Misc mappings like ]<space> or ]c
-  'vim-ruby/vim-ruby',
+
+  { "vim-ruby/vim-ruby", ft = { "ruby", "eruby" } },
 
   {
     'vim-test/vim-test',
