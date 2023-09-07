@@ -99,6 +99,7 @@ local plugins = {
       require('gitsigns').setup()
       vim.keymap.set({'o', 'x'}, 'ac', ':<C-U>Gitsigns select_hunk<CR>') -- Text object for git hunks
     end,
+    lazy = false,
     keys = {
       { "<leader>ghs", ":Gitsigns stage_hunk<cr>", desc = "Git stage hunk" },
       { "<leader>ghu", ":Gitsigns undo_stage_hunk<cr>", desc = "Git undo stage hunk" },
