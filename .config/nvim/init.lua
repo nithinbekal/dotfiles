@@ -159,13 +159,12 @@ local plugins = {
 
   {
     'tpope/vim-fugitive',
-    config = function()
-      vim.keymap.set({ 'n', 'v'}, '<leader>gbr', ':GBrowse<cr>', { desc = 'Git browse' })
-    end,
+    dependencies = { "tpope/vim-rhubarb" },
     keys = {
       { "<leader>gbl", ":Git blame<cr>", desc = "Git blame" },
       { "<leader>ghp", ":!/opt/dev/bin/dev open pr &<cr><cr>", desc = "Github PR" },
       { "<leader>gs", ":Git<cr>", desc = "Git status" },
+      { "<leader>gbr", ":Gbrowse<cr>", desc = "Git browse", mode = { "n", "v" } },
     },
   },
 
@@ -176,7 +175,6 @@ local plugins = {
     },
   },
 
-  'tpope/vim-rhubarb',      -- Needed by fugitive for Gbrowse
   'tpope/vim-surround',     -- Easily change quotes/bracket pairs
   'tpope/vim-unimpaired',   -- Misc mappings like ]<space> or ]c
   'vim-ruby/vim-ruby',
