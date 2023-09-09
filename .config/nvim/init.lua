@@ -175,9 +175,8 @@ local plugins = {
     },
   },
 
-  'tpope/vim-surround',     -- Easily change quotes/bracket pairs
-  'tpope/vim-unimpaired',   -- Misc mappings like ]<space> or ]c
-
+  { "tpope/vim-surround", event = { "BufReadPost", "BufNewFile" } },
+  { "tpope/vim-unimpaired", event = "VeryLazy" },
   { "vim-ruby/vim-ruby", ft = { "ruby", "eruby" } },
 
   {
