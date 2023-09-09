@@ -154,9 +154,7 @@ local plugins = {
 
   { "Townk/vim-autoclose", ft = { "ruby", "eruby" } },
   { "tpope/vim-bundler", ft = { "ruby", "eruby" } },
-
-  "tpope/vim-commentary",
-
+  { "tpope/vim-commentary", event = "VeryLazy" },
   { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
 
   {
