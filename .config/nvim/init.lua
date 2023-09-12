@@ -177,7 +177,7 @@ local plugins = {
 
   { "tpope/vim-surround", event = { "BufReadPost", "BufNewFile" } },
   { "tpope/vim-unimpaired", event = { "BufReadPost", "BufNewFile" } },
-  { "vim-ruby/vim-ruby", ft = { "ruby", "eruby" } },
+  { "vim-ruby/vim-ruby", event = { "BufReadPost", "BufNewFile" } },
 
   {
     "vim-test/vim-test",
