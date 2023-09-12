@@ -152,6 +152,8 @@ local plugins = {
     }
   },
 
+  "Shopify/vim-sorbet",
+
   { "Townk/vim-autoclose", ft = { "ruby", "eruby" } },
   { "tpope/vim-bundler", ft = { "ruby", "eruby" } },
   { "tpope/vim-commentary", event = "VeryLazy" },
