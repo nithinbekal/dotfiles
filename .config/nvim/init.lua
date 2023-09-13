@@ -106,7 +106,7 @@ local plugins = {
       { "<leader>ghr", ":Gitsigns reset_hunk<cr>", desc = "Git reset hunk" },
       { "]c", ":Gitsigns next_hunk<cr>", desc = "Gitsigns: Go to next hunk" },
       { "[c", ":Gitsigns prev_hunk<cr>", desc = "Gitsigns: Go to prev hunk" },
-      { "ac", ":<C-U>Gitsigns select_hunk<CR>", mode = {"o", "x"}, desc = "Text object for git hunks" },
+      { "ah", ":<C-U>Gitsigns select_hunk<CR>", mode = {"o", "x"}, desc = "Text object for git hunks" },
     },
   },
 
