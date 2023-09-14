@@ -211,12 +211,6 @@ require("lazy").setup(plugins)
 
 -- LSP setup
 
-local on_attach = function()
-  vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover documentation" })
-  vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
-  vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Go to references" })
-end
-
 local servers = {
   ruby_ls = {},
   sorbet = {},
@@ -242,7 +236,6 @@ mason_lspconfig.setup_handlers {
   function(server_name)
     require("lspconfig")[server_name].setup {
       capabilities = capabilities,
-      on_attach = on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
     }
@@ -379,15 +372,20 @@ vim.keymap.set("t", "<C-k>", "<C-\\><C-n><C-w>k")
 vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l")
 vim.keymap.set("t", "<C-o>", "<C-\\><C-n>")
 
+-- LSP and diagnostics
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
+
+vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover documentation" })
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
+vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Go to references" })
+
 -- Keymaps: Remap for dealing with word wrap
 vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
 -- Keymaps: misc
 vim.keymap.set({ "", "i" }, "<C-s>", "<esc>:w<cr>")
-
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
 
 vim.keymap.set("n", "<leader>mv", RenameFile, { desc = "Rename file" })
 vim.keymap.set("n", "<leader>nh", ":nohl<cr>", { desc = "No highlight" })
