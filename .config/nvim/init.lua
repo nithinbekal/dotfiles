@@ -142,6 +142,16 @@ local plugins = {
   },
 
   {
+    "nvim-telescope/telescope.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    keys = {
+      { "<leader>gr", "<cmd>Telescope lsp_references<cr>", desc = "Find references in telescope" },
+    }
+  },
+
+  {
     "nvim-treesitter/nvim-treesitter",
     dependencies = {
       "nvim-treesitter/nvim-treesitter-textobjects",
