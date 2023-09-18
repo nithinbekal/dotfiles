@@ -176,6 +176,7 @@ local plugins = {
   { "tpope/vim-bundler", ft = { "ruby", "eruby" } },
   { "tpope/vim-commentary", event = "VeryLazy" },
   { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
+  { "stevearc/dressing.nvim", opts = {} },
 
   {
     "tpope/vim-fugitive",
@@ -397,6 +398,7 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- Keymaps: misc
 vim.keymap.set({ "", "i" }, "<C-s>", "<esc>:w<cr>")
 
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code actions menu" })
 vim.keymap.set("n", "<leader>mv", RenameFile, { desc = "Rename file" })
 vim.keymap.set("n", "<leader>nh", ":nohl<cr>", { desc = "No highlight" })
 vim.keymap.set("n", "<leader>o", ":only<cr>", { desc = "Only keep current pane" })
