@@ -147,7 +147,11 @@ local plugins = {
       "nvim-lua/plenary.nvim",
     },
     keys = {
-      { "<leader>gr", "<cmd>Telescope lsp_references<cr>", desc = "Find references in telescope" },
+      {
+        "<leader>gr",
+        function () require("telescope.builtin").lsp_references({ show_line = false }) end,
+        desc = "Find references in telescope",
+      },
     }
   },
 
