@@ -47,7 +47,7 @@ link_file ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.
 
 current_status "Installing lazy.nvim for neovim"
 
-nvim -c 'q'
+nvim --headless "+Lazy! sync" +qa
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if ! which brew > /dev/null; then
