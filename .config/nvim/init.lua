@@ -110,6 +110,8 @@ local plugins = {
     },
   },
 
+  { "m4xshen/autoclose.nvim", config = function() require("autoclose").setup() end },
+
   {
     "Mofiqul/vscode.nvim",
     config = function()
@@ -176,7 +178,6 @@ local plugins = {
     }
   },
 
-  { "Townk/vim-autoclose", ft = { "ruby", "eruby" } },
   { "tpope/vim-bundler", ft = { "ruby", "eruby" } },
   { "tpope/vim-commentary", event = "VeryLazy" },
   { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
