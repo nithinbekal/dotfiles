@@ -359,6 +359,12 @@ require("nvim-treesitter.configs").setup {
   },
 }
 
+
+vim.diagnostic.config({
+  underline = { severity = { max = vim.diagnostic.severity.INFO } },
+  virtual_text = { severity = { min = vim.diagnostic.severity.WARN } },
+})
+
 function RenameFile()
   local old_name = vim.fn.expand("%")
   local new_name = vim.fn.input("New file name: ", vim.fn.expand("%"), "file")
