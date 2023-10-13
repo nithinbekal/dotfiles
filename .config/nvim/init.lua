@@ -110,8 +110,6 @@ local plugins = {
     },
   },
 
-  { "m4xshen/autoclose.nvim", config = function() require("autoclose").setup() end },
-
   {
     "Mofiqul/vscode.nvim",
     config = function()
