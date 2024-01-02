@@ -165,11 +165,6 @@ local plugins = {
   },
 
   {
-    "rcarriga/nvim-notify",
-    config = function () vim.notify = require("notify") end,
-  },
-
-  {
     "rhysd/devdocs.vim",
     keys = {
       { "<leader>dd", "<Plug>(devdocs-under-cursor)", desc = "Open devdocs.io" },
