@@ -128,6 +128,7 @@ local plugins = {
   {
     "nvim-lualine/lualine.nvim",
     dependencies = {
+      "Mofiqul/vscode.nvim",
       { "nvim-tree/nvim-web-devicons", opt = true },
     },
     config = function()
