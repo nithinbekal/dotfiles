@@ -315,7 +315,6 @@ require("nvim-treesitter.configs").setup {
   ensure_installed = { "lua", "ruby" },
   auto_install = false,
   highlight = { enable = true },
-  indent = { enable = true },
   incremental_selection = {
     enable = true,
     keymaps = {
