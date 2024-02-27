@@ -131,7 +131,7 @@ local plugins = {
     "nvim-lualine/lualine.nvim",
     dependencies = {
       "Mofiqul/vscode.nvim",
-      { "nvim-tree/nvim-web-devicons", opt = true },
+      "nvim-tree/nvim-web-devicons",
     },
     config = function()
       require("lualine").setup({
@@ -313,7 +313,10 @@ cmp.setup {
 require("nvim-treesitter.configs").setup {
   ensure_installed = { "lua", "ruby" },
   auto_install = false,
-  highlight = { enable = true },
+  highlight = {
+    disable = { "vimdoc" },
+    enable = true,
+  },
   hidesig = {
     enable = true,
     opacity = 0.5,
