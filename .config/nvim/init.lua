@@ -3,6 +3,7 @@
 -- Setting options
 
 vim.opt.autoindent = true             -- Indent: Copy indent from current line when starting new line
+vim.opt.clipboard = "unnamedplus"     -- Sync clipboard between OS and Neovim
 vim.opt.colorcolumn = "120"           -- Show vertical bar to indicate 120 chars
 vim.opt.cursorline = true             -- Highlight the cursor line
 vim.opt.expandtab = true              -- Use spaces to insert a tab
