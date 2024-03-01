@@ -67,22 +67,10 @@ local plugins = {
     keys = {
       { "<leader>,",  ":FzfLua files<cr>", desc = "Find files" },
       { "<leader>bb", ":FzfLua buffers<cr>", desc = "Find buffers" },
+      { "<leader>fd", ":FzfLua grep<cr> def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
       { "<leader>ff", ":FzfLua grep<cr>", desc = "Grep" },
       { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
     },
-  },
-
-  {
-    "junegunn/fzf",
-    keys = {
-      { "<leader>fd", ":Rg def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
-      { "<leader>fW", ":Rg \\b<C-r><C-w>\\b", desc = "Grep for word under cursor with boundaries" },
-    },
-  },
-
-  {
-    "junegunn/fzf.vim",
-    build = ":call fzf#install()",
   },
 
   {
