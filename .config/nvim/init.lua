@@ -64,6 +64,7 @@ local plugins = {
 
   {
     "ibhagwan/fzf-lua",
+    event = "VeryLazy",
     keys = {
       { "<leader>,",  ":FzfLua files<cr>", desc = "Find files" },
       { "<leader>ca", ":FzfLua lsp_code_actions<cr>", desc = "Code actions" },
