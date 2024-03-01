@@ -66,6 +66,7 @@ local plugins = {
     "ibhagwan/fzf-lua",
     keys = {
       { "<leader>,",  ":FzfLua files<cr>", desc = "Find files" },
+      { "<leader>ca", ":FzfLua lsp_code_actions<cr>", desc = "Code actions" },
       { "<leader>bb", ":FzfLua buffers<cr>", desc = "Find buffers" },
       { "<leader>fd", ":FzfLua grep<cr> def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
       { "<leader>ff", ":FzfLua grep<cr>", desc = "Grep" },
@@ -381,7 +382,6 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- Keymaps: misc
 vim.keymap.set({ "", "i" }, "<C-s>", "<esc>:w<cr>")
 
-vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code actions menu" })
 vim.keymap.set("n", "<leader>mv", RenameFile, { desc = "Rename file" })
 vim.keymap.set("n", "<leader>nh", ":nohl<cr>", { desc = "No highlight" })
 vim.keymap.set("n", "<leader>o", ":only<cr>", { desc = "Only keep current pane" })
