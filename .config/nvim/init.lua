@@ -70,6 +70,7 @@ local plugins = {
       { "<leader>fd", ":FzfLua grep<cr> def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
       { "<leader>ff", ":FzfLua grep<cr>", desc = "Grep" },
       { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
+      { "<leader>gr", ":FzfLua lsp_references<cr>", desc = "LSP references" },
     },
   },
 
@@ -131,20 +132,6 @@ local plugins = {
         }
       })
     end,
-  },
-
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-    },
-    keys = {
-      {
-        "<leader>gr",
-        function () require("telescope.builtin").lsp_references({ show_line = false }) end,
-        desc = "Find references in telescope",
-      },
-    }
   },
 
   {
