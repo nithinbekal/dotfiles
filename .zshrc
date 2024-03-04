@@ -13,7 +13,7 @@ export LC_ALL="en_US.UTF-8"
 
 ssh-add &>/dev/null
 
-git_fetch_and_checkout() { git fetch origin "$1" && git checkout "$1" }
+gfco() { git fetch origin "$1" && git checkout "$1" }
 
 # USAGE: git-churn --since='6 months ago' .
 #
@@ -60,7 +60,6 @@ alias gco='git checkout'
 alias gd='git diff'
 alias gdm="git diff main"
 alias ggpull='git pull origin $(git_current_branch)'
-alias gfco='git_fetch_and_checkout'
 alias gfp='git push origin $(git_current_branch) --force-with-lease'
 alias glg='git log --stat'
 alias glog='git log --oneline --decorate --graph'
