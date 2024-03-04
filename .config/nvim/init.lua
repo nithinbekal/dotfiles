@@ -71,6 +71,7 @@ local plugins = {
       { "<leader>bb", ":FzfLua buffers<cr>", desc = "Find buffers" },
       { "<leader>fd", ":FzfLua grep<cr> def <C-r><C-w><cr>", desc = "Search for ruby method definition" },
       { "<leader>ff", ":FzfLua grep<cr>", desc = "Grep" },
+      { "<leader>fr", ":FzfLua resume<cr>", desc = "Resume search" },
       { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
       { "<leader>gr", ":FzfLua lsp_references<cr>", desc = "LSP references" },
     },
