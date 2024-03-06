@@ -156,7 +156,6 @@ local plugins = {
   { "tpope/vim-bundler", ft = { "ruby", "eruby" } },
   { "tpope/vim-commentary", event = "VeryLazy" },
   { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
-  { "stevearc/dressing.nvim", opts = {} },
 
   {
     "tpope/vim-fugitive",
