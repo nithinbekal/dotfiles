@@ -75,6 +75,9 @@ local plugins = {
       { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
       { "<leader>gr", ":FzfLua lsp_references<cr>", desc = "LSP references" },
     },
+    config = function()
+      require("fzf-lua").setup({ files = { previewer = "max-perf" } })
+    end,
   },
 
   {
