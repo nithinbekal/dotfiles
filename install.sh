@@ -35,6 +35,18 @@ do
   link_file ~/dotfiles/$file ~/$file
 done
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  if ! which brew > /dev/null; then
+    current_status "Installing homebrew"
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  fi;
+
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+
+  current_status "Installing via brew"
+  brew install -q neovim fzf ripgrep
+fi
+
 current_status "Linking .vim directory"
 
 mkdir -p ~/.vim
@@ -48,17 +60,5 @@ link_file ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.
 current_status "Installing lazy.nvim for neovim"
 
 nvim --headless "+Lazy! sync" +qa
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  if ! which brew > /dev/null; then
-    current_status "Installing homebrew"
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  fi;
-
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-
-  current_status "Installing via brew"
-  brew install -q neovim fzf ripgrep
-fi
 
 current_status "Installation successful 🚀"
