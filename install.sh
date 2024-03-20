@@ -45,6 +45,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
   current_status "Installing via brew"
   brew install -q neovim fzf ripgrep
+
+  brew tap homebrew/cask-fonts
+  brew install --cask font-fira-code-nerd-font
 fi
 
 current_status "Linking .vim directory"
