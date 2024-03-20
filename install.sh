@@ -64,4 +64,10 @@ current_status "Installing lazy.nvim for neovim"
 
 nvim --headless "+Lazy! sync" +qa
 
+current_status "Remapping caps lock to escape"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029}]}'
+fi
+
 current_status "Installation successful 🚀"
