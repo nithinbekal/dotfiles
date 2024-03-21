@@ -195,6 +195,23 @@ local plugins = {
 
   { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
   "wsdjeg/vim-fetch",
+
+  {
+    "zbirenbaum/copilot-cmp",
+    event = "InsertEnter",
+    config = function () require("copilot_cmp").setup() end,
+    dependencies = {
+      "zbirenbaum/copilot.lua",
+      cmd = "Copilot",
+      config = function()
+        require("copilot").setup({
+          suggestion = { enabled = false },
+          panel = { enabled = false },
+        })
+      end,
+    },
+  },
+
 }
 
 if vim.env.SPIN == "1" then
@@ -283,6 +300,7 @@ cmp.setup {
     end, { "i", "s" }),
   },
   sources = {
+    { name = "copilot" },
     { name = "nvim_lsp" },
     { name = "luasnip" },
   },
