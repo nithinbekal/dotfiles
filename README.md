@@ -10,13 +10,6 @@ git clone git@github.com:nithinbekal/dotfiles.git
 cd dotfiles
 ./install.sh
 ```
-
-### Map Esc to Caps Lock (macOS)
-
-Since macOS Sierra (10.12):
-
-- System Preferences > Keyboard > Modifier keys: Set Caps Lock to Escape.
-
 ### Fonts
 
 I use Fira Code, patched by [Nerd Fonts](https://www.nerdfonts.com/).
