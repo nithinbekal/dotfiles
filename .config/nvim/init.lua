@@ -403,9 +403,8 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 
 -- Keymaps: misc
 vim.keymap.set({ "", "i" }, "<C-s>", "<esc>:w<cr>")
-
+vim.keymap.set("n", "<Esc>", ":nohlsearch<cr>", { desc = "Remove search highlight"})
 vim.keymap.set("n", "<leader>mv", RenameFile, { desc = "Rename file" })
-vim.keymap.set("n", "<leader>nh", ":nohl<cr>", { desc = "No highlight" })
 vim.keymap.set("n", "<leader>o", ":only<cr>", { desc = "Only keep current pane" })
 vim.keymap.set("n", "<leader>pp", '"+p', { desc = "Paste from clipboard" })
 vim.keymap.set("n", "<leader>q", ":bd<cr>", { desc = "Close buffer" })
