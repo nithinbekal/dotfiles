@@ -371,6 +371,11 @@ function RenameFile()
   end
 end
 
+vim.api.nvim_create_autocmd("VimResized", {
+  command = "wincmd =",
+  desc = "Automatically resize splits when window is resized",
+})
+
 -- Commonly mistyped commands
 vim.api.nvim_create_user_command("Q", "q", {})
 vim.api.nvim_create_user_command("Qa", "qa", {})
