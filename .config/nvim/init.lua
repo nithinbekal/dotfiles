@@ -65,6 +65,7 @@ local plugins = {
   {
     "ibhagwan/fzf-lua",
     event = "VeryLazy",
+    opts = { files = { previewer = "max-perf" } },
     keys = {
       { "<leader>,",  ":FzfLua files<cr>", desc = "Find files" },
       { "<leader>ca", ":FzfLua lsp_code_actions<cr>", desc = "Code actions" },
@@ -73,12 +74,8 @@ local plugins = {
       { "<leader>ff", ":FzfLua grep<cr>", desc = "Grep" },
       { "<leader>fr", ":FzfLua resume<cr>", desc = "Resume search" },
       { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
-
       { "gr", ":FzfLua lsp_references<cr>", desc = "LSP references" },
     },
-    config = function()
-      require("fzf-lua").setup({ files = { previewer = "max-perf" } })
-    end,
   },
 
   {
