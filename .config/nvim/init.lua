@@ -73,7 +73,8 @@ local plugins = {
       { "<leader>ff", ":FzfLua grep<cr>", desc = "Grep" },
       { "<leader>fr", ":FzfLua resume<cr>", desc = "Resume search" },
       { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
-      { "<leader>gr", ":FzfLua lsp_references<cr>", desc = "LSP references" },
+
+      { "gr", ":FzfLua lsp_references<cr>", desc = "LSP references" },
     },
     config = function()
       require("fzf-lua").setup({ files = { previewer = "max-perf" } })
@@ -400,7 +401,6 @@ vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnos
 
 vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover documentation" })
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
-vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Go to references" })
 
 -- Keymaps: Remap for dealing with word wrap
 vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
