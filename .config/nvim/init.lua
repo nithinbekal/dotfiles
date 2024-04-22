@@ -221,7 +221,7 @@ require("lazy").setup(plugins)
 -- LSP setup
 
 local servers = {
-  ruby_ls = {},
+  ruby_lsp = {},
   sorbet = {},
   lua_ls = {
     Lua = {
