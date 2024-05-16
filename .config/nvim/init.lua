@@ -87,7 +87,7 @@ local plugins = {
       { "<leader>tc", ":Tclear<cr>", desc = "Clear terminal" },
       { "<leader>to", ":Ttoggle<cr>", desc = "Toggle terminal" },
       { "<leader>tl", ":w<cr>:T dev test --include-branch-commits<cr>", desc = "Test local changes" },
-      { "<leader>ty", ":w<cr>:T srb typecheck<cr>", desc = "Sorbet typecheck" },
+      { "<leader>ty", ":w<cr>:T bin/srb typecheck<cr>", desc = "Sorbet typecheck" },
     },
   },
 
