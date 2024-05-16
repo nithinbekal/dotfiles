@@ -94,7 +94,7 @@ local plugins = {
   {
     "lewis6991/gitsigns.nvim",
     config = function()
-      require("gitsigns").setup()
+      require("gitsigns").setup({ signcolumn = false, numhl = true})
     end,
     event = { "CursorHold", "CursorHoldI" },
     keys = {
