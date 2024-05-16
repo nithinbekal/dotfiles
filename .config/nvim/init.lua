@@ -50,8 +50,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-  { "catlee/pull_diags.nvim", event = "LspAttach", opts = {} },
-
   {
     "hrsh7th/nvim-cmp",
     dependencies = {
