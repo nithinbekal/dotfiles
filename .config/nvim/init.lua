@@ -391,8 +391,9 @@ vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l")
 vim.keymap.set("t", "<C-o>", "<C-\\><C-n>")
 
 -- LSP and diagnostics
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
+vim.keymap.set("n", "[d", function() vim.diagnostic.goto_prev({ float = true }) end, { desc = "Diagnostics: prev" })
+vim.keymap.set("n", "]d", function() vim.diagnostic.goto_next({ float = true }) end, { desc = "Diagnostics: next" })
+
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
 
 -- Keymaps: Remap for dealing with word wrap
