@@ -10,15 +10,6 @@ git clone git@github.com:nithinbekal/dotfiles.git
 cd dotfiles
 ./install.sh
 ```
-### Fonts
-
-I use Fira Code, patched by [Nerd Fonts](https://www.nerdfonts.com/).
-To install it:
-
-```bash
-brew tap homebrew/cask-fonts
-brew install font-fira-code-nerd-font
-```
 
 ### iTerm settings
 
