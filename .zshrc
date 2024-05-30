@@ -26,14 +26,8 @@ git-churn() {
     | awk 'BEGIN {print "count\tfile"} {print $1 "\t" $2}'
 }
 
-# Usage:
-#       prs foo # opens PRs from foo
-#       prs     # opens my PRs
-#
-prs() {
-  local author=${1:-nithinbekal}
-  open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${author}+org%3Ashopify+archived%3Afalse+-repo%3Ashopify%2Ftheme-app-audit"
-}
+# Open prs by author (defaults to @me)
+prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
 
 # Spin up current branch
 #
