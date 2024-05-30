@@ -30,11 +30,7 @@ git-churn() {
 prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
 
 # Spin up current branch
-#
-function sucb() {
-  local current_branch=$(git rev-parse --abbrev-ref HEAD)
-  spin up shopify --name ${current_branch} -c shopify.branch=${current_branch}
-}
+function sucb() { spin up shopify --name ${git_current_branch} -c shopify.branch=${git_current_branch} }
 
 # Aliases
 
