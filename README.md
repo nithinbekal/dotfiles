@@ -39,10 +39,7 @@ the following settings need to be changed in iTerm
     - Report mouse wheel events: true
     - Everything else: false
 
-### VS Code and Sublime
-
-My config for VS Code and Sublime are in `editors/`, but these are not
-automatically installed.
+### VS Code
 
 VS Code has problems with repeated keystrokes with the vim plugin on MacOS,
 ([details](https://wesleywiser.github.io/post/vscode-vim-repeat-osx/))
