@@ -73,6 +73,7 @@ local plugins = {
       { "<leader>fr", ":FzfLua resume<cr>", desc = "Resume search" },
       { "<leader>fw", ":FzfLua grep_cword<cr>", desc = "Grep for word under cursor" },
       { "<leader>lds", ":FzfLua lsp_document_symbols<cr>", desc = "Document symbols" },
+      { "<leader>wd", ":FzfLua lsp_workspace_diagnostics<cr>", desc = "Workspace diagnostics" },
       { "gr", ":FzfLua lsp_references<cr>", desc = "LSP references" },
     },
   },
