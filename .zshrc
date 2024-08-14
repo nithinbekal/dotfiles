@@ -26,6 +26,11 @@ git-churn() {
     | awk 'BEGIN {print "count\tfile"} {print $1 "\t" $2}'
 }
 
+# Kill process running on a port
+# USAGE: killport 3000
+#
+killport() { kill -9 $(lsof -t -i:$1) 2>/dev/null }
+
 # Open prs by author (defaults to @me)
 prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
 
