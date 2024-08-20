@@ -307,12 +307,9 @@ cmp.setup {
 }
 
 require("nvim-treesitter.configs").setup {
-  ensure_installed = { "lua", "ruby" },
+  ensure_installed = { "lua", "ruby", "vimdoc" },
   auto_install = false,
-  highlight = {
-    disable = { "vimdoc" },
-    enable = true,
-  },
+  highlight = { enable = true, },
   hidesig = {
     enable = true,
     opacity = 0.5,
