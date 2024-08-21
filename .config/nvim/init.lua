@@ -144,6 +144,50 @@ local plugins = {
       "nvim-treesitter/nvim-treesitter-textobjects",
       "omnisyle/nvim-hidesig",
     },
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = { "lua", "ruby", "vimdoc" },
+        auto_install = false,
+        highlight = { enable = true, },
+        hidesig = {
+          enable = true,
+          opacity = 0.5,
+          delay = 200,
+        },
+        textobjects = {
+          select = {
+            enable = true,
+            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+            keymaps = {
+              ["af"] = "@function.outer",
+              ["if"] = "@function.inner",
+              ["ac"] = "@class.outer",
+              ["ic"] = "@class.inner",
+            },
+          },
+          move = {
+            enable = true,
+            set_jumps = true, -- whether to set jumps in the jumplist
+            goto_next_start = {
+              ["]m"] = "@function.outer",
+              ["]]"] = "@class.outer",
+            },
+            goto_next_end = {
+              ["]M"] = "@function.outer",
+              ["]["] = "@class.outer",
+            },
+            goto_previous_start = {
+              ["[m"] = "@function.outer",
+              ["[["] = "@class.outer",
+            },
+            goto_previous_end = {
+              ["[M"] = "@function.outer",
+              ["[]"] = "@class.outer",
+            },
+          },
+        },
+      })
+    end,
     build = ":TSUpdate",
   },
 
@@ -305,50 +349,6 @@ cmp.setup {
     return vim.api.nvim_buf_get_option(0, "filetype") ~= "markdown"
   end,
 }
-
-require("nvim-treesitter.configs").setup {
-  ensure_installed = { "lua", "ruby", "vimdoc" },
-  auto_install = false,
-  highlight = { enable = true, },
-  hidesig = {
-    enable = true,
-    opacity = 0.5,
-    delay = 200,
-  },
-  textobjects = {
-    select = {
-      enable = true,
-      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-      keymaps = {
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner",
-      },
-    },
-    move = {
-      enable = true,
-      set_jumps = true, -- whether to set jumps in the jumplist
-      goto_next_start = {
-        ["]m"] = "@function.outer",
-        ["]]"] = "@class.outer",
-      },
-      goto_next_end = {
-        ["]M"] = "@function.outer",
-        ["]["] = "@class.outer",
-      },
-      goto_previous_start = {
-        ["[m"] = "@function.outer",
-        ["[["] = "@class.outer",
-      },
-      goto_previous_end = {
-        ["[M"] = "@function.outer",
-        ["[]"] = "@class.outer",
-      },
-    },
-  },
-}
-
 
 vim.diagnostic.config({
   underline = { severity = { max = vim.diagnostic.severity.INFO } },
