@@ -8,6 +8,12 @@ vim.opt.colorcolumn = "120"           -- Show vertical bar to indicate 120 chars
 vim.opt.cursorline = true             -- Highlight the cursor line
 vim.opt.expandtab = true              -- Use spaces to insert a tab
 vim.opt.fillchars = "eob: "           -- Hide ~ in line number column after end of buffer
+
+-- Use treesitter for folding
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldenable = false
+
 vim.opt.grepprg = "rg --vimgrep"      -- Use ripgrep for file search
 vim.opt.laststatus = 2                -- Always show status line
 vim.opt.list = true                   -- Show tabs and trailing whitespace
