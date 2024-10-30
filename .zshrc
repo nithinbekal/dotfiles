@@ -84,3 +84,6 @@ if [ -e /Users/nithinbekal/.nix-profile/etc/profile.d/nix.sh ]; then . /Users/ni
 [[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
 
 [[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
+
+# Source OpenAI config for avante.nvim
+[ -f ~/.openairc ] && source ~/.openairc

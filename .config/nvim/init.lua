@@ -253,6 +253,35 @@ local plugins = {
   "wsdjeg/vim-fetch",
 
   {
+    "yetone/avante.nvim",
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+      "stevearc/dressing.nvim",
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      {
+        "MeanderingProgrammer/render-markdown.nvim",
+        opts = {
+          file_types = { "markdown", "Avante" },
+        },
+        ft = { "markdown", "Avante" },
+      },
+    },
+    build = "make",
+    opts = {
+      provider = "openai",
+      openai = {
+        endpoint = os.getenv("OPENAI_API_CHAT_COMPLETIONS"),
+        model = "anthropic:claude-3-5-sonnet",
+        timeout = 30000,
+        temperature = 0,
+        max_tokens = 4096,
+        ["local"] = false,
+      },
+    },
+  },
+
+  {
     "zbirenbaum/copilot-cmp",
     event = "InsertEnter",
     config = function () require("copilot_cmp").setup() end,
