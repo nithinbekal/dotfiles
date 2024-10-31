@@ -148,7 +148,7 @@ local plugins = {
     "nvim-treesitter/nvim-treesitter",
     dependencies = {
       "nvim-treesitter/nvim-treesitter-textobjects",
-      "omnisyle/nvim-hidesig",
+      { "nithinbekal/nvim-hidesig", branch = "type-alias" },
     },
     config = function()
       require("nvim-treesitter.configs").setup({
