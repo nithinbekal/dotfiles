@@ -1,7 +1,6 @@
 # Nithin Bekal's dotfiles
 
-This repo will contain the dot files I use to configure my system. The
-[bin](bin) directory contains some utility scripts that get copied to `~/.bin`.
+This repo will contain the dotfiles I use to configure my computers.
 
 ## Install
 
@@ -13,7 +12,7 @@ cd dotfiles
 
 ### iTerm settings
 
-After running ./install.sh on a new computer,
+After running `./install.sh` on a new computer,
 the following settings need to be changed in iTerm
 
 - General > Window
