@@ -63,20 +63,14 @@ alias gst='git status'
 alias gsta='git stash'
 alias gstp='git stash pop'
 
-if [ -f $HOME/.fzf.zsh ]; then
-  . $HOME/.fzf.zsh
-fi
-
 if [ -f $HOME/.asdf/asdf.sh ]; then
   . $HOME/.asdf/asdf.sh
   . $HOME/.asdf/completions/asdf.bash
 fi
 
 [ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
-
-[[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.openairc ] && source ~/.openairc # Source OpenAI config for avante.nvim
+[ -f /opt/dev/sh/chruby/chruby.sh ] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
 
 [[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
-
-# Source OpenAI config for avante.nvim
-[ -f ~/.openairc ] && source ~/.openairc
