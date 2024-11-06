@@ -48,6 +48,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
   brew tap homebrew/cask-fonts
   brew install --cask font-fira-code-nerd-font
+
+  # Fix VS Code has problems with repeated keystrokes with the vim plugin
+  # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
+  defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 fi
 
 current_status "Linking .vim directory"
