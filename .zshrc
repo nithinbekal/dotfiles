@@ -11,8 +11,6 @@ export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-ssh-add &>/dev/null
-
 gfco() { git fetch origin "$1" && git checkout "$1" }
 
 # USAGE: git-churn --since='6 months ago' .
