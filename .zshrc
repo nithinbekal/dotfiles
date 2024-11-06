@@ -39,8 +39,6 @@ function sucb() { spin up shopify --name ${git_current_branch} -c shopify.branch
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
-alias blog="cd ~/src/nithinbekal.github.io"
-alias dokku='bash $HOME/.dokku/contrib/dokku_client.sh --rm'
 alias dotf="cd ~/dotfiles"
 alias v="nvim"
 
@@ -54,7 +52,6 @@ alias gd='git diff'
 alias gdm="git diff main"
 alias ggpull='git pull origin $(git_current_branch)'
 alias gfp='git push origin $(git_current_branch) --force-with-lease'
-alias glg='git log --stat'
 alias glog='git log --oneline --decorate --graph'
 alias gp='git push origin $(git_current_branch)'
 alias grc="git rebase --continue"
