@@ -32,9 +32,6 @@ killport() { kill -9 $(lsof -t -i:$1) 2>/dev/null }
 # Open prs by author (defaults to @me)
 prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
 
-# Spin up current branch
-function sucb() { spin up shopify --name ${git_current_branch} -c shopify.branch=${git_current_branch} }
-
 # Aliases
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
