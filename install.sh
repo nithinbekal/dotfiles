@@ -76,4 +76,7 @@ current_status "Installing lazy.nvim for neovim"
 
 nvim --headless "+Lazy! sync" +qa
 
+current_status "Setting up IRB config"
+link_file ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
+
 current_status "Installation successful 🚀"
