@@ -72,6 +72,11 @@ current_status "Remapping caps lock to escape"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029}]}'
+
+  # https://stratus3d.com/blog/2015/02/28/sync-iterm2-profile-with-dotfiles-repository/
+  current_status "Setting iTerm2 to read prefs from dotfiles"
+  defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "~/dotfiles/iterm2"
+  defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
 fi
 
 current_status "Installation successful 🚀"
