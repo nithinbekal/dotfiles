@@ -45,8 +45,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
   current_status "Installing via brew"
   brew install -q neovim fzf ripgrep
-
-  brew tap homebrew/cask-fonts
   brew install --cask font-fira-code-nerd-font
 
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
