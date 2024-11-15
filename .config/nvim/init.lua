@@ -113,13 +113,6 @@ local plugins = {
   },
 
   {
-    "Mofiqul/vscode.nvim",
-    config = function()
-      require("vscode").load()
-    end,
-  },
-
-  {
     "neovim/nvim-lspconfig",
     dependencies = {
       { "williamboman/mason.nvim", config = true },
@@ -137,7 +130,7 @@ local plugins = {
       require("lualine").setup({
         options = {
           icons_enabled = true,
-          theme = "vscode",
+          theme = "onedark",
           path = 1, -- show relative file path
         }
       })
@@ -195,6 +188,12 @@ local plugins = {
       })
     end,
     build = ":TSUpdate",
+  },
+
+  {
+    "olimorris/onedarkpro.nvim",
+    priority = 1000,
+    config = function() vim.cmd("colorscheme onedark_dark") end,
   },
 
   {
