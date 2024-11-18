@@ -1,4 +1,3 @@
---database=postgresql
 --asset-pipeline=propshaft
 --skip-jbuilder
 --skip-keeps
