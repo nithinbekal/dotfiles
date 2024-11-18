@@ -291,7 +291,6 @@ local plugins = {
           timeout = 30000,
           temperature = 0,
           max_tokens = 4096,
-          ["local"] = false,
         }
       end
       require("avante").setup(opts)
