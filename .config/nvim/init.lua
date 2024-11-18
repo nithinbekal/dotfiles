@@ -114,7 +114,7 @@ local plugins = {
 
   {
     "MeanderingProgrammer/render-markdown.nvim",
-    ft = { "markdown", "Avante" },
+    ft = { "markdown", "Avante", "codecompanion" },
   },
 
   {
@@ -193,6 +193,21 @@ local plugins = {
       })
     end,
     build = ":TSUpdate",
+  },
+
+  {
+    "olimorris/codecompanion.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim",
+      { "stevearc/dressing.nvim", opts = {} },
+    },
+    opts = {
+      strategies = {
+        chat = { adapter = "anthropic" },
+        inline = { adapter = "copilot" },
+      },
+    },
   },
 
   {
