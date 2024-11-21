@@ -4,6 +4,8 @@ DISABLE_AUTO_UPDATE="true"
 ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="robbyrussell"
 
+plugins=(asdf brew fzf)
+
 source $ZSH/oh-my-zsh.sh
 
 export EDITOR=nvim
@@ -60,15 +62,7 @@ alias gst='git status'
 alias gsta='git stash'
 alias gstp='git stash pop'
 
-if [ -f $HOME/.asdf/asdf.sh ]; then
-  . $HOME/.asdf/asdf.sh
-  . $HOME/.asdf/completions/asdf.bash
-fi
-
 [ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 [ -f ~/.openairc ] && source ~/.openairc # Source OpenAI config for avante.nvim
-
-[[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
 
 [[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
