@@ -1,0 +1,6 @@
+if [ -z "$1" ]; then
+  echo "USAGE: killport <por>"
+  exit 1
+fi
+
+kill -9 $(lsof -t -i:$1) 2>/dev/null

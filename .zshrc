@@ -13,27 +13,10 @@ export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
+export PATH=$HOME/dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 
 gfco() { git fetch origin "$1" && git checkout "$1" }
-
-# USAGE: git-churn --since='6 months ago' .
-#
-git-churn() {
-  git log --all -M -C --name-only --format='format:' "$@" \
-    | sort \
-    | grep -v '^$' \
-    | uniq -c \
-    | sort -nr \
-    | awk 'BEGIN {print "count\tfile"} {print $1 "\t" $2}'
-}
-
-# Kill process running on a port
-# USAGE: killport 3000
-#
-killport() { kill -9 $(lsof -t -i:$1) 2>/dev/null }
-
-# Open prs by author (defaults to @me)
 prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
 
 # Aliases

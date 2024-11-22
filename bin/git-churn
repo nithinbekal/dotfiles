@@ -1,0 +1,11 @@
+if [ -z "$1" ]; then
+  echo "USAGE: git-churn --since='6 months ago'"
+  exit 1
+fi
+
+git log --all -M -C --name-only --format='format:' "$@" \
+  | sort \
+  | grep -v '^$' \
+  | uniq -c \
+  | sort -nr \
+  | awk 'BEGIN {print "count\tfile"} {print $1 "\t" $2}'
