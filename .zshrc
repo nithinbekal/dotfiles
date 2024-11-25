@@ -4,7 +4,7 @@ DISABLE_AUTO_UPDATE="true"
 ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="robbyrussell"
 
-plugins=(asdf brew fzf)
+plugins=(asdf fzf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -50,4 +50,8 @@ alias gstp='git stash pop'
 [ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
 [ -f ~/.openairc ] && source ~/.openairc # Source OpenAI config for avante.nvim
 
+# The following lines are automatically added by dev. Don't touch them.
+
 [[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
+
+[[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
