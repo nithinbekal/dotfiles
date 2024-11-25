@@ -47,7 +47,8 @@ alias gst='git status'
 alias gsta='git stash'
 alias gstp='git stash pop'
 
-[ -f ~/.openairc ] && source ~/.openairc # Source OpenAI config for avante.nvim
+# This file is for stuff that varies between work and personal machines, and isn't included in the repo.
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
 # The following lines are automatically added by dev. Don't touch them.
 
