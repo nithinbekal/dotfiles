@@ -47,10 +47,11 @@ alias gst='git status'
 alias gsta='git stash'
 alias gstp='git stash pop'
 
-[ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
 [ -f ~/.openairc ] && source ~/.openairc # Source OpenAI config for avante.nvim
 
 # The following lines are automatically added by dev. Don't touch them.
+
+[ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
 
 [[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
 
