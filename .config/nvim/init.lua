@@ -202,6 +202,7 @@ local plugins = {
       "nvim-telescope/telescope.nvim",
       { "stevearc/dressing.nvim", opts = {} },
     },
+    event = "VeryLazy",
     opts = {
       strategies = {
         chat = { adapter = "anthropic" },
@@ -280,6 +281,7 @@ local plugins = {
       "MunifTanjim/nui.nvim",
     },
     build = "make",
+    event = "VeryLazy",
     config = function()
       local opts = { provider = "copilot" }
       local openai_api_url = os.getenv("OPENAI_API_CHAT_COMPLETIONS")
@@ -288,6 +290,7 @@ local plugins = {
         opts.openai = {
           endpoint = openai_api_url,
           model = "anthropic:claude-3-5-sonnet",
+          api_key_name = "cmd:openai-proxy-key cat",
           timeout = 30000,
           temperature = 0,
           max_tokens = 4096,
