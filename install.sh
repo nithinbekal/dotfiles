@@ -47,6 +47,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   brew install -q neovim fzf ripgrep
   brew install --cask font-fira-code-nerd-font
 
+  current_status "Setting up tmux"
+  brew install tmux
+  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
