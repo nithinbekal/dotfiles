@@ -50,6 +50,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Setting up tmux"
   brew install tmux
   git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+  link_file ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
 
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
