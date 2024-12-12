@@ -44,8 +44,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 
   current_status "Installing via brew"
-  brew install -q neovim fzf ripgrep
-  brew install --cask font-fira-code-nerd-font
+  brew install -q neovim fzf ripgrep MonitorControl font-fira-code-nerd-font
 
   current_status "Setting up tmux"
   brew install tmux
