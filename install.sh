@@ -62,6 +62,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Setting iTerm2 preferences directory"
   defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "~/dotfiles/iterm2"
   defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
+
+  current_status "Setting up Ghostty config"
+  link_file ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
 fi
 
 current_status "Linking .vim directory"
