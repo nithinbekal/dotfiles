@@ -69,7 +69,7 @@ local plugins = {
   {
     "ibhagwan/fzf-lua",
     event = "VeryLazy",
-    opts = { files = { previewer = "max-perf" } },
+    opts = { files = { previewer = "telescope" } },
     keys = {
       { "<leader>,",  ":FzfLua files<cr>", desc = "Find files" },
       { "<leader>ca", ":FzfLua lsp_code_actions<cr>", desc = "Code actions" },
@@ -477,3 +477,4 @@ vim.keymap.set("n", "<leader>q", "<C-w>c", { desc = "Close buffer" })
 vim.keymap.set("n", "<leader>rm", ":!rm %", { desc = "Remove file" })
 vim.keymap.set("n", "<leader>vv", ":vnew<cr>", { desc = "New vertical split" })
 vim.keymap.set("v", "<leader>yy", '"+y', { desc = "Copy to clipboard" })
+vim.keymap.set("n", "glf", 'yaW<C-w><C-h>:e <C-r>"<cr>', { desc = "Open file in left split" })
