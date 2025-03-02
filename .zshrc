@@ -22,8 +22,6 @@ autoload -U compinit; compinit # Initialize completion
 
 export EDITOR=nvim # Set the editor to neovim
 export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"' # Set the default command for fzf
-export LANG="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
 
 export PATH=$HOME/dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
