@@ -1,15 +1,27 @@
+# Enable persistent history
+HISTFILE=~/.zsh_history
+HISTSIZE=100000
+SAVEHIST=100000
 
-# oh-my-zsh config
-DISABLE_AUTO_UPDATE="true"
-ZSH=$HOME/.oh-my-zsh
-ZSH_THEME="robbyrussell"
+setopt HIST_SAVE_NO_DUPS
+setopt INC_APPEND_HISTORY
 
-plugins=(asdf fzf)
+# Use the up and down keys to navigate the history
+bindkey "\e[A" history-beginning-search-backward
+bindkey "\e[B" history-beginning-search-forward
 
-source $ZSH/oh-my-zsh.sh
+# Home and End keys
+bindkey "^[[H"  beginning-of-line
+bindkey "^[[F"  end-of-line
+bindkey "^[[1~" beginning-of-line
+bindkey "^[[4~" end-of-line
 
-export EDITOR=nvim
-export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
+setopt autocd # Move to diretories without cd
+
+autoload -U compinit; compinit # Initialize completion
+
+export EDITOR=nvim # Set the editor to neovim
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"' # Set the default command for fzf
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
@@ -57,3 +69,7 @@ alias gstp='git stash pop'
 [[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
 
 [[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
+
+source <(fzf --zsh)
+
+eval "$(starship init zsh)"
