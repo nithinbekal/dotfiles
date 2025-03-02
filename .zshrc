@@ -28,9 +28,6 @@ export LC_ALL="en_US.UTF-8"
 export PATH=$HOME/dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 
-gfco() { git fetch origin "$1" && git checkout "$1" }
-prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
-
 # Aliases
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
@@ -38,7 +35,11 @@ alias bx="bundle exec"
 alias dotf="cd ~/dotfiles"
 alias v="nvim"
 
-# Git Aliases
+# Git functions and aliases
+
+git_current_branch() { git branch --show-current 2>/dev/null }
+gfco() { git fetch origin "$1" && git checkout "$1" }
+prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
 
 alias g='git'
 alias gbd='git branch -d'
