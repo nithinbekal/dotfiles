@@ -74,3 +74,4 @@ alias gstp='git stash pop'
 source <(fzf --zsh)
 
 eval "$(starship init zsh)"
+eval "$(mise activate zsh)"
