@@ -17,13 +17,6 @@ if [ $SPIN ]; then
   sudo apt-get install -y neovim ripgrep
 fi
 
-current_status "Installing ohmyzsh"
-if [ -d ~/.oh-my-zsh ]; then
-  current_status "Found ~/.oh-my-zsh - skipping this step"
-else
-  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-fi
-
 current_status "Installing dotfiles"
 
 dotfiles=(.gemrc .railsrc .vimrc .zshrc)
