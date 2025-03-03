@@ -443,6 +443,13 @@ vim.api.nvim_create_user_command("Q", "q", {})
 vim.api.nvim_create_user_command("Qa", "qa", {})
 vim.api.nvim_create_user_command("Wq", "wq", {})
 
+-- Custom Ed command to strip areas/core/<something>/ prefix
+vim.api.nvim_create_user_command("Ed", function(opts)
+  local path = opts.args
+  local stripped = path:gsub("^areas/core/[^/]+/", "")
+  vim.cmd("edit " .. stripped)
+end, { nargs = 1, complete = "file" })
+
 -- Keymaps: Navigation
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
