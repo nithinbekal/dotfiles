@@ -34,9 +34,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   brew bundle --file=~/dotfiles/Brewfile
 
   current_status "Setting up tmux"
-  mkdir -p ~/.config/tmux
   mkdir -p ~/.config/tmux/plugins
-  git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+  [ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
   ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
 
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
@@ -58,7 +57,6 @@ fi
 
 current_status "Linking .vim directory"
 
-mkdir -p ~/.vim
 mkdir -p ~/.vim/tmp
 
 current_status "Setting up Neovim config"
