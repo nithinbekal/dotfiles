@@ -16,8 +16,8 @@ setopt INC_APPEND_HISTORY
 bindkey -e # Enable Emacs keybindings
 
 # Use the up and down keys to navigate the history
-bindkey "\e[A" history-beginning-search-backward
-bindkey "\e[B" history-beginning-search-forward
+bindkey "\e[A" history-search-backward
+bindkey "\e[B" history-search-forward
 
 # Home and End keys
 bindkey "^[[H"  beginning-of-line
