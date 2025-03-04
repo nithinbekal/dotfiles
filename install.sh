@@ -6,12 +6,6 @@ current_status() {
   printf "\e[33m⭑\e[0m %s\n" "$1"
 }
 
-link_file() {
-  local src=$1 dst=$2
-  mkdir -p "$(dirname "$dst")"
-  ln -sf "$src" "$dst"
-}
-
 if [ $SPIN ]; then
   current_status "Installing packages"
   sudo apt-get install -y neovim ripgrep
@@ -25,7 +19,7 @@ for file in "${dotfiles[@]}"
 do
   current_status "Linking ${file}"
   rm -f ~/$file
-  link_file ~/dotfiles/$file ~/$file
+  ln -sf ~/dotfiles/$file ~/$file
 done
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -40,8 +34,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   brew bundle --file=~/dotfiles/Brewfile
 
   current_status "Setting up tmux"
+  mkdir -p ~/.config/tmux
+  mkdir -p ~/.config/tmux/plugins
   git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
-  link_file ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
+  ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
 
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
@@ -56,7 +52,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
 
   current_status "Setting up Ghostty config"
-  link_file ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
+  mkdir -p ~/.config/ghostty
+  ln -sf ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
 fi
 
 current_status "Linking .vim directory"
@@ -66,14 +63,16 @@ mkdir -p ~/.vim/tmp
 
 current_status "Setting up Neovim config"
 
-link_file ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
-link_file ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
+mkdir -p ~/.config/nvim
+ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
+ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 
 current_status "Installing lazy.nvim for neovim"
 
 nvim --headless "+Lazy! sync" +qa
 
 current_status "Setting up IRB config"
-link_file ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
+mkdir -p ~/.config/irb
+ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
 
 current_status "Installation successful 🚀"
