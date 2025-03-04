@@ -2,8 +2,8 @@
 brew "fzf"
 brew "mise"
 brew "neovim"
+brew "powerlevel10k"
 brew "ripgrep"
-brew "starship"
 brew "tmux"
 
 cask "font-fira-code-nerd-font"
