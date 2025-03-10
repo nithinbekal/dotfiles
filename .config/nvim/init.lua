@@ -69,7 +69,10 @@ local plugins = {
   {
     "ibhagwan/fzf-lua",
     event = "VeryLazy",
-    opts = { files = { previewer = "telescope" } },
+    opts = {
+      files = { previewer = "telescope" },
+      buffers = { no_term_buffers = true },
+    },
     keys = {
       { "<leader>,",  ":FzfLua files<cr>", desc = "Find files" },
       { "<leader>ca", ":FzfLua lsp_code_actions<cr>", desc = "Code actions" },
