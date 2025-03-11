@@ -1,9 +1,3 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
 
 # Enable persistent history
 HISTFILE=~/.zsh_history
@@ -70,6 +64,14 @@ alias gstp='git stash pop'
 # This file is for stuff that varies between work and personal machines, and isn't included in the repo.
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
+# Simple custom prompt with path and git branch
+autoload -Uz vcs_info
+precmd() { vcs_info }
+zstyle ':vcs_info:git:*' formats ' %b'
+setopt prompt_subst
+PROMPT='%F{blue}%B%~%b%f%F{240} %F{green}${vcs_info_msg_0_}%f
+%F{magenta}❯%f '
+
 # The following lines are automatically added by dev. Don't touch them.
 
 [ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
@@ -81,7 +83,3 @@ alias gstp='git stash pop'
 source <(fzf --zsh)
 
 eval "$(mise activate zsh)"
-
-source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme
-# To customize prompt, run `p10k configure` or edit ~/dotfiles/.config/powerlevel10k/p10k.zsh.
-[[ ! -f ~/dotfiles/.config/powerlevel10k/p10k.zsh ]] || source ~/dotfiles/.config/powerlevel10k/p10k.zsh
