@@ -8,9 +8,12 @@ setopt INC_APPEND_HISTORY
 
 bindkey -e # Enable Emacs keybindings
 
-# Use the up and down keys for prefix-based history search
-bindkey "^[[A" history-beginning-search-backward
-bindkey "^[[B" history-beginning-search-forward
+# History search - place cursor at end of line
+autoload -U history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "^[[A" history-beginning-search-backward-end
+bindkey "^[[B" history-beginning-search-forward-end
 
 # Home and End keys
 bindkey "^[[H"  beginning-of-line
