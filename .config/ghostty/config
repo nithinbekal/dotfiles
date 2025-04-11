@@ -1,9 +1,9 @@
 adjust-cell-height = 20%
-font-family = "FiraCode Nerd Font"
-font-size = 14
+font-family = "MesloLGS NF"
+font-size = 13
 copy-on-select = clipboard
 macos-non-native-fullscreen = true
 macos-titlebar-style = tabs
-theme = vesper
+theme = OneHalfDark
 window-colorspace = "display-p3"
 window-save-state = always
