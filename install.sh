@@ -25,10 +25,15 @@ done
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if ! which brew > /dev/null; then
     current_status "Installing homebrew"
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi;
 
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+  # Intel and M-series macs have different brew paths
+  if [[ "$(uname -m)" == "arm64" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  else
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
 
   current_status "Installing dependencies via Brewfile"
   brew bundle --file=~/dotfiles/Brewfile
