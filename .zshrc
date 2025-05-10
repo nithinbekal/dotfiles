@@ -35,7 +35,7 @@ export PATH=$HOME/.local/bin:$PATH
 
 alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
-alias dotf="cd ~/dotfiles"
+alias dotf="cursor ~/dotfiles"
 alias v="nvim"
 
 # Git functions and aliases
