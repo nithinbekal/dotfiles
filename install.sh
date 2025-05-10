@@ -72,7 +72,7 @@ ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.jso
 
 current_status "Installing lazy.nvim for neovim"
 
-nvim --headless "+Lazy! sync" +qa
+nvim --headless "+Lazy! sync" +qa > /dev/null 2>&1
 
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
