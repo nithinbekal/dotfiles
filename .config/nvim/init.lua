@@ -312,13 +312,17 @@ local plugins = {
       local openai_api_url = os.getenv("OPENAI_API_CHAT_COMPLETIONS")
       if openai_api_url then
         opts.provider = "openai"
-        opts.openai = {
-          endpoint = openai_api_url,
-          model = "anthropic:claude-3-5-sonnet",
-          api_key_name = "cmd:openai-proxy-key cat",
-          timeout = 30000,
-          temperature = 0,
-          max_tokens = 4096,
+        opts.providers = {
+          openai = {
+            endpoint = openai_api_url,
+            model = "anthropic:claude-3-5-sonnet",
+            api_key_name = "cmd:openai-proxy-key cat",
+            timeout = 30000,
+            max_tokens = 4096,
+            extra_request_body = {
+              temperature = 0,
+            },
+          }
         }
       end
       require("avante").setup(opts)
