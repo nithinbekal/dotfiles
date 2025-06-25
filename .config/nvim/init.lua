@@ -126,6 +126,33 @@ local plugins = {
       { "williamboman/mason.nvim", opts = { ui = { border = "rounded" } } },
       "williamboman/mason-lspconfig.nvim",
     },
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "ruby_lsp", "sorbet", "lua_ls" },
+        automatic_enable = true,
+      })
+
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+
+      require("lspconfig").ruby_lsp.setup({ capabilities = capabilities })
+
+      require("lspconfig").sorbet.setup({
+        capabilities = capabilities,
+        root_dir = require("lspconfig.util").root_pattern("sorbet/config"),
+      })
+
+      require("lspconfig").lua_ls.setup({
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+            diagnostics = { globals = { "vim" } },
+          },
+        },
+      })
+    end,
   },
 
   {
@@ -325,44 +352,7 @@ require("lazy").setup({
   ui = { border = "rounded" },
 })
 
--- LSP setup
 
-local servers = {
-  ruby_lsp = {},
-  sorbet = {},
-  lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-      diagnostics = { globals = { "vim" } },
-    },
-  },
-}
-
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
-
-local mason_lspconfig = require("mason-lspconfig")
-
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
-
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    local config = {
-      capabilities = capabilities,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    }
-
-    if server_name == "sorbet" then
-      config.root_dir = require("lspconfig.util").root_pattern("sorbet/config")
-    end
-
-    require("lspconfig")[server_name].setup(config)
-  end
-}
 
 -- Autocomplete setup
 
