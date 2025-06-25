@@ -116,11 +116,6 @@ local plugins = {
   },
 
   {
-    "MeanderingProgrammer/render-markdown.nvim",
-    ft = { "markdown", "Avante", "codecompanion" },
-  },
-
-  {
     "neovim/nvim-lspconfig",
     dependencies = {
       { "williamboman/mason.nvim", opts = { ui = { border = "rounded" } } },
