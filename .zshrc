@@ -33,7 +33,6 @@ export PATH=$HOME/.local/bin:$PATH
 
 # Aliases
 
-alias aliases="cat ~/.zshrc | grep alias | sort | sed -e \"s/^alias\ //\" | column -t -s'='"
 alias bx="bundle exec"
 alias dotf="cursor ~/dotfiles"
 alias v="nvim"
