@@ -68,13 +68,21 @@ local plugins = {
 
   {
     "ibhagwan/fzf-lua",
-    event = "VeryLazy",
-    opts = {
-      files = { previewer = "telescope" },
-      buffers = { no_term_buffers = true },
+    dependencies = {
+      "otavioschwanck/fzf-lua-enchanted-files",
     },
+    event = "VeryLazy",
+    config = function()
+      vim.g.fzf_lua_enchanted_files = {
+        max_history_per_cwd = 50,
+      }
+      require("fzf-lua").setup({
+        files = { previewer = "telescope" },
+        buffers = { no_term_buffers = true },
+      })
+    end,
     keys = {
-      { "<leader>,",  ":FzfLua files<cr>", desc = "Find files" },
+      { "<leader>,",  ":FzfLuaFiles<cr>", desc = "Find files" },
       { "<leader>ca", ":FzfLua lsp_code_actions<cr>", desc = "Code actions" },
       { "<leader>bb", ":FzfLua buffers<cr>", desc = "Find buffers" },
       { "<leader>ds", ":FzfLua lsp_document_symbols<cr>", desc = "Document symbols" },
