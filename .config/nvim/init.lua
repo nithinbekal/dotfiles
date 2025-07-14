@@ -292,37 +292,7 @@ local plugins = {
   { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
   "wsdjeg/vim-fetch",
 
-  {
-    "yetone/avante.nvim",
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
-      "stevearc/dressing.nvim",
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-    },
-    build = "make",
-    event = "VeryLazy",
-    config = function()
-      local opts = { provider = "copilot" }
-      local openai_api_url = os.getenv("OPENAI_API_CHAT_COMPLETIONS")
-      if openai_api_url then
-        opts.provider = "openai"
-        opts.providers = {
-          openai = {
-            endpoint = openai_api_url,
-            model = "anthropic:claude-3-5-sonnet",
-            api_key_name = "cmd:openai-proxy-key cat",
-            timeout = 30000,
-            max_tokens = 4096,
-            extra_request_body = {
-              temperature = 0,
-            },
-          }
-        }
-      end
-      require("avante").setup(opts)
-    end,
-  },
+
 
   {
     "zbirenbaum/copilot-cmp",
