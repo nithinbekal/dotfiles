@@ -216,22 +216,6 @@ local plugins = {
   },
 
   {
-    "olimorris/codecompanion.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim",
-      { "stevearc/dressing.nvim", opts = {} },
-    },
-    event = "VeryLazy",
-    opts = {
-      strategies = {
-        chat = { adapter = "anthropic" },
-        inline = { adapter = "copilot" },
-      },
-    },
-  },
-
-  {
     "olimorris/onedarkpro.nvim",
     priority = 1000,
     config = function() vim.cmd("colorscheme onedark") end,
