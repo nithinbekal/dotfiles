@@ -15,7 +15,7 @@ vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt.foldenable = false
 
 vim.opt.grepprg = "rg --vimgrep"      -- Use ripgrep for file search
-vim.opt.laststatus = 3                -- Always show status line, and only last window
+vim.opt.laststatus = 2                -- Always show status line
 vim.opt.list = true                   -- Show tabs and trailing whitespace
 vim.opt.listchars = "tab:>-,trail:·"  -- Set chars to show for tabs or trailing whitespace
 vim.opt.mouse = ""                    -- Disable mouse clicks but scrolling still works
