@@ -18,6 +18,7 @@ vim.opt.grepprg = "rg --vimgrep"      -- Use ripgrep for file search
 vim.opt.laststatus = 3                -- Always show status line, and only last window
 vim.opt.list = true                   -- Show tabs and trailing whitespace
 vim.opt.listchars = "tab:>-,trail:·"  -- Set chars to show for tabs or trailing whitespace
+vim.opt.mouse = ""                    -- Disable mouse clicks but scrolling still works
 vim.opt.scrolloff = 10                -- Show next few lines when searching text
 vim.opt.shiftround = true             -- Indentation: When at 3 spaces, >> takes to 4, not 5
 vim.opt.shiftwidth = 2                -- Tab settings - Use 2 spaces for each indent level
