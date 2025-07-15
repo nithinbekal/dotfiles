@@ -1,6 +1,6 @@
 adjust-cell-height = 20%
 font-family = "MesloLGS NF"
-font-size = 13
+font-size = 12
 copy-on-select = clipboard
 macos-non-native-fullscreen = true
 macos-titlebar-style = tabs
