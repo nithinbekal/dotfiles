@@ -7,3 +7,5 @@ macos-titlebar-style = tabs
 theme = OneHalfDark
 window-colorspace = "display-p3"
 window-save-state = always
+
+keybind = cmd+v=paste_from_clipboard
