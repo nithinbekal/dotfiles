@@ -7,6 +7,7 @@ brew "ripgrep"
 brew "tmux"
 
 cask "cursor"
+cask "antigravity"
 cask "font-fira-code-nerd-font"
 cask "ghostty"
 cask "logseq"
