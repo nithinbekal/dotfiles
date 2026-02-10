@@ -35,6 +35,7 @@ export PATH=$HOME/.local/bin:$PATH
 
 alias bx="bundle exec"
 alias dotf="cursor ~/dotfiles"
+alias la="ls -lAh"
 alias v="nvim"
 
 # Git functions and aliases
