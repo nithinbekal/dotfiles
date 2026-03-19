@@ -58,6 +58,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Setting up Ghostty config"
   mkdir -p ~/.config/ghostty
   ln -sf ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
+
+  current_status "Setting up Obsidian backup"
+  mkdir -p ~/Documents/backups/obsidian
+  ln -sf ~/dotfiles/launchagents/com.nithin.obsidian-backup.plist ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
+  launchctl unload ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist 2>/dev/null || true
+  launchctl load ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
 fi
 
 current_status "Linking .vim directory"
