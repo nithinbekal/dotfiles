@@ -59,6 +59,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   mkdir -p ~/.config/ghostty
   ln -sf ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
 
+  current_status "Setting up Claude config"
+  mkdir -p ~/.claude
+  ln -sf ~/dotfiles/.claude/settings.json ~/.claude/settings.json
+  ln -sf ~/dotfiles/.claude/settings.local.json ~/.claude/settings.local.json
+  ln -sf ~/dotfiles/.claude/statusline-command.sh ~/.claude/statusline-command.sh
+
   current_status "Setting up Obsidian backup"
   mkdir -p ~/Documents/backups/obsidian
   ln -sf ~/dotfiles/launchagents/com.nithin.obsidian-backup.plist ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
