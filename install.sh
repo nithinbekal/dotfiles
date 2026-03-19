@@ -80,6 +80,10 @@ current_status "Installing lazy.nvim for neovim"
 
 nvim --headless "+Lazy! sync" +qa > /dev/null 2>&1
 
+current_status "Installing languages via mise"
+mise install ruby@latest
+mise install rust@latest
+
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
 ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
