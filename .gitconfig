@@ -1,0 +1,18 @@
+[user]
+	name = Nithin Bekal
+	email = nithinbekal@gmail.com
+
+[init]
+	defaultBranch = main
+
+[core]
+	editor = nvim
+
+[pull]
+	rebase = true
+
+[rebase]
+	autoStash = true
+
+[push]
+	autoSetupRemote = true
