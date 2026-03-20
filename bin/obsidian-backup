@@ -1,0 +1,32 @@
+#!/bin/zsh
+
+SOURCE="$HOME/Documents/Obsidian"
+DEST="$HOME/Documents/backups/obsidian"
+DATE=$(date +%Y-%m-%d)
+ZIPFILE="$DEST/$DATE.zip"
+LOGFILE="$DEST/backup.log"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOGFILE"
+}
+
+mkdir -p "$DEST"
+
+# Create today's backup (skip if already done today)
+if [ ! -f "$ZIPFILE" ]; then
+    log "Starting backup to $ZIPFILE"
+    if zip -rq "$ZIPFILE" "$SOURCE" -x "*.DS_Store" -x "__MACOSX"; then
+        log "Backup complete: $(du -sh "$ZIPFILE" | cut -f1)"
+    else
+        log "ERROR: Backup failed"
+        exit 1
+    fi
+else
+    log "Backup already exists for today, skipping"
+fi
+
+# Remove backups older than 30 days
+deleted=$(find "$DEST" -name "*.zip" -mtime +30 -print -delete)
+if [ -n "$deleted" ]; then
+    log "Removed old backups: $(echo "$deleted" | wc -l | tr -d ' ') file(s)"
+fi

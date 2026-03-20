@@ -6,8 +6,7 @@
     <string>com.nithin.obsidian-backup</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/zsh</string>
-        <string>/Users/nithin/dotfiles/scripts/obsidian-backup.sh</string>
+        <string>/Users/nithin/dotfiles/bin/obsidian-backup</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>
@@ -16,10 +15,7 @@
         <key>Minute</key>
         <integer>0</integer>
     </dict>
-    <key>StandardOutPath</key>
-    <string>/tmp/obsidian-backup.log</string>
-    <key>StandardErrorPath</key>
-    <string>/tmp/obsidian-backup.log</string>
+
     <key>RunAtLoad</key>
     <false/>
 </dict>
