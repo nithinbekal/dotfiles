@@ -90,6 +90,10 @@ current_status "Installing languages via mise"
 mise install ruby@latest
 mise install rust@latest
 
+current_status "Setting up mise config"
+mkdir -p ~/.config/mise
+ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
+
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
 ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc

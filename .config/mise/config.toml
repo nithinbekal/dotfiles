@@ -1,0 +1,13 @@
+[tools]
+elixir = "latest"
+erlang = "latest"
+go = "latest"
+node = "24.2.0"
+postgres = "15.3"
+ruby = "4.0.2"
+uv = "latest"
+
+[settings]
+
+[settings.ruby]
+compile = false
