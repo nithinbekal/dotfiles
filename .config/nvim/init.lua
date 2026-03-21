@@ -185,7 +185,7 @@ local plugins = {
       capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
       vim.lsp.config("*", { capabilities = capabilities })
 
-      vim.lsp.config("sorbet", {
+      require("lspconfig").sorbet.setup({
         root_dir = require("lspconfig.util").root_pattern("sorbet/config"),
       })
 
