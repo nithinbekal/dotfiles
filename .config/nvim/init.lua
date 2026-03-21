@@ -145,7 +145,7 @@ local plugins = {
 
   {
     "kassio/neoterm",
-    config = function() vim.g.neoterm_default_mod = "vertical" end,
+    init = function() vim.g.neoterm_default_mod = "vertical" end,
     lazy = false,
     keys = {
       { "<leader>tc", ":Tclear<cr>", desc = "Clear terminal" },
@@ -311,7 +311,7 @@ local plugins = {
 
   {
     "vim-test/vim-test",
-    config = function() vim.g["test#strategy"] = "neoterm" end,
+    init = function() vim.g["test#strategy"] = "neoterm" end,
     keys = {
       { "<leader>tf", ":w<cr>:TestFile<cr>", desc = "Test current file" },
       { "<leader>tn", ":w<cr>:TestNearest<cr>", desc = "Test current file" },
