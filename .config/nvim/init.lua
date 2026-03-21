@@ -130,16 +130,15 @@ local plugins = {
 
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+      vim.lsp.config("*", { capabilities = capabilities })
 
-      require("lspconfig").ruby_lsp.setup({ capabilities = capabilities })
+      require("lspconfig").ruby_lsp.setup({})
 
       require("lspconfig").sorbet.setup({
-        capabilities = capabilities,
         root_dir = require("lspconfig.util").root_pattern("sorbet/config"),
       })
 
       vim.lsp.config("lua_ls", {
-        capabilities = capabilities,
         settings = {
           Lua = {
             workspace = {
