@@ -60,25 +60,18 @@ local plugins = {
   {
     "hrsh7th/nvim-cmp",
     dependencies = {
-      "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
       "hrsh7th/cmp-nvim-lsp",
-      "rafamadriz/friendly-snippets",
     },
     config = function()
       local cmp_autopairs = require("nvim-autopairs.completion.cmp")
       local cmp = require("cmp")
-      local luasnip = require("luasnip")
 
       cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-
-      require("luasnip.loaders.from_vscode").lazy_load()
-      luasnip.config.setup {}
 
       cmp.setup {
         snippet = {
           expand = function(args)
-            luasnip.lsp_expand(args.body)
+            vim.snippet.expand(args.body)
           end,
         },
         mapping = cmp.mapping.preset.insert {
@@ -94,8 +87,8 @@ local plugins = {
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
-            elseif luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
+            elseif vim.snippet.active({ direction = 1 }) then
+              vim.snippet.jump(1)
             else
               fallback()
             end
@@ -103,8 +96,8 @@ local plugins = {
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
-            elseif luasnip.locally_jumpable(-1) then
-              luasnip.jump(-1)
+            elseif vim.snippet.active({ direction = -1 }) then
+              vim.snippet.jump(-1)
             else
               fallback()
             end
@@ -113,7 +106,6 @@ local plugins = {
         sources = {
           { name = "copilot" },
           { name = "nvim_lsp" },
-          { name = "luasnip" },
         },
         enabled = function()
           return vim.bo.filetype ~= "markdown"
