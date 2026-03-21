@@ -124,7 +124,7 @@ local plugins = {
     },
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "ruby_lsp", "sorbet", "lua_ls" },
+        ensure_installed = { "ruby_lsp", "lua_ls" },
         automatic_enable = true,
       })
 
