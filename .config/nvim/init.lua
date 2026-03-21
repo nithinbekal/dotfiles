@@ -162,11 +162,12 @@ local plugins = {
   },
 
   {
-    "neovim/nvim-lspconfig",
-    dependencies = {
-      { "williamboman/mason.nvim", opts = { ui = { border = "rounded" } } },
-      "williamboman/mason-lspconfig.nvim",
-    },
+    "williamboman/mason.nvim",
+    opts = { ui = { border = "rounded" } },
+  },
+
+  {
+    "williamboman/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup({
         ensure_installed = { "ruby_lsp", "lua_ls" },
@@ -177,9 +178,13 @@ local plugins = {
       capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
       vim.lsp.config("*", { capabilities = capabilities })
 
-      require("lspconfig").sorbet.setup({
-        root_dir = require("lspconfig.util").root_pattern("sorbet/config"),
+      vim.lsp.config("sorbet", {
+        cmd = { "srb", "tc", "--lsp" },
+        filetypes = { "ruby" },
+        root_dir = vim.fs.dirname(vim.fs.find("sorbet/config", { upward = true })[1]),
       })
+      vim.lsp.enable("sorbet")
+
 
       vim.lsp.config("lua_ls", {
         settings = {
