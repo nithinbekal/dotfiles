@@ -213,15 +213,13 @@ local plugins = {
       "Mofiqul/vscode.nvim",
       "nvim-tree/nvim-web-devicons",
     },
-    config = function()
-      require("lualine").setup({
-        options = {
-          icons_enabled = true,
-          theme = "onedark",
-          path = 1, -- show relative file path
-        }
-      })
-    end,
+    opts = {
+      options = {
+        icons_enabled = true,
+        theme = "onedark",
+        path = 1, -- show relative file path
+      },
+    },
   },
 
   {
