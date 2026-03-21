@@ -102,9 +102,7 @@ local plugins = {
 
   {
     "lewis6991/gitsigns.nvim",
-    config = function()
-      require("gitsigns").setup({ signcolumn = false, numhl = true})
-    end,
+    opts = { signcolumn = false, numhl = true },
     event = { "CursorHold", "CursorHoldI" },
     keys = {
       { "<leader>ghs", ":Gitsigns stage_hunk<cr>", desc = "Git stage hunk" },
