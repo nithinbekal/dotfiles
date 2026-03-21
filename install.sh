@@ -59,6 +59,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   mkdir -p ~/.config/ghostty
   ln -sf ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
 
+  current_status "Setting up Zellij config"
+  mkdir -p ~/.config/zellij
+  ln -sf ~/dotfiles/.config/zellij/config.kdl ~/.config/zellij/config.kdl
+
   current_status "Setting up Claude config"
   mkdir -p ~/.claude
   ln -sf ~/dotfiles/.claude/settings.json ~/.claude/settings.json

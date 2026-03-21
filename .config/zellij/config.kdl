@@ -1,0 +1,9 @@
+default_mode "locked"
+show_startup_tips false
+theme "nord"
+
+mouse_mode true
+copy_on_select true
+copy_clipboard "system"
+pane_frames false
+scrollback_lines 50000
