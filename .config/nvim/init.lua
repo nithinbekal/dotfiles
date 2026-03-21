@@ -43,7 +43,7 @@ vim.g.mapleader = ","
 
 -- Install lazy.nvim if not installed already
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   print("Installing lazy.nvim plugin manager")
   vim.fn.system({
     "git",
@@ -138,11 +138,17 @@ local plugins = {
         root_dir = require("lspconfig.util").root_pattern("sorbet/config"),
       })
 
-      require("lspconfig").lua_ls.setup({
+      vim.lsp.config("lua_ls", {
         capabilities = capabilities,
         settings = {
           Lua = {
-            workspace = { checkThirdParty = false },
+            workspace = {
+              checkThirdParty = false,
+              library = vim.list_extend(
+                vim.api.nvim_get_runtime_file("", true),
+                { "${3rd}/luv/library" }
+              ),
+            },
             telemetry = { enable = false },
             diagnostics = { globals = { "vim" } },
           },
@@ -176,6 +182,9 @@ local plugins = {
     config = function()
       require("nvim-treesitter.configs").setup({
         ensure_installed = { "lua", "ruby", "vimdoc" },
+        sync_install = false,
+        ignore_install = {},
+        modules = {},
         auto_install = false,
         highlight = { enable = true, },
         textobjects = {
@@ -354,7 +363,7 @@ cmp.setup {
     { name = "luasnip" },
   },
   enabled = function ()
-    return vim.api.nvim_buf_get_option(0, "filetype") ~= "markdown"
+    return vim.bo.filetype ~= "markdown"
   end,
 }
 
@@ -405,8 +414,8 @@ vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l")
 vim.keymap.set("t", "<C-o>", "<C-\\><C-n>")
 
 -- LSP and diagnostics
-vim.keymap.set("n", "[d", function() vim.diagnostic.goto_prev({ float = true }) end, { desc = "Diagnostics: prev" })
-vim.keymap.set("n", "]d", function() vim.diagnostic.goto_next({ float = true }) end, { desc = "Diagnostics: next" })
+vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Diagnostics: prev" })
+vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Diagnostics: next" })
 
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
 
