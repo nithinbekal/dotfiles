@@ -285,15 +285,6 @@ local plugins = {
     }
   },
 
-  {
-    "rmagatti/goto-preview",
-    event = "BufEnter",
-    config = true,
-    keys = {
-      { "<leader>gp", ":lua require('goto-preview').goto_preview_definition()<cr>", desc = "Preview definition" },
-    },
-  },
-
   { "tpope/vim-bundler", ft = { "ruby", "eruby" } },
   { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
 
