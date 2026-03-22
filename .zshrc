@@ -37,6 +37,7 @@ alias bx="bundle exec"
 alias dotf="cursor ~/dotfiles"
 alias la="ls -lAh"
 alias v="nvim"
+alias zj='zellij attach --create "$(basename $PWD)"'
 
 # Git functions and aliases
 
