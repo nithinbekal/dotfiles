@@ -13,7 +13,7 @@ fi
 
 current_status "Installing dotfiles"
 
-dotfiles=(.gemrc .gitconfig .railsrc .vimrc .zshrc)
+dotfiles=(.gemrc .railsrc .vimrc .zshrc)
 
 for file in "${dotfiles[@]}"
 do
