@@ -67,13 +67,17 @@ alias gstp='git stash pop'
 # This file is for stuff that varies between work and personal machines, and isn't included in the repo.
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
-# Simple custom prompt with path and git branch
+# Prompt
 autoload -Uz vcs_info
 precmd() { vcs_info }
 zstyle ':vcs_info:git:*' formats ' %b'
 setopt prompt_subst
-PROMPT='%F{blue}%B%~%b%f%F{240} %F{green}${vcs_info_msg_0_}%f
+
+PROMPT='%F{blue}%B%~%b%f%F{240} %F{green}${vcs_info_msg_0_}%f
 %F{magenta}❯%f '
+
+# Machine-specific overrides (e.g. work prompt)
+[ -f ~/.zshrc.shopify ] && source ~/.zshrc.shopify
 
 # The following lines are automatically added by dev. Don't touch them.
 
@@ -89,3 +93,6 @@ command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 
 # Added by Antigravity
 export PATH="/Users/nithin/.antigravity/antigravity/bin:$PATH"
+
+# Added by tec agent
+[[ -x /Users/nithin/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/nithin/.local/state/tec/profiles/base/current/global/init zsh)"
