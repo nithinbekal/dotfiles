@@ -34,7 +34,7 @@ export PATH=$HOME/.local/bin:$PATH
 # Aliases
 
 alias bx="bundle exec"
-alias dotf="cursor ~/dotfiles"
+alias dotf="cd ~/dotfiles"
 alias la="ls -lAh"
 alias v="nvim"
 alias zj='zellij attach --create "$(basename $PWD)"'
