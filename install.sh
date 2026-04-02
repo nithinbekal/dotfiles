@@ -106,6 +106,9 @@ current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/themes
 ln -sf ~/dotfiles/pi/settings.json ~/.pi/agent/settings.json
 ln -sf ~/dotfiles/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
-ln -sf ~/dotfiles/pi/extensions ~/.pi/agent/extensions
+mkdir -p ~/.pi/agent/extensions
+for ext in ~/dotfiles/pi/extensions/*; do
+  ln -sf "$ext" ~/.pi/agent/extensions/"$(basename "$ext")"
+done
 
 current_status "Installation successful 🚀"
