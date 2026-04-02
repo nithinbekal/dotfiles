@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Get the current directory name to use as session name
+# Replace dots with underscores to avoid tmux target specification issues
+SESSION_NAME=$(basename "$PWD" | tr '.' '_')
+
+# Check if the session already exists
+tmux has-session -t "$SESSION_NAME" 2>/dev/null
+
+if [ $? != 0 ]; then
+  # Create a new session in detached mode with nvim
+  tmux new-session -d -s "$SESSION_NAME" -n "nvim" nvim
+  
+  # Create a second window for pi
+  tmux new-window -t "$SESSION_NAME" -n "π" pi
+  
+  # Select the first window (nvim) by default
+  tmux select-window -t "$SESSION_NAME:1"
+fi
+
+# Attach to the session
+tmux attach-session -t "$SESSION_NAME"
