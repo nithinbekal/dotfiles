@@ -102,4 +102,9 @@ current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
 ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
 
+current_status "Setting up Pi config"
+mkdir -p ~/.pi/agent/themes
+ln -sf ~/dotfiles/pi/settings.json ~/.pi/agent/settings.json
+ln -sf ~/dotfiles/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
+
 current_status "Installation successful 🚀"
