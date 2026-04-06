@@ -181,16 +181,26 @@ local plugins = {
       vim.lsp.config("ruby_lsp", {
         cmd = { "ruby-lsp" },
         filetypes = { "ruby", "eruby" },
-        root_dir = vim.fs.dirname(vim.fs.find({ "Gemfile", ".git" }, { upward = true })[1]),
+        root_dir = function(bufnr, on_dir)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+          local found = vim.fs.find({ "Gemfile", ".git" }, { upward = true, path = vim.fs.dirname(bufname) })[1]
+          if found then
+            on_dir(vim.fs.dirname(found))
+          end
+        end,
       })
       vim.lsp.enable("ruby_lsp")
 
       vim.lsp.config("sorbet", {
         cmd = { "srb", "tc", "--lsp" },
         filetypes = { "ruby" },
-        root_dir = vim.fs.dirname(
-          vim.fs.dirname(vim.fs.find("sorbet/config", { upward = true })[1])
-        ),
+        root_dir = function(bufnr, on_dir)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+          local found = vim.fs.find("sorbet/config", { upward = true, path = vim.fs.dirname(bufname) })[1]
+          if found then
+            on_dir(vim.fs.dirname(vim.fs.dirname(found)))
+          end
+        end,
       })
       vim.lsp.enable("sorbet")
 
