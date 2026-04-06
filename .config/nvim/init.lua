@@ -223,15 +223,10 @@ local plugins = {
     "nvim-treesitter/nvim-treesitter",
     branch = "main",
     build = ":TSUpdate",
-    init = function()
-      local wanted = { "lua", "ruby", "vimdoc" }
-      local installed = require("nvim-treesitter").installed()
-      local to_install = vim.tbl_filter(function(lang)
-        return not vim.tbl_contains(installed, lang)
-      end, wanted)
-      if #to_install > 0 then
-        require("nvim-treesitter").install(to_install)
-      end
+    config = function()
+      require("nvim-treesitter").setup({
+        ensure_installed = { "lua", "ruby", "vimdoc" },
+      })
     end,
   },
 
