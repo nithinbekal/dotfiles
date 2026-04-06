@@ -178,10 +178,19 @@ local plugins = {
       capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
       vim.lsp.config("*", { capabilities = capabilities })
 
+      vim.lsp.config("ruby_lsp", {
+        cmd = { "ruby-lsp" },
+        filetypes = { "ruby", "eruby" },
+        root_dir = vim.fs.dirname(vim.fs.find({ "Gemfile", ".git" }, { upward = true })[1]),
+      })
+      vim.lsp.enable("ruby_lsp")
+
       vim.lsp.config("sorbet", {
         cmd = { "srb", "tc", "--lsp" },
         filetypes = { "ruby" },
-        root_dir = vim.fs.dirname(vim.fs.find("sorbet/config", { upward = true })[1]),
+        root_dir = vim.fs.dirname(
+          vim.fs.dirname(vim.fs.find("sorbet/config", { upward = true })[1])
+        ),
       })
       vim.lsp.enable("sorbet")
 
