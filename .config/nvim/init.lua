@@ -221,52 +221,51 @@ local plugins = {
 
   {
     "nvim-treesitter/nvim-treesitter",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-    },
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "lua", "ruby", "vimdoc" },
-        sync_install = false,
-        ignore_install = {},
-        modules = {},
-        auto_install = false,
-        highlight = { enable = true, },
-        textobjects = {
-          select = {
-            enable = true,
-            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-            keymaps = {
-              ["af"] = "@function.outer",
-              ["if"] = "@function.inner",
-              ["ac"] = "@class.outer",
-              ["ic"] = "@class.inner",
-            },
-          },
-          move = {
-            enable = true,
-            set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-              ["]m"] = "@function.outer",
-              ["]]"] = "@class.outer",
-            },
-            goto_next_end = {
-              ["]M"] = "@function.outer",
-              ["]["] = "@class.outer",
-            },
-            goto_previous_start = {
-              ["[m"] = "@function.outer",
-              ["[["] = "@class.outer",
-            },
-            goto_previous_end = {
-              ["[M"] = "@function.outer",
-              ["[]"] = "@class.outer",
-            },
-          },
-        },
-      })
-    end,
+    branch = "main",
     build = ":TSUpdate",
+    init = function()
+      local wanted = { "lua", "ruby", "vimdoc" }
+      local installed = require("nvim-treesitter").installed()
+      local to_install = vim.tbl_filter(function(lang)
+        return not vim.tbl_contains(installed, lang)
+      end, wanted)
+      if #to_install > 0 then
+        require("nvim-treesitter").install(to_install)
+      end
+    end,
+  },
+
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      -- Textobject selection
+      local select = require("nvim-treesitter-textobjects.select")
+      vim.keymap.set({ "x", "o" }, "af", function() select.select_textobject("@function.outer", "textobjects") end)
+      vim.keymap.set({ "x", "o" }, "if", function() select.select_textobject("@function.inner", "textobjects") end)
+      vim.keymap.set({ "x", "o" }, "ac", function() select.select_textobject("@class.outer", "textobjects") end)
+      vim.keymap.set({ "x", "o" }, "ic", function() select.select_textobject("@class.inner", "textobjects") end)
+
+      -- Textobject movement
+      local move = require("nvim-treesitter-textobjects.move")
+      local jumps = {
+        ["]m"] = { query = "@function.outer", forward = true, start = true },
+        ["]M"] = { query = "@function.outer", forward = true, start = false },
+        ["]]"] = { query = "@class.outer", forward = true, start = true },
+        ["]["] = { query = "@class.outer", forward = true, start = false },
+        ["[m"] = { query = "@function.outer", forward = false, start = true },
+        ["[M"] = { query = "@function.outer", forward = false, start = false },
+        ["[["] = { query = "@class.outer", forward = false, start = true },
+        ["[]"] = { query = "@class.outer", forward = false, start = false },
+      }
+      for key, opts in pairs(jumps) do
+        local fn = opts.forward
+          and (opts.start and move.goto_next_start or move.goto_next_end)
+          or (opts.start and move.goto_previous_start or move.goto_previous_end)
+        vim.keymap.set({ "n", "x", "o" }, key, function() fn(opts.query, "textobjects") end)
+      end
+    end,
   },
 
   {
@@ -347,6 +346,15 @@ require("lazy").setup({
 })
 
 
+
+-- Enable treesitter highlighting and indentation when a parser is available
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function()
+    if pcall(vim.treesitter.start) then
+      vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end
+  end,
+})
 
 vim.diagnostic.config({
   underline = { severity = { max = vim.diagnostic.severity.INFO } },
