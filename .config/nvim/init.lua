@@ -57,7 +57,62 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+    },
+    config = function()
+      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+      local cmp = require("cmp")
 
+      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+
+      cmp.setup {
+        snippet = {
+          expand = function(args)
+            vim.snippet.expand(args.body)
+          end,
+        },
+        mapping = cmp.mapping.preset.insert {
+          ["<C-n>"] = cmp.mapping.select_next_item(),
+          ["<C-p>"] = cmp.mapping.select_prev_item(),
+          ["<C-d>"] = cmp.mapping.scroll_docs(-4),
+          ["<C-f>"] = cmp.mapping.scroll_docs(4),
+          ["<C-Space>"] = cmp.mapping.complete {},
+          ["<CR>"] = cmp.mapping.confirm {
+            behavior = cmp.ConfirmBehavior.Replace,
+            select = true,
+          },
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif vim.snippet.active({ direction = 1 }) then
+              vim.snippet.jump(1)
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif vim.snippet.active({ direction = -1 }) then
+              vim.snippet.jump(-1)
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+        },
+        sources = {
+          { name = "copilot" },
+          { name = "nvim_lsp" },
+        },
+        enabled = function()
+          return vim.bo.filetype ~= "markdown"
+        end,
+      }
+    end,
+  },
 
   {
     "ibhagwan/fzf-lua",
@@ -119,15 +174,9 @@ local plugins = {
         automatic_enable = true,
       })
 
-      vim.lsp.config("*", {
-        capabilities = {
-          textDocument = {
-            completion = {
-              completionItem = { snippetSupport = true },
-            },
-          },
-        },
-      })
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+      vim.lsp.config("*", { capabilities = capabilities })
 
       vim.lsp.config("ruby_lsp", {
         cmd = { "ruby-lsp" },
@@ -287,14 +336,21 @@ local plugins = {
 
 
   {
-    "zbirenbaum/copilot.lua",
+    "zbirenbaum/copilot-cmp",
     event = "InsertEnter",
-    config = function()
-      require("copilot").setup({
-        suggestion = { enabled = true, auto_trigger = true },
-        panel = { enabled = false },
-      })
-    end,
+    config = function() require("copilot_cmp").setup() end,
+    dependencies = {
+      {
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
+        config = function()
+          require("copilot").setup({
+            suggestion = { enabled = false },
+            panel = { enabled = false },
+          })
+        end,
+      },
+    },
   },
 }
 
@@ -313,35 +369,6 @@ vim.api.nvim_create_autocmd("FileType", {
     end
   end,
 })
-
--- Native LSP completion
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client:supports_method("textDocument/completion") then
-      vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-    end
-  end,
-})
-
-vim.keymap.set("i", "<CR>", function()
-  if vim.fn.pumvisible() == 1 then return "<C-y>" end
-  return "<CR>"
-end, { expr = true })
-
-vim.keymap.set("i", "<Tab>", function()
-  local copilot = require("copilot.suggestion")
-  if vim.fn.pumvisible() == 1 then return "<C-n>" end
-  if copilot.is_visible() then copilot.accept(); return "" end
-  if vim.snippet.active({ direction = 1 }) then vim.snippet.jump(1); return "" end
-  return "<Tab>"
-end, { expr = true })
-
-vim.keymap.set("i", "<S-Tab>", function()
-  if vim.fn.pumvisible() == 1 then return "<C-p>" end
-  if vim.snippet.active({ direction = -1 }) then vim.snippet.jump(-1); return "" end
-  return "<S-Tab>"
-end, { expr = true })
 
 vim.diagnostic.config({
   underline = { severity = { max = vim.diagnostic.severity.INFO } },
