@@ -43,7 +43,6 @@ alias zj='zellij attach --create "$(basename $PWD)"'
 
 git_current_branch() { git branch --show-current 2>/dev/null }
 gfco() { git fetch origin "$1" && git checkout "$1" }
-prs() { open "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3A${1:-@me}+org%3Ashopify" }
 
 alias g='git'
 alias gbd='git branch -d'
