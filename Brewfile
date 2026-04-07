@@ -3,6 +3,7 @@ brew "fzf"
 brew "mise"
 brew "neovim"
 brew "ripgrep"
+brew "watchman" # required by Sorbet LSP to detect file changes
 brew "zellij"
 
 cask "antigravity"
