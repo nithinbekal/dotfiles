@@ -309,13 +309,6 @@ local plugins = {
     },
   },
 
-  {
-    "tpope/vim-rails",
-    keys = {
-      { "<leader>s", ":A<cr>", desc = "Toggle test and code files" },
-    },
-  },
-
   { "tpope/vim-surround", event = { "BufReadPost", "BufNewFile" } },
   { "tpope/vim-unimpaired", event = { "BufReadPost", "BufNewFile" } },
 
