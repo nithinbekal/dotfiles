@@ -1,6 +1,7 @@
 {
   "model": "sonnet",
   "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50",
     "ENABLE_LSP_TOOL": "1"
   },
   "statusLine": {
