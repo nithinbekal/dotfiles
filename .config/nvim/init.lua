@@ -326,8 +326,6 @@ local plugins = {
   { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
   "wsdjeg/vim-fetch",
 
-
-
   {
     "zbirenbaum/copilot-cmp",
     event = "InsertEnter",
