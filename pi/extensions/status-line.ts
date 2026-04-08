@@ -81,6 +81,15 @@ export default function (pi: ExtensionAPI) {
 						n < 1000 ? `${n}` : n < 1_000_000 ? `${(n / 1000).toFixed(1)}k` : `${(n / 1_000_000).toFixed(1)}M`;
 
 					const tokensPart = theme.fg("dim", `↑${fmt(inputTokens)} ↓${fmt(outputTokens)}`);
+
+					// Context usage %
+					const ctxUsage = ctx.getContextUsage();
+					const ctxPart = ctxUsage?.percent != null
+						? separator + theme.fg(
+							ctxUsage.percent > 80 ? "error" : ctxUsage.percent > 50 ? "warning" : "dim",
+							`ctx ${Math.round(ctxUsage.percent)}%`
+						)
+						: "";
 					const costPart = totalCost > 0
 						? separator + theme.fg("warning", `$${formatCost(totalCost)}`)
 						: "";
@@ -88,7 +97,7 @@ export default function (pi: ExtensionAPI) {
 						? separator + theme.fg("muted", `${turnCount} turn${turnCount !== 1 ? "s" : ""}`)
 						: "";
 
-					const right = tokensPart + costPart + turnsPart;
+					const right = tokensPart + ctxPart + costPart + turnsPart;
 
 					// --- Compose ---
 					const gap = width - visibleWidth(left) - visibleWidth(right);
