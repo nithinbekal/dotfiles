@@ -92,6 +92,3 @@ command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 
 # Added by Antigravity
 export PATH="/Users/nithin/.antigravity/antigravity/bin:$PATH"
-
-# Added by tec agent
-[[ -x /Users/nithin/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/nithin/.local/state/tec/profiles/base/current/global/init zsh)"
