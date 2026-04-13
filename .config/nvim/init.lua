@@ -235,6 +235,14 @@ local plugins = {
         theme = "onedark",
         path = 1, -- show relative file path
       },
+      sections = {
+        lualine_b = {
+          -- Use gitsigns_head for branch name (handles git worktrees correctly)
+          { function() return vim.b.gitsigns_head or "" end, icon = "" },
+          "diff",
+          "diagnostics",
+        },
+      },
     },
   },
 
