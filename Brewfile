@@ -2,6 +2,8 @@
 brew "fzf"
 brew "mise"
 brew "neovim"
+brew "tree-sitter"
+brew "tree-sitter-cli"
 brew "ripgrep"
 brew "watchman" # required by Sorbet LSP to detect file changes
 brew "zellij"
