@@ -58,60 +58,39 @@ vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
   {
-    "hrsh7th/nvim-cmp",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-    },
-    config = function()
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-      local cmp = require("cmp")
-
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-
-      cmp.setup {
-        snippet = {
-          expand = function(args)
-            vim.snippet.expand(args.body)
-          end,
-        },
-        mapping = cmp.mapping.preset.insert {
-          ["<C-n>"] = cmp.mapping.select_next_item(),
-          ["<C-p>"] = cmp.mapping.select_prev_item(),
-          ["<C-d>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<C-Space>"] = cmp.mapping.complete {},
-          ["<CR>"] = cmp.mapping.confirm {
-            behavior = cmp.ConfirmBehavior.Replace,
-            select = true,
+    "saghen/blink.cmp",
+    version = "*",
+    opts = {
+      keymap = { preset = "default" },
+      sources = {
+        default = { "lsp", "path", "snippets", "copilot" },
+        providers = {
+          copilot = {
+            name = "copilot",
+            module = "blink-cmp-copilot",
+            score_offset = 100,
+            async = true,
           },
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif vim.snippet.active({ direction = 1 }) then
-              vim.snippet.jump(1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif vim.snippet.active({ direction = -1 }) then
-              vim.snippet.jump(-1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
         },
-        sources = {
-          { name = "copilot" },
-          { name = "nvim_lsp" },
-        },
-        enabled = function()
-          return vim.bo.filetype ~= "markdown"
+      },
+      enabled = function()
+        return vim.bo.filetype ~= "markdown"
+      end,
+    },
+    dependencies = {
+      {
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
+        event = "InsertEnter",
+        config = function()
+          require("copilot").setup({
+            suggestion = { enabled = false },
+            panel = { enabled = false },
+          })
         end,
-      }
-    end,
+      },
+      { "giuxtaposition/blink-cmp-copilot" },
+    },
   },
 
   {
@@ -173,9 +152,7 @@ local plugins = {
         ensure_installed = { "ruby_lsp", "lua_ls", "rust_analyzer" },
       })
 
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
-      vim.lsp.config("*", { capabilities = capabilities })
+      vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
 
       vim.lsp.config("ruby_lsp", {
         cmd = { "ruby-lsp" },
@@ -325,26 +302,10 @@ local plugins = {
     },
   },
 
-  { "windwp/nvim-autopairs", event = "InsertEnter", opts = {} },
+  { "echasnovski/mini.pairs", event = "InsertEnter", opts = {} },
   "wsdjeg/vim-fetch",
 
-  {
-    "zbirenbaum/copilot-cmp",
-    event = "InsertEnter",
-    config = function() require("copilot_cmp").setup() end,
-    dependencies = {
-      {
-        "zbirenbaum/copilot.lua",
-        cmd = "Copilot",
-        config = function()
-          require("copilot").setup({
-            suggestion = { enabled = false },
-            panel = { enabled = false },
-          })
-        end,
-      },
-    },
-  },
+
 }
 
 require("lazy").setup({
