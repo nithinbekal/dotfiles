@@ -170,8 +170,7 @@ local plugins = {
     "williamboman/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "ruby_lsp", "lua_ls" },
-        automatic_enable = true,
+        ensure_installed = { "ruby_lsp", "lua_ls", "rust_analyzer" },
       })
 
       local capabilities = vim.lsp.protocol.make_client_capabilities()
