@@ -300,13 +300,6 @@ local plugins = {
     config = function() vim.cmd("colorscheme onedark") end,
   },
 
-  {
-    "rhysd/devdocs.vim",
-    keys = {
-      { "<leader>dd", "<Plug>(devdocs-under-cursor)", desc = "Open devdocs.io" },
-    }
-  },
-
   { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
 
   {
@@ -430,6 +423,9 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- Keymaps: misc
 vim.keymap.set({ "", "i" }, "<C-s>", "<esc>:w<cr>", { desc = "Save file" })
 vim.keymap.set("n", "<Esc>", ":nohlsearch<cr>", { desc = "Remove search highlight"})
+vim.keymap.set("n", "<leader>dd", function()
+  vim.fn.jobstart({ "open", "https://devdocs.io/#q=" .. vim.fn.expand("<cword>") })
+end, { desc = "Open devdocs.io" })
 vim.keymap.set("n", "<leader>mv", RenameFile, { desc = "Rename file" })
 vim.keymap.set("n", "<leader>nv", ":e ~/dotfiles/.config/nvim/init.lua<cr>", { desc = "Edit nvim config" })
 vim.keymap.set("n", "<leader>o", ":only<cr>", { desc = "Only keep current pane" })
