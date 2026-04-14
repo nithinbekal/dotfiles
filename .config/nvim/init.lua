@@ -300,7 +300,6 @@ local plugins = {
     config = function() vim.cmd("colorscheme onedark") end,
   },
 
-  { "tpope/vim-endwise", ft = { "ruby", "eruby" } },
 
   {
     "tpope/vim-fugitive",
