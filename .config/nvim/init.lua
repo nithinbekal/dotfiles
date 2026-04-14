@@ -331,7 +331,7 @@ vim.diagnostic.config({
   float = { border = "rounded", header = "" },
 })
 
-function RenameFile()
+local function RenameFile()
   local old_name = vim.fn.expand("%")
   local new_name = vim.fn.input("New file name: ", vim.fn.expand("%"), "file")
   if new_name ~= "" and new_name ~= old_name then
