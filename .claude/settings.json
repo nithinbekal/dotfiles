@@ -1,16 +1,17 @@
 {
-  "model": "sonnet",
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50",
     "ENABLE_LSP_TOOL": "1"
   },
+  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "ruby-lsp@claude-plugins-official": true
+    "ruby-lsp@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true
   },
   "voiceEnabled": false,
   "skipDangerousModePermissionPrompt": true
