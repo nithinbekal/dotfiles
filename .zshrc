@@ -77,18 +77,15 @@ PROMPT='%F{blue}%B%~%b%f%F{240} %F{green}${vcs_info_msg_0_}%f
 
 [[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
 
-# Machine-specific overrides (e.g. work prompt)
-[ -f ~/.zshrc.shopify ] && source ~/.zshrc.shopify
-
-# The following lines are automatically added by dev. Don't touch them.
-
-[ -f /opt/dev/dev.sh ] && source /opt/dev/dev.sh
-
-[[ -f /opt/dev/sh/chruby/chruby.sh ]] && { type chruby >/dev/null 2>&1 || chruby () { source /opt/dev/sh/chruby/chruby.sh; chruby "$@"; } }
-
 source <(fzf --zsh)
 
 command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 
 # Added by Antigravity
 export PATH="/Users/nithin/.antigravity/antigravity/bin:$PATH"
+
+# Machine-specific overrides (e.g. work prompt)
+[ -f ~/.zshrc.shopify ] && source ~/.zshrc.shopify
+
+# Added by tec agent
+[[ -x /Users/nithin/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/nithin/.local/state/tec/profiles/base/current/global/init zsh)"
