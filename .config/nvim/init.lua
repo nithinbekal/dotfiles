@@ -91,6 +91,7 @@ local plugins = {
         event = "InsertEnter",
         config = function()
           require("copilot").setup({
+            copilot_node_command = vim.fn.expand("~/.local/share/mise/installs/node/24.2.0/bin/node"),
             suggestion = { enabled = false },
             panel = { enabled = false },
           })
