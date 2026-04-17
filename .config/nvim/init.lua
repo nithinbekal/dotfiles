@@ -59,6 +59,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
+  "sapphire-project/vim-sapphire",
+
   {
     "saghen/blink.cmp",
     version = "*",
