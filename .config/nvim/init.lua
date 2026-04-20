@@ -25,6 +25,7 @@ vim.opt.shiftwidth = 2                -- Tab settings - Use 2 spaces for each in
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.swapfile = false              -- No swap files; save often + git is sufficient
+vim.opt.autoread = true               -- Reload files when changed elsewhere
 vim.opt.undofile = true               -- Persist undo history across sessions
 vim.opt.updatetime = 200              -- Reduce updatetime
 vim.opt.wildmode = "list:full"        -- Completion mode: list all matches
