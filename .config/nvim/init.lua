@@ -291,7 +291,15 @@ local plugins = {
   {
     "folke/tokyonight.nvim",
     priority = 1000,
-    config = function() vim.cmd("colorscheme tokyonight") end,
+    opts = {
+      on_highlights = function(hl, _)
+        hl.WinSeparator = { fg = "#3d59a1" }
+      end,
+    },
+    config = function(_, opts)
+      require("tokyonight").setup(opts)
+      vim.cmd("colorscheme tokyonight")
+    end,
   },
 
   {
