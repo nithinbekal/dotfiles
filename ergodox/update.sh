@@ -29,8 +29,12 @@ cp "$SRC/keymap.c"  "$DEST/keymap.c"
 cp "$SRC/rules.mk"  "$DEST/rules.mk"
 cp "$SRC/keymap.json" "$DEST/keymap.json"
 
+LAYOUT_ID=$(grep 'SERIAL_NUMBER' "$DEST/config.h" | sed 's/.*"\([^/]*\)\/.*/\1/')
+CONFIG_URL="https://configure.zsa.io/ergodox-ez/layouts/$LAYOUT_ID/latest/0"
+
 echo "Updating README..."
 sed -i '' "s|https://oryx\.zsa\.io/source/[^)'\ \`]*|$URL|g" "$DEST/README.md"
+sed -i '' "s|https://configure\.zsa\.io/ergodox-ez/layouts/[^/]*/latest/0|$CONFIG_URL|g" "$DEST/README.md"
 
 echo "Updated:"
 ls -lh "$DEST/config.h" "$DEST/keymap.c" "$DEST/rules.mk" "$DEST/keymap.json"
