@@ -29,5 +29,8 @@ cp "$SRC/keymap.c"  "$DEST/keymap.c"
 cp "$SRC/rules.mk"  "$DEST/rules.mk"
 cp "$SRC/keymap.json" "$DEST/keymap.json"
 
+echo "Updating README..."
+sed -i '' "s|https://oryx\.zsa\.io/source/[^)'\ \`]*|$URL|g" "$DEST/README.md"
+
 echo "Updated:"
 ls -lh "$DEST/config.h" "$DEST/keymap.c" "$DEST/rules.mk" "$DEST/keymap.json"
