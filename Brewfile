@@ -10,6 +10,7 @@ brew "zellij"
 
 cask "antigravity"
 cask "font-fira-code-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
 cask "iterm2"
 cask "monitorcontrol"
 cask "notunes"
