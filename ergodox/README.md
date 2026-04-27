@@ -1,11 +1,11 @@
 # ErgoDox EZ Keymap
 
-Layout: https://configure.zsa.io/ergodox-ez/layouts/aOZK5/latest/0
+Layout: https://configure.zsa.io/ergodox-ez/layouts/4WqVm/latest/0
 
 ## Updating
 
-1. Make changes in [Oryx](https://configure.zsa.io/ergodox-ez/layouts/aOZK5/latest/0)
-2. Click **Download Source** → copy the share URL (e.g. `https://oryx.zsa.io/source/B4Wx4d`)
+1. Make changes in [Oryx](https://configure.zsa.io/ergodox-ez/layouts/4WqVm/latest/0)
+2. Click **Download Source** → copy the share URL (e.g. `https://oryx.zsa.io/source/6ayg4r`)
 3. Run:
 
 ```sh
