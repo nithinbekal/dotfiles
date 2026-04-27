@@ -1,0 +1,8 @@
+#define FLOW_TAP_TERM 100
+#undef TAPPING_TERM
+#define TAPPING_TERM 150
+
+#define USB_SUSPEND_WAKEUP_DELAY 0
+#define SERIAL_NUMBER "Xxe5B/nlDgQ0"
+#define LAYER_STATE_8BIT
+
