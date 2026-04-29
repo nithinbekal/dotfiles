@@ -246,7 +246,13 @@ class DiffOverlay implements Component {
 	private lastWidth = 0;
 	private cachedWrappedLines: string[] = [];
 	private lastDiffStamp = -1;
+	// Number of content rows we last rendered. Used by handleInput so paging
+	// (PgUp/PgDn) tracks whatever full-height the overlay currently has.
 	private visibleContentHeight = 30;
+
+	// Total chrome rows around the content area: top border, title, separator,
+	// scroll info, hint, bottom border = 6.
+	private static readonly CHROME_ROWS = 6;
 
 	constructor(
 		private theme: Theme,
@@ -339,7 +345,18 @@ class DiffOverlay implements Component {
 		lines.push(row(` ${title}${stats}  ${mode}`));
 		lines.push(row(th.fg("border", "─".repeat(innerW))));
 
-		const contentHeight = this.visibleContentHeight;
+		// Fill whatever vertical space the overlay was given. The overlay is
+		// configured with maxHeight: "100%" so this expands to the full terminal
+		// height (minus a small margin). Fall back to the previous default if
+		// rows are unavailable.
+		const termRows = (process.stdout.rows ?? 36) as number;
+		const contentHeight = Math.max(5, termRows - DiffOverlay.CHROME_ROWS - 2 /* top+bottom margin */);
+		this.visibleContentHeight = contentHeight;
+
+		// Re-clamp scroll now that contentHeight may have changed (e.g. terminal resize).
+		const maxScrollAfterResize = Math.max(0, this.cachedWrappedLines.length - contentHeight);
+		if (this.scroll > maxScrollAfterResize) this.scroll = maxScrollAfterResize;
+
 		const visible = this.cachedWrappedLines.slice(this.scroll, this.scroll + contentHeight);
 		for (const l of visible) lines.push(row(" " + l + " "));
 		for (let i = visible.length; i < contentHeight; i++) lines.push(row(""));
@@ -480,9 +497,9 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 					overlayOptions: {
 						width: "50%",
 						minWidth: 50,
-						maxHeight: "90%",
-						anchor: "right-center",
-						margin: { right: 1 },
+						maxHeight: "100%",
+						anchor: "top-right",
+						margin: { top: 1, right: 1, bottom: 1 },
 					},
 				},
 			);
