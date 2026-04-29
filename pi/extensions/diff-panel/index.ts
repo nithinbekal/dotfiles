@@ -7,20 +7,16 @@
  * Layout:
  *   Untracked (N) → Unstaged (N) → Staged (N)
  *
- * Focus model:
- *   Overlay grabs keyboard focus on open. Press alt+g (or esc) to hand
- *   control back to the prompt; alt+g again re-focuses the overlay.
- *
- * Keys (in the overlay, when focused):
+ * Keys (in the overlay):
  *   j/k or ↑/↓         move cursor between files
  *   space              toggle inline diff under current file
  *   -                  stage (untracked/unstaged) or unstage (staged)
+ *   X                  discard changes to current file (press twice to confirm)
  *   c                  commit staged changes (prompts for message)
  *   r                  refresh status
  *   g / G              first / last file
  *   PgUp / PgDn        scroll viewport one page
- *   alt+g / Esc        release focus back to the prompt
- *   q                  close the overlay
+ *   q / Esc            close
  *
  * Auto-refreshes whenever the agent uses write/edit/bash tools.
  *
@@ -30,7 +26,7 @@
  */
 
 import { execSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
@@ -102,7 +98,7 @@ let requestOverlayRender: (() => void) | null = null;
 let overlayHandle: OverlayHandle | null = null;
 
 /** Key used to focus the overlay from the prompt. */
-// ctrl+g conflicts with the built-in app.editor.external (open $EDITOR).
+// ctrl+g is taken by the built-in app.editor.external (open $EDITOR).
 const FOCUS_OVERLAY_KEY = "alt+g";
 
 // ---------- Git helpers ----------
@@ -399,7 +395,7 @@ function statusLetterColor(status: string, section: Section): string {
 	return FG_YELLOW;
 }
 
-// ---------- Stage / unstage actions ----------
+// ---------- Stage / unstage / discard actions ----------
 
 function stageOrUnstage(entry: FileEntry): { ok: boolean; message: string } {
 	if (!state.isGitRepo) {
@@ -420,6 +416,44 @@ function stageOrUnstage(entry: FileEntry): { ok: boolean; message: string } {
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 		return { ok: true, message: `Staged ${entry.path}` };
+	} catch (e) {
+		const stderr = (e as { stderr?: Buffer }).stderr?.toString().trim() || (e as Error).message;
+		return { ok: false, message: stderr.split("\n")[0] };
+	}
+}
+
+/**
+ * Discard changes to a file. Behavior depends on the file's section:
+ *   untracked → delete the file from disk (UNRECOVERABLE).
+ *   unstaged  → `git checkout HEAD -- <path>` (revert worktree to HEAD).
+ *   staged    → `git restore --staged --worktree -- <path>` (drop staged + worktree changes).
+ *
+ * Caller is responsible for confirmation — this just performs the action.
+ */
+function discardFile(entry: FileEntry): { ok: boolean; message: string } {
+	if (!state.isGitRepo) {
+		return { ok: false, message: "Not a git repo — discard disabled" };
+	}
+	const quoted = JSON.stringify(entry.path);
+	try {
+		if (entry.section === "untracked") {
+			const abs = resolve(state.cwd, entry.path);
+			rmSync(abs, { force: true });
+			return { ok: true, message: `Deleted ${entry.path}` };
+		}
+		if (entry.section === "staged") {
+			execSync(`git restore --staged --worktree -- ${quoted}`, {
+				cwd: state.cwd,
+				stdio: ["ignore", "pipe", "pipe"],
+			});
+			return { ok: true, message: `Discarded ${entry.path}` };
+		}
+		// unstaged
+		execSync(`git checkout HEAD -- ${quoted}`, {
+			cwd: state.cwd,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+		return { ok: true, message: `Discarded ${entry.path}` };
 	} catch (e) {
 		const stderr = (e as { stderr?: Buffer }).stderr?.toString().trim() || (e as Error).message;
 		return { ok: false, message: stderr.split("\n")[0] };
@@ -530,6 +564,8 @@ class StatusOverlay implements Component {
 	private cachedRows: ListRow[] = [];
 	private lastDiffStamp = -1;
 	private visibleHeight = 30;
+	/** Path of the entry pending a discard confirmation, if any. Cleared by any other action. */
+	private pendingDiscard: string | null = null;
 
 	// top border, header, blank, scroll info, hint, bottom border
 	private static readonly CHROME_ROWS = 6;
@@ -579,14 +615,39 @@ class StatusOverlay implements Component {
 	}
 
 	handleInput(data: string): void {
-		// Esc / alt+g return focus to the prompt but keep the overlay open.
-		if (matchesKey(data, "escape") || matchesKey(data, "alt+g")) {
+		// Capture-then-clear: any keypress other than another X cancels a pending discard.
+		const armedDiscard = this.pendingDiscard;
+		if (data !== "X") this.pendingDiscard = null;
+
+		// Esc returns focus to the prompt but keeps the overlay open.
+		if (matchesKey(data, "escape")) {
 			this.releaseFocus();
 			return;
 		}
 		// q closes the overlay entirely.
 		if (data === "q" || data === "Q") {
 			this.done();
+			return;
+		}
+		if (data === "X") {
+			const entry = this.currentEntry();
+			if (!entry) return;
+			if (armedDiscard !== entry.path) {
+				this.pendingDiscard = entry.path;
+				const what = entry.section === "untracked" ? "DELETE" : "discard changes to";
+				this.notify(`Press X again to ${what} ${entry.path}`, "warning");
+				return;
+			}
+			const result = discardFile(entry);
+			if (!result.ok) {
+				this.notify(result.message, "error");
+				return;
+			}
+			this.notify(result.message, "info");
+			refreshStatus();
+			this.clampCursor();
+			this.invalidate();
+			this.requestRender();
 			return;
 		}
 		if (data === "c" || data === "C") {
@@ -735,8 +796,8 @@ class StatusOverlay implements Component {
 			row(
 				th.fg(
 					"dim",
-					" j/k move • space expand • - stage • c commit • r refresh • " +
-						FOCUS_OVERLAY_KEY + "/esc unfocus • q close",
+					" " + FOCUS_OVERLAY_KEY +
+						" focus • j/k move • space expand • - stage • X discard • c commit • r refresh • esc unfocus • q close",
 				),
 			),
 		);
@@ -884,9 +945,10 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						maxHeight: "100%",
 						anchor: "top-right",
 						margin: { top: 1, right: 1, bottom: 1 },
-						// Grab keyboard focus on open so j/k, space, -, c, r work
-						// immediately. Press alt+g (or esc) to hand control back to
-						// the prompt; alt+g again re-focuses the overlay.
+						// Don't grab keyboard focus on open. The user keeps typing in
+						// the prompt; pressing the focus shortcut hands control to the
+						// overlay on demand.
+						nonCapturing: true,
 					},
 					onHandle: (handle) => {
 						overlayHandle = handle;
