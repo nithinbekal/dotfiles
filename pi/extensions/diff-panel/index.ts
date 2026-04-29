@@ -7,7 +7,11 @@
  * Layout:
  *   Untracked (N) → Unstaged (N) → Staged (N)
  *
- * Keys (in the overlay):
+ * Focus model:
+ *   /diff-panel grabs focus on open. Press alt+g (or esc) to release focus
+ *   to the prompt; alt+g re-focuses the overlay.
+ *
+ * Keys (in the overlay, when focused):
  *   j/k or ↑/↓         move cursor between files
  *   space              toggle inline diff under current file
  *   -                  stage (untracked/unstaged) or unstage (staged)
@@ -16,7 +20,8 @@
  *   r                  refresh status
  *   g / G              first / last file
  *   PgUp / PgDn        scroll viewport one page
- *   q / Esc            close
+ *   alt+g / Esc        release focus back to the prompt
+ *   q                  close the overlay
  *
  * Auto-refreshes whenever the agent uses write/edit/bash tools.
  *
@@ -657,8 +662,8 @@ class StatusOverlay implements Component {
 		const armedDiscard = this.pendingDiscard;
 		if (data !== "X") this.pendingDiscard = null;
 
-		// Esc returns focus to the prompt but keeps the overlay open.
-		if (matchesKey(data, "escape")) {
+		// Esc / alt+g return focus to the prompt but keep the overlay open.
+		if (matchesKey(data, "escape") || matchesKey(data, FOCUS_OVERLAY_KEY)) {
 			this.releaseFocus();
 			return;
 		}
@@ -836,8 +841,8 @@ class StatusOverlay implements Component {
 			row(
 				th.fg(
 					"dim",
-					" " + FOCUS_OVERLAY_KEY +
-						" focus • j/k move • space expand • - stage • X discard • c commit • r refresh • esc unfocus • q close",
+					" j/k move • space expand • - stage • X discard • c commit • r refresh • " +
+						FOCUS_OVERLAY_KEY + "/esc unfocus • q close",
 				),
 			),
 		);
@@ -945,7 +950,16 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			}
 			refreshStatus();
 			overlayActive = true;
-			await ctx.ui.custom<void>(
+			// Fire-and-forget: don't await the overlay's lifetime, otherwise the
+			// /diff-panel command itself never returns, which keeps the main
+			// interactive loop blocked inside session.prompt(). With the loop
+			// blocked, getUserInput() never re-arms onInputCallback, so any
+			// subsequent Enter in the prompt clears the editor without sending
+			// the message. By returning immediately we let the loop resume and
+			// the editor go back to working normally; the overlay keeps running
+			// independently until the user closes it with `q` or runs the
+			// command again.
+			void ctx.ui.custom<void>(
 				(tui, theme, _kb, done) => {
 					overlayDone = () => {
 						done();
@@ -989,10 +1003,10 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						maxHeight: "100%",
 						anchor: "top-right",
 						margin: { top: 1, right: 1, bottom: 1 },
-						// Don't grab keyboard focus on open. The user keeps typing in
-						// the prompt; pressing the focus shortcut hands control to the
-						// overlay on demand.
-						nonCapturing: true,
+						// Capturing overlay: framework focuses it on open and reliably
+						// restores focus to the prompt editor on `handle.unfocus()`
+						// (via entry.preFocus). Press alt+g/esc to unfocus; alt+g
+						// from the prompt re-focuses via the registered shortcut.
 					},
 					onHandle: (handle) => {
 						overlayHandle = handle;
