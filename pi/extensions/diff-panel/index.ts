@@ -1,12 +1,27 @@
 /**
- * Diff Panel - shows a live git diff of changes made during the session
+ * Diff Panel — interactive git status view.
  *
  * Command:
- *   /diff-panel  - Toggle a right-side overlay showing the diff (scrollable, modal).
- *                  Press `c` inside the overlay to commit the changes (prompts for message).
+ *   /diff-panel  - Toggle a right-side overlay showing a list of changed files.
  *
- * The diff auto-refreshes whenever the agent uses write/edit/bash tools.
- * Works in git repos (uses `git diff`) and outside (snapshots originals on first touch).
+ * Layout:
+ *   Untracked (N) → Unstaged (N) → Staged (N)
+ *
+ * Keys (in the overlay):
+ *   j/k or ↑/↓         move cursor between files
+ *   space              toggle inline diff under current file
+ *   -                  stage (untracked/unstaged) or unstage (staged)
+ *   c                  commit staged changes (prompts for message)
+ *   r                  refresh status
+ *   g / G              first / last file
+ *   PgUp / PgDn        scroll viewport one page
+ *   q / Esc            close
+ *
+ * Auto-refreshes whenever the agent uses write/edit/bash tools.
+ *
+ * In non-git directories, the overlay falls back to a single "Modified"
+ * section built from snapshots taken on first write/edit. Stage/unstage is
+ * disabled in that mode.
  */
 
 import { execSync } from "node:child_process";
@@ -21,18 +36,41 @@ import {
 	wrapTextWithAnsi,
 } from "@mariozechner/pi-tui";
 
-// ---------- Shared state (module-scoped so component + handlers see same data) ----------
+// ---------- Types ----------
+
+type Section = "untracked" | "unstaged" | "staged";
+
+interface FileEntry {
+	section: Section;
+	path: string;
+	/** Single-letter porcelain status: M, A, D, R, C, U, ?, T, ... */
+	status: string;
+}
+
+interface StatusModel {
+	branch: string;
+	staged: FileEntry[];
+	unstaged: FileEntry[];
+	untracked: FileEntry[];
+}
+
+const EMPTY_STATUS: StatusModel = {
+	branch: "",
+	staged: [],
+	unstaged: [],
+	untracked: [],
+};
 
 interface DiffState {
 	cwd: string;
 	isGitRepo: boolean;
-	// For non-git fallback: path -> original contents at first touch
-	snapshots: Map<string, string | null>; // null means "did not exist before"
-	// Files we've tracked being touched
+	// Non-git fallback: path -> original contents at first touch (null = did not exist).
+	snapshots: Map<string, string | null>;
 	touched: Set<string>;
-	// Cached diff text + last refresh timestamp
-	diffText: string;
+	status: StatusModel;
 	lastRefresh: number;
+	/** Cache of raw (unstyled) diff lines per "section:path". Cleared on refresh. */
+	diffCache: Map<string, string[]>;
 }
 
 const state: DiffState = {
@@ -40,11 +78,18 @@ const state: DiffState = {
 	isGitRepo: false,
 	snapshots: new Map(),
 	touched: new Set(),
-	diffText: "",
+	status: EMPTY_STATUS,
 	lastRefresh: 0,
+	diffCache: new Map(),
 };
 
-// ---------- Diff generation ----------
+/**
+ * When the overlay is active, this is set to a callback that re-renders it.
+ * Used by tool_result auto-refresh and by stage/unstage actions.
+ */
+let requestOverlayRender: (() => void) | null = null;
+
+// ---------- Git helpers ----------
 
 function detectGitRepo(cwd: string): boolean {
 	try {
@@ -58,96 +103,209 @@ function detectGitRepo(cwd: string): boolean {
 	}
 }
 
-function generateGitDiff(cwd: string): string {
+function getCurrentBranch(cwd: string): string {
 	try {
-		// Show both staged and unstaged changes vs HEAD, plus untracked files
-		const tracked = execSync("git diff HEAD --no-color", {
+		const out = execSync("git rev-parse --abbrev-ref HEAD", {
 			cwd,
 			encoding: "utf8",
-			maxBuffer: 10 * 1024 * 1024,
-		});
-
-		// Add untracked files as a synthetic "new file" diff
-		const untracked = execSync("git ls-files --others --exclude-standard", {
-			cwd,
-			encoding: "utf8",
-			maxBuffer: 1024 * 1024,
-		})
-			.split("\n")
-			.filter((f) => f.trim());
-
-		let untrackedDiff = "";
-		for (const f of untracked) {
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+		if (out === "HEAD") {
+			// Detached: show short SHA
 			try {
-				const full = resolve(cwd, f);
-				if (!existsSync(full)) continue;
-				const content = readFileSync(full, "utf8");
-				const lines = content.split("\n");
-				untrackedDiff += `diff --git a/${f} b/${f}\n`;
-				untrackedDiff += `new file mode 100644\n`;
-				untrackedDiff += `--- /dev/null\n`;
-				untrackedDiff += `+++ b/${f}\n`;
-				untrackedDiff += `@@ -0,0 +1,${lines.length} @@\n`;
-				untrackedDiff += lines.map((l) => `+${l}`).join("\n") + "\n";
+				const sha = execSync("git rev-parse --short HEAD", {
+					cwd,
+					encoding: "utf8",
+					stdio: ["ignore", "pipe", "ignore"],
+				}).trim();
+				return `(detached ${sha})`;
 			} catch {
-				// skip unreadable
+				return "(detached)";
 			}
 		}
-
-		return (tracked + untrackedDiff).trim() || "(no changes yet)";
-	} catch (e) {
-		return `(git diff failed: ${(e as Error).message})`;
+		return out;
+	} catch {
+		return "";
 	}
 }
 
-function generateSnapshotDiff(): string {
-	if (state.touched.size === 0) return "(no changes yet)";
+function loadGitStatus(cwd: string): StatusModel {
+	const branch = getCurrentBranch(cwd);
+	const staged: FileEntry[] = [];
+	const unstaged: FileEntry[] = [];
+	const untracked: FileEntry[] = [];
 
-	let out = "";
-	for (const path of state.touched) {
-		const original = state.snapshots.get(path);
+	let raw: string;
+	try {
+		raw = execSync("git status --porcelain=v1 -uall --no-renames", {
+			cwd,
+			encoding: "utf8",
+			maxBuffer: 4 * 1024 * 1024,
+		});
+	} catch {
+		return { branch, staged, unstaged, untracked };
+	}
+
+	for (const rawLine of raw.split("\n")) {
+		if (!rawLine) continue;
+		// Format: "XY path"  (X=index, Y=worktree). Path may be quoted if it has special chars,
+		// but with --porcelain=v1 (no -z) git uses C-style quotes around paths with weird chars.
+		// We accept the unquoted common case and strip surrounding quotes if present.
+		if (rawLine.length < 3) continue;
+		const X = rawLine[0];
+		const Y = rawLine[1];
+		let path = rawLine.slice(3);
+		if (path.startsWith('"') && path.endsWith('"')) {
+			// Best-effort unquote: handles \\ \" \n \t. Most paths won't hit this.
+			path = path
+				.slice(1, -1)
+				.replace(/\\\\/g, "\\")
+				.replace(/\\"/g, '"')
+				.replace(/\\n/g, "\n")
+				.replace(/\\t/g, "\t");
+		}
+
+		if (X === "?" && Y === "?") {
+			untracked.push({ section: "untracked", path, status: "?" });
+			continue;
+		}
+		if (X !== " " && X !== "?") {
+			staged.push({ section: "staged", path, status: X });
+		}
+		if (Y !== " " && Y !== "?") {
+			unstaged.push({ section: "unstaged", path, status: Y });
+		}
+	}
+
+	return { branch, staged, unstaged, untracked };
+}
+
+function loadSnapshotStatus(): StatusModel {
+	// Build a single "unstaged" section from touched files in non-git mode.
+	const unstaged: FileEntry[] = [];
+	for (const abs of state.touched) {
+		const original = state.snapshots.get(abs);
 		let current: string | null = null;
 		try {
-			if (existsSync(path)) current = readFileSync(path, "utf8");
+			if (existsSync(abs)) current = readFileSync(abs, "utf8");
 		} catch {
 			current = null;
 		}
-
-		const rel = path.startsWith(state.cwd) ? path.slice(state.cwd.length + 1) : path;
-
+		const rel = abs.startsWith(state.cwd) ? abs.slice(state.cwd.length + 1) : abs;
 		if (original === null && current !== null) {
-			// New file
-			const lines = current.split("\n");
-			out += `diff --git a/${rel} b/${rel}\nnew file mode 100644\n--- /dev/null\n+++ b/${rel}\n`;
-			out += `@@ -0,0 +1,${lines.length} @@\n`;
-			out += lines.map((l) => `+${l}`).join("\n") + "\n";
+			unstaged.push({ section: "unstaged", path: rel, status: "A" });
 		} else if (original !== null && current === null) {
-			// Deleted file
-			const lines = original.split("\n");
-			out += `diff --git a/${rel} b/${rel}\ndeleted file mode 100644\n--- a/${rel}\n+++ /dev/null\n`;
-			out += `@@ -1,${lines.length} +0,0 @@\n`;
-			out += lines.map((l) => `-${l}`).join("\n") + "\n";
+			unstaged.push({ section: "unstaged", path: rel, status: "D" });
 		} else if (original !== null && current !== null && original !== current) {
-			// Modified - simple full-file replace diff (no LCS)
-			const oldLines = original.split("\n");
-			const newLines = current.split("\n");
-			out += `diff --git a/${rel} b/${rel}\n--- a/${rel}\n+++ b/${rel}\n`;
-			out += `@@ -1,${oldLines.length} +1,${newLines.length} @@\n`;
-			out += oldLines.map((l) => `-${l}`).join("\n") + "\n";
-			out += newLines.map((l) => `+${l}`).join("\n") + "\n";
+			unstaged.push({ section: "unstaged", path: rel, status: "M" });
 		}
 	}
-
-	return out.trim() || "(no changes yet)";
+	return { branch: "(no git)", staged: [], unstaged, untracked: [] };
 }
 
-function refreshDiff(): void {
-	state.diffText = state.isGitRepo ? generateGitDiff(state.cwd) : generateSnapshotDiff();
+function refreshStatus(): void {
+	state.status = state.isGitRepo ? loadGitStatus(state.cwd) : loadSnapshotStatus();
+	state.diffCache.clear();
 	state.lastRefresh = Date.now();
 }
 
+// ---------- Per-file diff loading ----------
+
+function diffCacheKey(entry: FileEntry): string {
+	return `${entry.section}:${entry.path}`;
+}
+
+function loadFileDiff(entry: FileEntry): string[] {
+	const key = diffCacheKey(entry);
+	const cached = state.diffCache.get(key);
+	if (cached) return cached;
+
+	let lines: string[];
+	if (state.isGitRepo) {
+		lines = loadGitFileDiff(entry);
+	} else {
+		lines = loadSnapshotFileDiff(entry);
+	}
+	state.diffCache.set(key, lines);
+	return lines;
+}
+
+function loadGitFileDiff(entry: FileEntry): string[] {
+	if (entry.section === "untracked") {
+		const abs = resolve(state.cwd, entry.path);
+		try {
+			const content = readFileSync(abs, "utf8");
+			const fileLines = content.split("\n");
+			const out: string[] = [];
+			out.push(`@@ -0,0 +1,${fileLines.length} @@`);
+			for (const l of fileLines) out.push(`+${l}`);
+			return out;
+		} catch (e) {
+			return [`(unreadable: ${(e as Error).message})`];
+		}
+	}
+
+	const flag = entry.section === "staged" ? "--cached" : "";
+	try {
+		const cmd = `git diff ${flag} --no-color -- ${JSON.stringify(entry.path)}`.trim();
+		const out = execSync(cmd, {
+			cwd: state.cwd,
+			encoding: "utf8",
+			maxBuffer: 16 * 1024 * 1024,
+		});
+		const all = out.split("\n");
+		// Skip the file header (diff --git ... / index ... / --- / +++) — the file row above
+		// already names the file. Start from the first hunk.
+		const hunkIdx = all.findIndex((l) => l.startsWith("@@"));
+		const sliced = hunkIdx >= 0 ? all.slice(hunkIdx) : all;
+		// Drop trailing blank
+		while (sliced.length && !sliced[sliced.length - 1]) sliced.pop();
+		if (sliced.length === 0) return ["(no diff)"];
+		return sliced;
+	} catch (e) {
+		return [`(diff failed: ${(e as Error).message})`];
+	}
+}
+
+function loadSnapshotFileDiff(entry: FileEntry): string[] {
+	const abs = resolve(state.cwd, entry.path);
+	const original = state.snapshots.get(abs);
+	let current: string | null = null;
+	try {
+		if (existsSync(abs)) current = readFileSync(abs, "utf8");
+	} catch {
+		current = null;
+	}
+
+	if (original === undefined && current !== null) {
+		// Not snapshotted but exists — treat as fully new.
+		const fileLines = current.split("\n");
+		return [`@@ -0,0 +1,${fileLines.length} @@`, ...fileLines.map((l) => `+${l}`)];
+	}
+	if (original === null && current !== null) {
+		const fileLines = current.split("\n");
+		return [`@@ -0,0 +1,${fileLines.length} @@`, ...fileLines.map((l) => `+${l}`)];
+	}
+	if (original !== null && original !== undefined && current === null) {
+		const fileLines = original.split("\n");
+		return [`@@ -1,${fileLines.length} +0,0 @@`, ...fileLines.map((l) => `-${l}`)];
+	}
+	if (original !== null && original !== undefined && current !== null && original !== current) {
+		const oldLines = original.split("\n");
+		const newLines = current.split("\n");
+		return [
+			`@@ -1,${oldLines.length} +1,${newLines.length} @@`,
+			...oldLines.map((l) => `-${l}`),
+			...newLines.map((l) => `+${l}`),
+		];
+	}
+	return ["(no diff)"];
+}
+
+// ---------- Snapshot tracking (non-git fallback) ----------
+
 function snapshotIfNeeded(path: string): void {
-	if (state.isGitRepo) return; // git tracks for us
+	if (state.isGitRepo) return;
 	const abs = resolve(state.cwd, path);
 	if (state.snapshots.has(abs)) return;
 	try {
@@ -166,29 +324,26 @@ function trackPath(path: string): void {
 	state.touched.add(abs);
 }
 
-// ---------- Diff styling ----------
+// ---------- ANSI styling ----------
 
-// ANSI codes — explicit bright green/red so additions/deletions pop
-// regardless of theme. We use these instead of pi's renderDiff because
-// renderDiff expects a line-numbered format (`+123 content`) and silently
-// renders raw `git diff HEAD` output as dim context.
 const RESET = "\x1b[0m";
 const BOLD = "\x1b[1m";
 const DIM = "\x1b[2m";
+const INVERSE = "\x1b[7m";
+const INVERSE_OFF = "\x1b[27m";
 const FG_GREEN = "\x1b[32m";
 const FG_RED = "\x1b[31m";
 const FG_CYAN = "\x1b[36m";
 const FG_YELLOW = "\x1b[33m";
 const FG_GRAY = "\x1b[90m";
-const BG_GREEN = "\x1b[48;5;22m"; // dark green bg for added lines
-const BG_RED = "\x1b[48;5;52m"; // dark red bg for removed lines
+const FG_MAGENTA = "\x1b[35m";
+const BG_GREEN = "\x1b[48;5;22m";
+const BG_RED = "\x1b[48;5;52m";
 
-// Tabs in source code are a real footgun for pi-tui's width calculations:
-// wrapTextWithAnsi() and truncateToWidth() count a TAB as 1 visible column,
-// but the terminal renders it as 4 or 8 columns. That mismatch makes the
-// overlay row wider than `width`, tripping the TUI overflow guard
-// (e.g. "Rendered line N exceeds terminal width (396 > 393)").
-// Expand tabs to spaces up front so widths line up.
+/**
+ * pi-tui counts a TAB as 1 visible column but the terminal renders 4-8.
+ * Expand to spaces up front so width math lines up.
+ */
 function expandTabs(line: string, tabSize = 4): string {
 	if (!line.includes("\t")) return line;
 	let out = "";
@@ -209,58 +364,201 @@ function expandTabs(line: string, tabSize = 4): string {
 function styleDiffLine(line: string): string {
 	line = expandTabs(line);
 	if (line.length === 0) return "";
-	// File header lines
-	if (line.startsWith("diff --git ")) {
-		return `${BOLD}${FG_CYAN}${line}${RESET}`;
-	}
-	if (line.startsWith("index ") || line.startsWith("new file") || line.startsWith("deleted file")) {
-		return `${FG_GRAY}${line}${RESET}`;
-	}
-	if (line.startsWith("--- ") || line.startsWith("+++ ")) {
-		return `${BOLD}${FG_GRAY}${line}${RESET}`;
-	}
-	// Hunk header
-	if (line.startsWith("@@")) {
-		return `${FG_YELLOW}${line}${RESET}`;
-	}
-	// Added line — bright green on dark green bg, bold marker
+	if (line.startsWith("@@")) return `${FG_YELLOW}${line}${RESET}`;
 	if (line.startsWith("+")) {
 		return `${BG_GREEN}${FG_GREEN}${BOLD}+${RESET}${BG_GREEN}${FG_GREEN}${line.slice(1)}${RESET}`;
 	}
-	// Removed line — bright red on dark red bg, bold marker
 	if (line.startsWith("-")) {
 		return `${BG_RED}${FG_RED}${BOLD}-${RESET}${BG_RED}${FG_RED}${line.slice(1)}${RESET}`;
 	}
-	// Context (space prefix) — dim
 	return `${DIM}${line}${RESET}`;
 }
 
-function styledDiffLines(): string[] {
-	return state.diffText.split("\n").map(styleDiffLine);
+function statusLetterColor(status: string, section: Section): string {
+	if (section === "untracked") return FG_CYAN;
+	if (section === "staged") return FG_GREEN;
+	// unstaged
+	if (status === "D") return FG_RED;
+	if (status === "A") return FG_GREEN;
+	return FG_YELLOW;
 }
 
-// ---------- Modal overlay component (full scrollable diff viewer) ----------
+// ---------- Stage / unstage actions ----------
 
-class DiffOverlay implements Component {
+function stageOrUnstage(entry: FileEntry): { ok: boolean; message: string } {
+	if (!state.isGitRepo) {
+		return { ok: false, message: "Not a git repo — stage/unstage disabled" };
+	}
+	const quoted = JSON.stringify(entry.path);
+	try {
+		if (entry.section === "staged") {
+			execSync(`git reset -q HEAD -- ${quoted}`, {
+				cwd: state.cwd,
+				stdio: ["ignore", "pipe", "pipe"],
+			});
+			return { ok: true, message: `Unstaged ${entry.path}` };
+		}
+		// untracked or unstaged — `git add -A` handles new/modified/deleted
+		execSync(`git add -A -- ${quoted}`, {
+			cwd: state.cwd,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+		return { ok: true, message: `Staged ${entry.path}` };
+	} catch (e) {
+		const stderr = (e as { stderr?: Buffer }).stderr?.toString().trim() || (e as Error).message;
+		return { ok: false, message: stderr.split("\n")[0] };
+	}
+}
+
+// ---------- List row construction ----------
+
+type RowKind = "header" | "file" | "diff" | "spacer";
+
+interface ListRow {
+	kind: RowKind;
+	/** Pre-styled text, NOT yet width-truncated. */
+	text: string;
+	/** For kind === 'file': index into flat entries. */
+	entryIndex?: number;
+	/** For kind === 'diff' / 'spacer' under a file: index it belongs to. */
+	belongsTo?: number;
+}
+
+function flatEntries(): FileEntry[] {
+	const s = state.status;
+	return [...s.untracked, ...s.unstaged, ...s.staged];
+}
+
+function sectionHeader(label: string, count: number, color: string): string {
+	return `${BOLD}${color}${label}${RESET} ${FG_GRAY}(${count})${RESET}`;
+}
+
+function fileRowText(entry: FileEntry, isCursor: boolean): string {
+	const color = statusLetterColor(entry.status, entry.section);
+	const letter = entry.status === "?" ? "?" : entry.status;
+	const marker = isCursor ? `${FG_MAGENTA}${BOLD}▶${RESET}` : " ";
+	const inner = `${marker}  ${BOLD}${color}${letter}${RESET}  ${entry.path}`;
+	return isCursor ? `${INVERSE}${inner}${INVERSE_OFF}` : inner;
+}
+
+function buildRows(cursorEntryIndex: number, expanded: Set<string>, innerWidth: number): ListRow[] {
+	const rows: ListRow[] = [];
+	const s = state.status;
+
+	// Header line
+	const headLabel = state.isGitRepo ? "HEAD" : "(snapshot mode)";
+	const headValue = state.isGitRepo ? s.branch || "(unknown)" : state.cwd;
+	rows.push({
+		kind: "header",
+		text: `${BOLD}${FG_GRAY}${headLabel}:${RESET} ${headValue}`,
+	});
+	rows.push({ kind: "spacer", text: "" });
+
+	const entries = flatEntries();
+	let entryIdx = 0;
+
+	const renderSection = (label: string, list: FileEntry[], color: string) => {
+		if (list.length === 0) return;
+		rows.push({ kind: "header", text: sectionHeader(label, list.length, color) });
+		for (const entry of list) {
+			const isCursor = entryIdx === cursorEntryIndex;
+			rows.push({
+				kind: "file",
+				text: fileRowText(entry, isCursor),
+				entryIndex: entryIdx,
+			});
+			if (expanded.has(diffCacheKey(entry))) {
+				const diffLines = loadFileDiff(entry);
+				const indent = "    ";
+				// Wrap each diff line within the available width minus indent.
+				const wrapWidth = Math.max(10, innerWidth - indent.length - 2);
+				for (const raw of diffLines) {
+					const styled = styleDiffLine(raw);
+					const pieces = wrapTextWithAnsi(styled, wrapWidth);
+					for (const p of pieces) {
+						rows.push({
+							kind: "diff",
+							text: `${indent}${p}`,
+							belongsTo: entryIdx,
+						});
+					}
+				}
+				rows.push({ kind: "spacer", text: "", belongsTo: entryIdx });
+			}
+			entryIdx++;
+		}
+		rows.push({ kind: "spacer", text: "" });
+	};
+
+	renderSection("Untracked", s.untracked, FG_CYAN);
+	renderSection("Unstaged", s.unstaged, FG_YELLOW);
+	renderSection("Staged", s.staged, FG_GREEN);
+
+	if (entries.length === 0) {
+		rows.push({
+			kind: "header",
+			text: `${DIM}nothing to commit, working tree clean${RESET}`,
+		});
+	}
+
+	return rows;
+}
+
+// ---------- Overlay component ----------
+
+class StatusOverlay implements Component {
+	private cursor = 0;
+	private expanded: Set<string> = new Set();
 	private scroll = 0;
 	private lastWidth = 0;
-	private cachedWrappedLines: string[] = [];
+	private cachedRows: ListRow[] = [];
 	private lastDiffStamp = -1;
-	// Number of content rows we last rendered. Used by handleInput so paging
-	// (PgUp/PgDn) tracks whatever full-height the overlay currently has.
-	private visibleContentHeight = 30;
+	private visibleHeight = 30;
 
-	// Total chrome rows around the content area: top border, title, separator,
-	// scroll info, hint, bottom border = 6.
+	// top border, header, blank, scroll info, hint, bottom border
 	private static readonly CHROME_ROWS = 6;
 
 	constructor(
 		private theme: Theme,
 		private done: () => void,
 		private requestRender: () => void,
+		private notify: (msg: string, level?: "info" | "warning" | "error") => void,
 		private onCommit: () => void,
 	) {
-		refreshDiff();
+		refreshStatus();
+	}
+
+	/** Force the next render to rebuild rows. Called from outside on auto-refresh. */
+	invalidate(): void {
+		this.cachedRows = [];
+		this.lastDiffStamp = -1;
+		this.clampCursor();
+	}
+
+	private currentEntry(): FileEntry | null {
+		const entries = flatEntries();
+		if (this.cursor < 0 || this.cursor >= entries.length) return null;
+		return entries[this.cursor];
+	}
+
+	private clampCursor(): void {
+		const total = flatEntries().length;
+		if (total === 0) {
+			this.cursor = 0;
+			return;
+		}
+		if (this.cursor < 0) this.cursor = 0;
+		if (this.cursor >= total) this.cursor = total - 1;
+	}
+
+	/** Find the row index of the given entry index in the cached rows. */
+	private cursorRowIndex(): number {
+		for (let i = 0; i < this.cachedRows.length; i++) {
+			if (this.cachedRows[i].kind === "file" && this.cachedRows[i].entryIndex === this.cursor) {
+				return i;
+			}
+		}
+		return 0;
 	}
 
 	handleInput(data: string): void {
@@ -272,71 +570,113 @@ class DiffOverlay implements Component {
 			this.onCommit();
 			return;
 		}
-		const visibleHeight = this.visibleContentHeight;
-		const maxScroll = Math.max(0, this.cachedWrappedLines.length - visibleHeight);
-
-		if (matchesKey(data, "up") || data === "k") {
-			this.scroll = Math.max(0, this.scroll - 1);
-		} else if (matchesKey(data, "down") || data === "j") {
-			this.scroll = Math.min(maxScroll, this.scroll + 1);
-		} else if (matchesKey(data, "pageUp") || data === "\x15") {
-			this.scroll = Math.max(0, this.scroll - visibleHeight);
-		} else if (matchesKey(data, "pageDown") || data === "\x04" || data === " ") {
-			this.scroll = Math.min(maxScroll, this.scroll + visibleHeight);
-		} else if (matchesKey(data, "home") || data === "g") {
-			this.scroll = 0;
-		} else if (matchesKey(data, "end") || data === "G") {
-			this.scroll = maxScroll;
-		} else if (data === "r" || data === "R") {
-			refreshDiff();
-			this.cachedWrappedLines = [];
-		} else {
+		if (data === "r" || data === "R") {
+			refreshStatus();
+			this.invalidate();
+			this.clampCursor();
+			this.requestRender();
 			return;
 		}
-		this.requestRender();
-	}
 
-	invalidate(): void {
-		this.cachedWrappedLines = [];
+		const total = flatEntries().length;
+
+		if (matchesKey(data, "up") || data === "k") {
+			if (total === 0) return;
+			this.cursor = Math.max(0, this.cursor - 1);
+			this.invalidate();
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "down") || data === "j") {
+			if (total === 0) return;
+			this.cursor = Math.min(total - 1, this.cursor + 1);
+			this.invalidate();
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "home") || data === "g") {
+			this.cursor = 0;
+			this.invalidate();
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "end") || data === "G") {
+			this.cursor = Math.max(0, total - 1);
+			this.invalidate();
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "pageUp") || data === "\x15" /* C-u */) {
+			this.scroll = Math.max(0, this.scroll - this.visibleHeight);
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "pageDown") || data === "\x04" /* C-d */) {
+			const maxScroll = Math.max(0, this.cachedRows.length - this.visibleHeight);
+			this.scroll = Math.min(maxScroll, this.scroll + this.visibleHeight);
+			this.requestRender();
+			return;
+		}
+
+		if (data === " ") {
+			const entry = this.currentEntry();
+			if (!entry) return;
+			const key = diffCacheKey(entry);
+			if (this.expanded.has(key)) this.expanded.delete(key);
+			else this.expanded.add(key);
+			this.invalidate();
+			this.requestRender();
+			return;
+		}
+
+		if (data === "-") {
+			const entry = this.currentEntry();
+			if (!entry) return;
+			const rememberedPath = entry.path;
+			const result = stageOrUnstage(entry);
+			if (!result.ok) {
+				this.notify(result.message, "warning");
+				return;
+			}
+			refreshStatus();
+			// Try to keep cursor on the same path in its new section.
+			const entries = flatEntries();
+			const sameIdx = entries.findIndex((e) => e.path === rememberedPath);
+			if (sameIdx >= 0) this.cursor = sameIdx;
+			else this.clampCursor();
+			this.invalidate();
+			this.requestRender();
+			return;
+		}
 	}
 
 	render(width: number): string[] {
 		const th = this.theme;
 		const innerW = Math.max(20, width - 2);
 
-		// Re-wrap when width changes or diff updates
 		if (
-			this.cachedWrappedLines.length === 0 ||
+			this.cachedRows.length === 0 ||
 			this.lastWidth !== width ||
 			this.lastDiffStamp !== state.lastRefresh
 		) {
-			const styled = styledDiffLines();
-			const wrapped: string[] = [];
-			for (const line of styled) {
-				const pieces = wrapTextWithAnsi(line, innerW - 2);
-				for (const p of pieces) wrapped.push(p);
-			}
-			this.cachedWrappedLines = wrapped;
+			this.cachedRows = buildRows(this.cursor, this.expanded, innerW);
 			this.lastWidth = width;
 			this.lastDiffStamp = state.lastRefresh;
-			// Clamp scroll if diff shrank
-			const maxScroll = Math.max(0, this.cachedWrappedLines.length - this.visibleContentHeight);
-			if (this.scroll > maxScroll) this.scroll = maxScroll;
 		}
 
-		const totalLines = this.cachedWrappedLines.length;
-		const fileCount = (state.diffText.match(/^diff --git /gm) || []).length;
-		const title = th.bold(th.fg("accent", "📋 Session Diff"));
-		const stats = th.fg("muted", `  ${fileCount} file${fileCount === 1 ? "" : "s"}  ${totalLines} lines`);
+		const entries = flatEntries();
+		const stagedCount = state.status.staged.length;
+		const totalCount = entries.length;
+
+		const title = th.bold(th.fg("accent", "📋 Git Status"));
+		const stats = th.fg(
+			"muted",
+			`  ${totalCount} file${totalCount === 1 ? "" : "s"}  •  ${stagedCount} staged`,
+		);
 		const mode = th.fg("dim", state.isGitRepo ? "git" : "snapshot");
 
 		const top = th.fg("border", "╭" + "─".repeat(innerW) + "╮");
 		const bottom = th.fg("border", "╰" + "─".repeat(innerW) + "╯");
-		// truncateToWidth with pad=true both truncates overflow AND pads underflow
-		// to exactly innerW. This is the safety net that prevents the TUI
-		// "Rendered line N exceeds terminal width" crash if wrapTextWithAnsi
-		// ever returns a piece slightly wider than requested (wide chars, ANSI
-		// edge cases).
 		const row = (s: string) =>
 			th.fg("border", "│") + truncateToWidth(s, innerW, "", true) + th.fg("border", "│");
 
@@ -345,28 +685,37 @@ class DiffOverlay implements Component {
 		lines.push(row(` ${title}${stats}  ${mode}`));
 		lines.push(row(th.fg("border", "─".repeat(innerW))));
 
-		// Fill whatever vertical space the overlay was given. The overlay is
-		// configured with maxHeight: "100%" so this expands to the full terminal
-		// height (minus a small margin). Fall back to the previous default if
-		// rows are unavailable.
 		const termRows = (process.stdout.rows ?? 36) as number;
-		const contentHeight = Math.max(5, termRows - DiffOverlay.CHROME_ROWS - 2 /* top+bottom margin */);
-		this.visibleContentHeight = contentHeight;
+		const contentHeight = Math.max(5, termRows - StatusOverlay.CHROME_ROWS - 2);
+		this.visibleHeight = contentHeight;
 
-		// Re-clamp scroll now that contentHeight may have changed (e.g. terminal resize).
-		const maxScrollAfterResize = Math.max(0, this.cachedWrappedLines.length - contentHeight);
-		if (this.scroll > maxScrollAfterResize) this.scroll = maxScrollAfterResize;
+		// Auto-scroll so cursor row stays visible.
+		const cursorRow = this.cursorRowIndex();
+		if (cursorRow < this.scroll) this.scroll = Math.max(0, cursorRow - 1);
+		if (cursorRow >= this.scroll + contentHeight) {
+			this.scroll = Math.max(0, cursorRow - contentHeight + 2);
+		}
+		const maxScroll = Math.max(0, this.cachedRows.length - contentHeight);
+		if (this.scroll > maxScroll) this.scroll = maxScroll;
 
-		const visible = this.cachedWrappedLines.slice(this.scroll, this.scroll + contentHeight);
-		for (const l of visible) lines.push(row(" " + l + " "));
+		const visible = this.cachedRows.slice(this.scroll, this.scroll + contentHeight);
+		for (const r of visible) lines.push(row(" " + r.text + " "));
 		for (let i = visible.length; i < contentHeight; i++) lines.push(row(""));
 
-		const end = Math.min(this.scroll + contentHeight, totalLines);
-		const scrollInfo = totalLines > contentHeight
-			? `${this.scroll + 1}-${end} / ${totalLines}`
-			: `${totalLines} lines`;
+		const end = Math.min(this.scroll + contentHeight, this.cachedRows.length);
+		const scrollInfo =
+			this.cachedRows.length > contentHeight
+				? `${this.scroll + 1}-${end} / ${this.cachedRows.length}`
+				: `${this.cachedRows.length} rows`;
 		lines.push(row(th.fg("dim", ` ${scrollInfo}`)));
-		lines.push(row(th.fg("dim", " ↑↓/jk • PgUp/PgDn • g/G • r refresh • c commit • q/Esc close")));
+		lines.push(
+			row(
+				th.fg(
+					"dim",
+					" j/k move • space expand • - stage/unstage • c commit • r refresh • q close",
+				),
+			),
+		);
 		lines.push(bottom);
 
 		return lines;
@@ -375,14 +724,10 @@ class DiffOverlay implements Component {
 
 // ---------- Tracked tool detection ----------
 
-function pathsFromToolCall(toolName: string, input: any): string[] {
+function pathsFromToolCall(toolName: string, input: unknown): string[] {
 	if (toolName === "write" || toolName === "edit") {
-		return input?.path ? [input.path] : [];
-	}
-	if (toolName === "bash") {
-		// Best-effort: don't try to parse arbitrary bash. Fall back to tracking nothing —
-		// in git mode we'll see all changes anyway via `git diff`.
-		return [];
+		const p = (input as { path?: string } | null)?.path;
+		return p ? [p] : [];
 	}
 	return [];
 }
@@ -396,31 +741,27 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 	pi.on("session_start", async (_event, ctx) => {
 		state.cwd = ctx.cwd;
 		state.isGitRepo = detectGitRepo(ctx.cwd);
-		refreshDiff();
+		refreshStatus();
 	});
 
-	// Snapshot before write/edit (non-git mode)
+	// Snapshot before write/edit (non-git mode only)
 	pi.on("tool_call", async (event) => {
 		if (!state.isGitRepo) {
 			if (isToolCallEventType("write", event) || isToolCallEventType("edit", event)) {
-				const path = (event.input as any).path;
+				const path = (event.input as { path?: string }).path;
 				if (path) snapshotIfNeeded(path);
 			}
 		}
 	});
 
-	// After tool result, refresh diff
+	// After tool result, refresh status and re-render overlay if open.
 	pi.on("tool_result", async (event) => {
 		const paths = pathsFromToolCall(event.toolName, event.input);
 		for (const p of paths) trackPath(p);
 
-		// Refresh on any potentially file-mutating tool (incl. bash in git mode)
-		if (
-			event.toolName === "write" ||
-			event.toolName === "edit" ||
-			event.toolName === "bash"
-		) {
-			refreshDiff();
+		if (event.toolName === "write" || event.toolName === "edit" || event.toolName === "bash") {
+			refreshStatus();
+			requestOverlayRender?.();
 		}
 	});
 
@@ -429,35 +770,41 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			ctx.ui.notify("Not a git repo — cannot commit", "warning");
 			return;
 		}
-		let hasChanges = false;
+		let stagedCount = 0;
 		try {
-			const staged = execSync("git diff --cached --name-only", { cwd: state.cwd, encoding: "utf8" }).trim();
-			const unstaged = execSync("git diff --name-only", { cwd: state.cwd, encoding: "utf8" }).trim();
-			const untracked = execSync("git ls-files --others --exclude-standard", { cwd: state.cwd, encoding: "utf8" }).trim();
-			hasChanges = !!(staged || unstaged || untracked);
+			const staged = execSync("git diff --cached --name-only", {
+				cwd: state.cwd,
+				encoding: "utf8",
+			}).trim();
+			stagedCount = staged ? staged.split("\n").length : 0;
 		} catch {
-			hasChanges = false;
+			stagedCount = 0;
 		}
-		if (!hasChanges) {
-			ctx.ui.notify("No changes to commit", "info");
+		if (stagedCount === 0) {
+			ctx.ui.notify("No staged changes — press '-' to stage files first", "warning");
 			return;
 		}
 
-		const message = await ctx.ui.input("Commit message", "e.g. fix: handle edge case");
+		const message = await ctx.ui.input(
+			`Commit message (${stagedCount} file${stagedCount === 1 ? "" : "s"} staged)`,
+			"e.g. fix: handle edge case",
+		);
 		if (!message || !message.trim()) {
 			ctx.ui.notify("Commit cancelled", "info");
 			return;
 		}
 
 		try {
-			execSync("git add -A", { cwd: state.cwd, stdio: ["ignore", "pipe", "pipe"] });
 			execSync(`git commit -m ${JSON.stringify(message.trim())}`, {
 				cwd: state.cwd,
 				stdio: ["ignore", "pipe", "pipe"],
 			});
-			const sha = execSync("git rev-parse --short HEAD", { cwd: state.cwd, encoding: "utf8" }).trim();
+			const sha = execSync("git rev-parse --short HEAD", {
+				cwd: state.cwd,
+				encoding: "utf8",
+			}).trim();
 			ctx.ui.notify(`Committed ${sha}: ${message.trim()}`, "info");
-			refreshDiff();
+			refreshStatus();
 		} catch (e) {
 			const stderr = (e as { stderr?: Buffer }).stderr?.toString().trim() || (e as Error).message;
 			ctx.ui.notify(`Commit failed: ${stderr.split("\n")[0]}`, "error");
@@ -465,13 +812,13 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 	}
 
 	pi.registerCommand("diff-panel", {
-		description: "Toggle the side diff panel (modal overlay)",
+		description: "Toggle the side diff panel (interactive git status)",
 		handler: async (_args, ctx) => {
 			if (overlayActive) {
 				overlayDone?.();
 				return;
 			}
-			refreshDiff();
+			refreshStatus();
 			overlayActive = true;
 			let pendingCommit = false;
 			await ctx.ui.custom<void>(
@@ -480,17 +827,24 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						done();
 						overlayActive = false;
 						overlayDone = null;
+						requestOverlayRender = null;
 					};
 					const onCommit = () => {
 						pendingCommit = true;
 						overlayDone!();
 					};
-					return new DiffOverlay(
+					const overlay = new StatusOverlay(
 						theme,
 						() => overlayDone!(),
 						() => tui.requestRender(),
+						(msg, level) => ctx.ui.notify(msg, level ?? "info"),
 						onCommit,
 					);
+					requestOverlayRender = () => {
+						overlay.invalidate();
+						tui.requestRender();
+					};
+					return overlay;
 				},
 				{
 					overlay: true,
@@ -508,5 +862,4 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			}
 		},
 	});
-
 }
