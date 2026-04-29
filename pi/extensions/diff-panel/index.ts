@@ -32,6 +32,7 @@ import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import {
 	type Component,
 	matchesKey,
+	type OverlayHandle,
 	truncateToWidth,
 	wrapTextWithAnsi,
 } from "@mariozechner/pi-tui";
@@ -88,6 +89,16 @@ const state: DiffState = {
  * Used by tool_result auto-refresh and by stage/unstage actions.
  */
 let requestOverlayRender: (() => void) | null = null;
+
+/**
+ * The overlay handle while it's open. Used by the `ctrl+g` shortcut to grab
+ * keyboard focus on demand. Null when the overlay is closed.
+ */
+let overlayHandle: OverlayHandle | null = null;
+
+/** Key used to focus the overlay from the prompt. */
+// ctrl+g conflicts with the built-in app.editor.external (open $EDITOR).
+const FOCUS_OVERLAY_KEY = "alt+g";
 
 // ---------- Git helpers ----------
 
@@ -524,6 +535,7 @@ class StatusOverlay implements Component {
 		private requestRender: () => void,
 		private notify: (msg: string, level?: "info" | "warning" | "error") => void,
 		private onCommit: () => void,
+		private releaseFocus: () => void,
 	) {
 		refreshStatus();
 	}
@@ -562,7 +574,13 @@ class StatusOverlay implements Component {
 	}
 
 	handleInput(data: string): void {
-		if (matchesKey(data, "escape") || data === "q" || data === "Q") {
+		// Esc returns focus to the prompt but keeps the overlay open.
+		if (matchesKey(data, "escape")) {
+			this.releaseFocus();
+			return;
+		}
+		// q closes the overlay entirely.
+		if (data === "q" || data === "Q") {
 			this.done();
 			return;
 		}
@@ -712,7 +730,8 @@ class StatusOverlay implements Component {
 			row(
 				th.fg(
 					"dim",
-					" j/k move • space expand • - stage/unstage • c commit • r refresh • q close",
+					" " + FOCUS_OVERLAY_KEY +
+						" focus • j/k move • space expand • - stage • c commit • r refresh • esc unfocus • q close",
 				),
 			),
 		);
@@ -828,10 +847,15 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						overlayActive = false;
 						overlayDone = null;
 						requestOverlayRender = null;
+						overlayHandle = null;
 					};
 					const onCommit = () => {
 						pendingCommit = true;
 						overlayDone!();
+					};
+					const releaseFocus = () => {
+						overlayHandle?.unfocus();
+						tui.requestRender();
 					};
 					const overlay = new StatusOverlay(
 						theme,
@@ -839,6 +863,7 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						() => tui.requestRender(),
 						(msg, level) => ctx.ui.notify(msg, level ?? "info"),
 						onCommit,
+						releaseFocus,
 					);
 					requestOverlayRender = () => {
 						overlay.invalidate();
@@ -854,12 +879,30 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						maxHeight: "100%",
 						anchor: "top-right",
 						margin: { top: 1, right: 1, bottom: 1 },
+						// Don't grab keyboard focus on open. The user keeps typing in
+						// the prompt; pressing the focus shortcut hands control to the
+						// overlay on demand.
+						nonCapturing: true,
+					},
+					onHandle: (handle) => {
+						overlayHandle = handle;
 					},
 				},
 			);
 			if (pendingCommit) {
 				await commitFlow(ctx);
 			}
+		},
+	});
+
+	// Global shortcut: focus the overlay so j/k, space, -, c, r work.
+	// No-op when the overlay is closed or already focused.
+	pi.registerShortcut(FOCUS_OVERLAY_KEY, {
+		description: "Focus the diff panel overlay (when open)",
+		handler: () => {
+			if (!overlayHandle) return;
+			if (overlayHandle.isFocused()) return;
+			overlayHandle.focus();
 		},
 	});
 }

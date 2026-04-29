@@ -4,9 +4,17 @@ Interactive git status overlay for the current pi session. Single command: `/dif
 
 ## Command
 
-`/diff-panel` toggles a scrollable modal overlay anchored to the right side of the terminal. By default it shows a list of changed files grouped into **Untracked → Unstaged → Staged**, auto-refreshing on every `write`/`edit`/`bash` tool call.
+`/diff-panel` toggles a scrollable overlay anchored to the right side of the terminal. By default it shows a list of changed files grouped into **Untracked → Unstaged → Staged**, auto-refreshing on every `write`/`edit`/`bash` tool call.
 
-## Keys (in the overlay)
+The overlay is **non-capturing**: while it's open you can keep typing in the prompt as usual. To interact with it, focus it with the shortcut below.
+
+## Keys
+
+**From the prompt (overlay open, prompt focused):**
+
+- `Alt+G` — focus the overlay so its keys take effect
+
+**Inside the overlay (focused):**
 
 - `↑` / `↓` or `j` / `k` — move cursor between files
 - `<space>` — toggle inline diff under the current file
@@ -15,7 +23,10 @@ Interactive git status overlay for the current pi session. Single command: `/dif
 - `r` — force refresh
 - `g` / `G` — first / last file
 - `PgUp` / `PgDn` (or `Ctrl+U` / `Ctrl+D`) — scroll viewport one page
-- `q` or `Esc` — close
+- `Esc` — release focus back to the prompt (overlay stays open)
+- `q` — close the overlay entirely
+
+Run `/diff-panel` again at any time to close it.
 
 ## Behavior
 
@@ -27,6 +38,5 @@ Diffs are rendered with explicit bright green/red on dark green/red backgrounds,
 
 ## Notes
 
-- The overlay is modal: while it's open, keystrokes drive the panel. Press `q`/`Esc` to return to typing.
 - Width is 50% (min 50 cols), anchored top-right, full height.
 - `/reload` picks up code changes to this extension without restarting pi.
