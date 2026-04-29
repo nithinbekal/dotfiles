@@ -1,7 +1,4 @@
-#undef TAPPING_TERM
-#define TAPPING_TERM 175
-
 #define USB_SUSPEND_WAKEUP_DELAY 0
-#define SERIAL_NUMBER "4WqVm/6ayg4r"
+#define SERIAL_NUMBER "mXEoP/DzYGoJ"
 #define LAYER_STATE_8BIT
 
