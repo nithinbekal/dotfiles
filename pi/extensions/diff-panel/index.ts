@@ -945,7 +945,6 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			}
 			refreshStatus();
 			overlayActive = true;
-			let pendingCommit = false;
 			await ctx.ui.custom<void>(
 				(tui, theme, _kb, done) => {
 					overlayDone = () => {
@@ -955,9 +954,14 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						requestOverlayRender = null;
 						overlayHandle = null;
 					};
+					// Run the commit flow inline without closing the overlay. The
+					// input dialog replaces the prompt editor, so the overlay stays
+					// pinned top-right and shows the result of the commit when done.
 					const onCommit = () => {
-						pendingCommit = true;
-						overlayDone!();
+						void commitFlow(ctx).then(() => {
+							refreshStatus();
+							requestOverlayRender?.();
+						});
 					};
 					const releaseFocus = () => {
 						overlayHandle?.unfocus();
@@ -995,9 +999,6 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 					},
 				},
 			);
-			if (pendingCommit) {
-				await commitFlow(ctx);
-			}
 		},
 	});
 
