@@ -7,7 +7,11 @@
  * Layout:
  *   Untracked (N) → Unstaged (N) → Staged (N)
  *
- * Keys (in the overlay):
+ * Focus model:
+ *   Overlay grabs keyboard focus on open. Press alt+g (or esc) to hand
+ *   control back to the prompt; alt+g again re-focuses the overlay.
+ *
+ * Keys (in the overlay, when focused):
  *   j/k or ↑/↓         move cursor between files
  *   space              toggle inline diff under current file
  *   -                  stage (untracked/unstaged) or unstage (staged)
@@ -15,7 +19,8 @@
  *   r                  refresh status
  *   g / G              first / last file
  *   PgUp / PgDn        scroll viewport one page
- *   q / Esc            close
+ *   alt+g / Esc        release focus back to the prompt
+ *   q                  close the overlay
  *
  * Auto-refreshes whenever the agent uses write/edit/bash tools.
  *
@@ -574,8 +579,8 @@ class StatusOverlay implements Component {
 	}
 
 	handleInput(data: string): void {
-		// Esc returns focus to the prompt but keeps the overlay open.
-		if (matchesKey(data, "escape")) {
+		// Esc / alt+g return focus to the prompt but keep the overlay open.
+		if (matchesKey(data, "escape") || matchesKey(data, "alt+g")) {
 			this.releaseFocus();
 			return;
 		}
@@ -730,8 +735,8 @@ class StatusOverlay implements Component {
 			row(
 				th.fg(
 					"dim",
-					" " + FOCUS_OVERLAY_KEY +
-						" focus • j/k move • space expand • - stage • c commit • r refresh • esc unfocus • q close",
+					" j/k move • space expand • - stage • c commit • r refresh • " +
+						FOCUS_OVERLAY_KEY + "/esc unfocus • q close",
 				),
 			),
 		);
@@ -879,10 +884,9 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						maxHeight: "100%",
 						anchor: "top-right",
 						margin: { top: 1, right: 1, bottom: 1 },
-						// Don't grab keyboard focus on open. The user keeps typing in
-						// the prompt; pressing the focus shortcut hands control to the
-						// overlay on demand.
-						nonCapturing: true,
+						// Grab keyboard focus on open so j/k, space, -, c, r work
+						// immediately. Press alt+g (or esc) to hand control back to
+						// the prompt; alt+g again re-focuses the overlay.
 					},
 					onHandle: (handle) => {
 						overlayHandle = handle;

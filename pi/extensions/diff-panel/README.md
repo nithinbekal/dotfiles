@@ -4,17 +4,13 @@ Interactive git status overlay for the current pi session. Single command: `/dif
 
 ## Command
 
-`/diff-panel` toggles a scrollable overlay anchored to the right side of the terminal. By default it shows a list of changed files grouped into **Untracked → Unstaged → Staged**, auto-refreshing on every `write`/`edit`/`bash` tool call.
+`/diff-panel` toggles a scrollable overlay anchored to the right side of the terminal. It shows a list of changed files grouped into **Untracked → Unstaged → Staged**, auto-refreshing on every `write`/`edit`/`bash` tool call.
 
-The overlay is **non-capturing**: while it's open you can keep typing in the prompt as usual. To interact with it, focus it with the shortcut below.
+The overlay **takes keyboard focus on open** so its keys work immediately. Press `Alt+G` (or `Esc`) to hand control back to the prompt; press `Alt+G` again to re-focus the overlay.
 
 ## Keys
 
-**From the prompt (overlay open, prompt focused):**
-
-- `Alt+G` — focus the overlay so its keys take effect
-
-**Inside the overlay (focused):**
+**Inside the overlay (focused, default on open):**
 
 - `↑` / `↓` or `j` / `k` — move cursor between files
 - `<space>` — toggle inline diff under the current file
@@ -23,8 +19,12 @@ The overlay is **non-capturing**: while it's open you can keep typing in the pro
 - `r` — force refresh
 - `g` / `G` — first / last file
 - `PgUp` / `PgDn` (or `Ctrl+U` / `Ctrl+D`) — scroll viewport one page
-- `Esc` — release focus back to the prompt (overlay stays open)
+- `Alt+G` or `Esc` — release focus back to the prompt (overlay stays open)
 - `q` — close the overlay entirely
+
+**From the prompt (overlay open, prompt focused):**
+
+- `Alt+G` — re-focus the overlay
 
 Run `/diff-panel` again at any time to close it.
 
