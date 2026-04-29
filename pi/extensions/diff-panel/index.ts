@@ -479,6 +479,44 @@ function flatEntries(): FileEntry[] {
 	return [...s.untracked, ...s.unstaged, ...s.staged];
 }
 
+function sectionList(section: Section): FileEntry[] {
+	const s = state.status;
+	if (section === "untracked") return s.untracked;
+	if (section === "unstaged") return s.unstaged;
+	return s.staged;
+}
+
+function sectionStart(section: Section): number {
+	const s = state.status;
+	if (section === "untracked") return 0;
+	if (section === "unstaged") return s.untracked.length;
+	return s.untracked.length + s.unstaged.length;
+}
+
+/**
+ * After a stage/unstage that moves a file out of `prevSection`, pick a flat
+ * cursor index that keeps focus in the same section on the file that has
+ * shifted into the previous slot (or the new last file if at the end). If the
+ * section is now empty, fall through to the next non-empty section in display
+ * order, then back to earlier sections as a last resort.
+ */
+function pickCursorAfterMutation(prevSection: Section, prevSectionIdx: number): number {
+	const order: Section[] = ["untracked", "unstaged", "staged"];
+	const start = order.indexOf(prevSection);
+	const tryOrder: Section[] = [
+		prevSection,
+		...order.slice(start + 1),
+		...order.slice(0, start).reverse(),
+	];
+	for (const sec of tryOrder) {
+		const list = sectionList(sec);
+		if (list.length === 0) continue;
+		const within = sec === prevSection ? Math.min(prevSectionIdx, list.length - 1) : 0;
+		return sectionStart(sec) + within;
+	}
+	return 0;
+}
+
 function sectionHeader(label: string, count: number, color: string): string {
 	return `${BOLD}${color}${label}${RESET} ${FG_GRAY}(${count})${RESET}`;
 }
@@ -716,18 +754,20 @@ class StatusOverlay implements Component {
 		if (data === "-") {
 			const entry = this.currentEntry();
 			if (!entry) return;
-			const rememberedPath = entry.path;
+			// Remember position within the section so we can land on the *next*
+			// file in the same section after staging/unstaging, instead of
+			// chasing the file to its new section.
+			const prevSection = entry.section;
+			const prevSectionList = sectionList(prevSection);
+			const prevSectionIdx = prevSectionList.indexOf(entry);
+
 			const result = stageOrUnstage(entry);
 			if (!result.ok) {
 				this.notify(result.message, "warning");
 				return;
 			}
 			refreshStatus();
-			// Try to keep cursor on the same path in its new section.
-			const entries = flatEntries();
-			const sameIdx = entries.findIndex((e) => e.path === rememberedPath);
-			if (sameIdx >= 0) this.cursor = sameIdx;
-			else this.clampCursor();
+			this.cursor = pickCursorAfterMutation(prevSection, prevSectionIdx);
 			this.invalidate();
 			this.requestRender();
 			return;
