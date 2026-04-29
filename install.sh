@@ -105,6 +105,7 @@ ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/themes
 ln -sf ~/dotfiles/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
+ln -sfn ~/dotfiles/pi/extensions/diff-panel ~/.pi/agent/extensions/diff-panel
 ln -sf ~/dotfiles/pi/settings.json ~/.pi/agent/settings.json
 ln -sf ~/dotfiles/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
 
