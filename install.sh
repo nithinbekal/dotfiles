@@ -66,7 +66,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Setting up Claude config"
   mkdir -p ~/.claude
   ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
-  ln -sf ~/dotfiles/agents/claude/settings.local.json ~/.claude/settings.local.json
   ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
 
   current_status "Setting up Obsidian backup"
