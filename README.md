@@ -10,9 +10,15 @@ cd dotfiles
 ./install.sh
 ```
 
-## Agent skills
+## Agent config
 
-Shared skills live in `common/skills/` and are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.pi/agent/skills/`.
+Agent-related files live under `agents/`:
+
+- `agents/common/` — shared skills for all agents
+- `agents/pi/` — Pi settings, extensions, themes, and Pi-specific files
+- `agents/claude/` — Claude settings and scripts
+
+Shared skills are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.pi/agent/skills/`.
 
 ### iTerm settings
 

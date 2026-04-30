@@ -65,9 +65,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
   current_status "Setting up Claude config"
   mkdir -p ~/.claude
-  ln -sf ~/dotfiles/.claude/settings.json ~/.claude/settings.json
-  ln -sf ~/dotfiles/.claude/settings.local.json ~/.claude/settings.local.json
-  ln -sf ~/dotfiles/.claude/statusline-command.sh ~/.claude/statusline-command.sh
+  ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
+  ln -sf ~/dotfiles/agents/claude/settings.local.json ~/.claude/settings.local.json
+  ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
 
   current_status "Setting up Obsidian backup"
   mkdir -p ~/Documents/backups/obsidian
@@ -104,14 +104,14 @@ ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
 
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/themes
-ln -sf ~/dotfiles/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
-ln -sfn ~/dotfiles/pi/extensions/diff-panel ~/.pi/agent/extensions/diff-panel
-ln -sf ~/dotfiles/pi/settings.json ~/.pi/agent/settings.json
-ln -sf ~/dotfiles/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
+ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
+ln -sfn ~/dotfiles/agents/pi/extensions/diff-panel ~/.pi/agent/extensions/diff-panel
+ln -sf ~/dotfiles/agents/pi/settings.json ~/.pi/agent/settings.json
+ln -sf ~/dotfiles/agents/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
 
 current_status "Setting up common agent skills"
 mkdir -p ~/.agents/skills ~/.claude/skills ~/.pi/agent/skills
-for skill in ~/dotfiles/common/skills/*
+for skill in ~/dotfiles/agents/common/skills/*
 do
   [ -d "$skill" ] || continue
   skill_name=$(basename "$skill")
