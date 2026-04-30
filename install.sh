@@ -109,4 +109,15 @@ ln -sfn ~/dotfiles/pi/extensions/diff-panel ~/.pi/agent/extensions/diff-panel
 ln -sf ~/dotfiles/pi/settings.json ~/.pi/agent/settings.json
 ln -sf ~/dotfiles/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
 
+current_status "Setting up common agent skills"
+mkdir -p ~/.agents/skills ~/.claude/skills ~/.pi/agent/skills
+for skill in ~/dotfiles/common/skills/*
+do
+  [ -d "$skill" ] || continue
+  skill_name=$(basename "$skill")
+  ln -sfn "$skill" ~/.agents/skills/$skill_name
+  ln -sfn "$skill" ~/.claude/skills/$skill_name
+  ln -sfn "$skill" ~/.pi/agent/skills/$skill_name
+done
+
 current_status "Installation successful 🚀"

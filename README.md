@@ -10,6 +10,10 @@ cd dotfiles
 ./install.sh
 ```
 
+## Agent skills
+
+Shared skills live in `common/skills/` and are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.pi/agent/skills/`.
+
 ### iTerm settings
 
 After running `./install.sh` on a new computer,
