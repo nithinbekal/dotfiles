@@ -1,16 +1,15 @@
 /**
  * Status Line Extension
  *
- * A custom footer for pi with:
- *   Left:   folder │ git branch │ ● model name │ thinking level
- *   Right:  ↑in ↓out tokens │ $cost │ turn count
+ * A custom footer for pi that mirrors the Claude Code status line:
+ *   π ❯ model/context/thinking ❯ folder ❯ git branch ❯ ctx usage ❯ tokens ❯ cost
  *
- * Also sets a status indicator that shows turn progress.
+ * Also tracks turn progress.
  */
 
 import type { AssistantMessage } from "@mariozechner/pi-ai";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
+import { truncateToWidth } from "@mariozechner/pi-tui";
 
 export default function (pi: ExtensionAPI) {
 	let turnCount = 0;
@@ -33,7 +32,6 @@ export default function (pi: ExtensionAPI) {
 				dispose: unsub,
 				invalidate() {},
 				render(width: number): string[] {
-					// --- Compute token stats ---
 					let inputTokens = 0;
 					let outputTokens = 0;
 					let totalCost = 0;
@@ -47,62 +45,52 @@ export default function (pi: ExtensionAPI) {
 						}
 					}
 
-					// --- Left side: folder | branch | model | thinking ---
-					const separator = theme.fg("dim", " │ ");
+					const sep = theme.fg("dim", " ❯ ");
+					const accent = (s: string) => theme.fg("accent", s);
+					const dim = (s: string) => theme.fg("dim", s);
+					const text = (s: string) => theme.fg("text", s);
+					const warning = (s: string) => theme.fg("warning", s);
 
-					// Current working directory (just folder name)
-					const cwd = process.cwd();
-					const folderName = cwd.split('/').pop() || cwd;
-					const folderPart = theme.fg("muted", "📁 " + folderName);
-
-					// Git branch
-					const branch = footerData.getGitBranch();
-					const branchPart = branch
-						? separator + theme.fg("muted", "🌿 " + branch)
-						: "";
-
-					// Model indicator
-					const modelName = ctx.model?.id || "no-model";
-					const shortModel = shortenModel(modelName);
-					const modelPart = separator + (isStreaming
-						? theme.fg("accent", "◉ ") + theme.fg("text", shortModel)
-						: theme.fg("dim", "○ ") + theme.fg("text", shortModel));
-
-					// Thinking level
-					const thinking = pi.getThinkingLevel();
-					const thinkingPart = thinking !== "off"
-						? separator + thinkingBadge(theme, thinking)
-						: "";
-
-					const left = folderPart + branchPart + modelPart + thinkingPart;
-
-					// --- Right side: tokens + cost + turns ---
-					const fmt = (n: number) =>
-						n < 1000 ? `${n}` : n < 1_000_000 ? `${(n / 1000).toFixed(1)}k` : `${(n / 1_000_000).toFixed(1)}M`;
-
-					const tokensPart = theme.fg("dim", `↑${fmt(inputTokens)} ↓${fmt(outputTokens)}`);
-
-					// Context usage %
 					const ctxUsage = ctx.getContextUsage();
-					const ctxPart = ctxUsage?.percent != null
-						? separator + theme.fg(
-							ctxUsage.percent > 80 ? "error" : ctxUsage.percent > 50 ? "warning" : "dim",
-							`ctx ${Math.round(ctxUsage.percent)}%`
-						)
-						: "";
-					const costPart = totalCost > 0
-						? separator + theme.fg("warning", `$${formatCost(totalCost)}`)
-						: "";
-					const turnsPart = turnCount > 0
-						? separator + theme.fg("muted", `${turnCount} turn${turnCount !== 1 ? "s" : ""}`)
-						: "";
+					const ctxWindow = ctxUsage?.contextWindow ?? ctx.model?.contextWindow ?? 0;
+					const ctxSize = ctxWindow > 0 ? fmt(ctxWindow) : "?";
+					const ctxPercent = ctxUsage?.percent ?? 0;
+					const ctxPct = ctxUsage?.percent != null ? ctxPercent.toFixed(1) : "0.0";
+					const totalTokens = inputTokens + outputTokens;
 
-					const right = tokensPart + ctxPart + costPart + turnsPart;
+					const modelName = ctx.model?.id || "no-model";
+					const modelLabel = prettyModel(modelName);
+					const thinking = pi.getThinkingLevel();
+					const thinkingColor = thinkingLevelColor(theme, thinking);
+					const streamingDot = isStreaming ? accent("◉ ") : thinkingColor("● ");
+					const modelPart = `${accent("⚙ ")}${text(modelLabel)}${dim(` [${ctxSize}]`)}${dim(" ·")} ${streamingDot}${text(thinking)}`;
 
-					// --- Compose ---
-					const gap = width - visibleWidth(left) - visibleWidth(right);
-					const pad = " ".repeat(Math.max(1, gap));
-					return [truncateToWidth(left + pad + right, width)];
+					const cwd = process.cwd();
+					const folderName = cwd.split("/").pop() || cwd;
+					const folderPart = `${theme.fg("success", " ")}${text(folderName)}`;
+
+					const branch = footerData.getGitBranch();
+					const branchPart = branch ? `${sep}${warning("")}${text(` ${branch}`)}` : "";
+
+					const contextColor = ctxPercent > 80 ? "error" : ctxPercent > 50 ? "warning" : "accent";
+					const contextPart = `${accent(" ")}${theme.fg(contextColor, `${ctxPct}%/${ctxSize}`)}`;
+					const tokensPart = `${accent(" ")}${text(`→${fmt(totalTokens)}`)}`;
+					const costPart = totalCost > 0 ? `${sep}${warning(`$${formatCost(totalCost)}`)}` : "";
+					const turnsPart = turnCount > 0 ? `${sep}${dim(`${turnCount} turn${turnCount !== 1 ? "s" : ""}`)}` : "";
+
+					const line = [
+						accent(" π"),
+						modelPart,
+						folderPart,
+					]
+						.join(sep)
+						+ branchPart
+						+ sep + contextPart
+						+ sep + tokensPart
+						+ costPart
+						+ turnsPart;
+
+					return [truncateToWidth(line, width)];
 				},
 			};
 		});
@@ -129,25 +117,42 @@ export default function (pi: ExtensionAPI) {
 
 // --- Helpers ---
 
-function shortenModel(id: string): string {
-	// Trim common prefixes/suffixes for a compact display
-	return id
-		.replace(/-\d{8}$/, "")        // remove date suffixes like -20250514
-		.replace(/^claude-/, "")        // claude-sonnet-4 → sonnet-4
-		.replace(/^gpt-/, "gpt")        // keep gpt prefix short
-		.replace(/^gemini-/, "gemini "); // gemini-2.5-pro → gemini 2.5-pro
+function fmt(n: number): string {
+	if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+	if (n >= 1000) return `${Math.round(n / 1000)}k`;
+	return `${n}`;
 }
 
-function thinkingBadge(theme: any, level: string): string {
-	const badges: Record<string, [string, string]> = {
-		minimal:  ["⚡", "thinkingMinimal"],
-		low:      ["💭", "thinkingLow"],
-		medium:   ["🧠", "thinkingMedium"],
-		high:     ["🔥", "thinkingHigh"],
-		xhigh:    ["⚡🔥", "thinkingXhigh"],
+function prettyModel(id: string): string {
+	const parts = id
+		.replace(/-\d{8}$/, "")
+		.replace(/\[.*\]/, "")
+		.split("-");
+
+	if (parts[0] === "claude" && parts.length >= 4) {
+		return `${capitalize(parts[1])} ${parts[2]}.${parts[3]}`;
+	}
+
+	if (parts[0] === "claude" && parts.length >= 3) {
+		return `${capitalize(parts[1])} ${parts[2]}`;
+	}
+
+	return id;
+}
+
+function capitalize(s: string): string {
+	return s ? s[0].toUpperCase() + s.slice(1) : s;
+}
+
+function thinkingLevelColor(theme: any, level: string): (s: string) => string {
+	const color: Record<string, string> = {
+		minimal: "dim",
+		low: "text",
+		medium: "warning",
+		high: "error",
+		xhigh: "error",
 	};
-	const [icon, color] = badges[level] || ["?", "dim"];
-	return theme.fg(color, `${icon} ${level}`);
+	return (s: string) => theme.fg(color[level] || "text", s);
 }
 
 function formatCost(cost: number): string {
