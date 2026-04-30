@@ -1,6 +1,6 @@
 ---
 name: nithin-writing-voice
-description: Write or revise text in Nithin Bekal's voice: Slack messages, PR descriptions, docs, emails, review comments, and technical notes. Use for practical, concise, low-drama writing grounded in concrete details.
+description: "Write or revise text in Nithin Bekal's voice: Slack messages, PR descriptions, docs, emails, review comments, and technical notes. Use for practical, concise, low-drama writing grounded in concrete details."
 ---
 
 # Nithin Writing Voice
