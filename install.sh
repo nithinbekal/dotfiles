@@ -115,6 +115,7 @@ ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
 
 current_status "Installing languages via mise"
 mise install
+export PATH="$HOME/.local/share/mise/shims:$PATH"
 
 current_status "Installing Claude Code"
 if ! command -v claude > /dev/null 2>&1; then
