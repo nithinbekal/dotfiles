@@ -7,13 +7,8 @@ current_status() {
 }
 
 is_wsl2() {
-  is_wsl2
+  grep -qi microsoft /proc/version 2>/dev/null
 }
-
-if [ $SPIN ]; then
-  current_status "Installing packages"
-  sudo apt-get install -y neovim ripgrep
-fi
 
 current_status "Installing dotfiles"
 
