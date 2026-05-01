@@ -6,6 +6,10 @@ current_status() {
   printf "\e[33m⭑\e[0m %s\n" "$1"
 }
 
+is_wsl2() {
+  is_wsl2
+}
+
 if [ $SPIN ]; then
   current_status "Installing packages"
   sudo apt-get install -y neovim ripgrep
@@ -22,7 +26,7 @@ do
   ln -sf ~/dotfiles/$file ~/$file
 done
 
-if grep -qi microsoft /proc/version 2>/dev/null; then
+if is_wsl2; then
   current_status "Installing packages"
   sudo apt-get update -qq
   sudo apt-get install -y build-essential zsh neovim
@@ -98,7 +102,7 @@ mkdir -p ~/.config/nvim
 ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
 ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 
-if grep -qi microsoft /proc/version 2>/dev/null; then
+if is_wsl2; then
   clipboard_lua="$HOME/.config/nvim/lua/clipboard.lua"
   if [ ! -f "$clipboard_lua" ]; then
     mkdir -p "$(dirname "$clipboard_lua")"
@@ -131,7 +135,7 @@ ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
 current_status "Installing languages via mise"
 mise install
 
-if grep -qi microsoft /proc/version 2>/dev/null; then
+if is_wsl2; then
   current_status "Installing Claude Code"
   if ! command -v claude > /dev/null 2>&1; then
     npm install -g @anthropic-ai/claude-code
