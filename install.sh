@@ -38,11 +38,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Installing dependencies via Brewfile"
   brew bundle --file=~/dotfiles/Brewfile
 
-  current_status "Setting up tmux"
-  mkdir -p ~/.config/tmux/plugins
-  [ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
-  ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
-
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
@@ -62,13 +57,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Setting up Zellij config"
   mkdir -p ~/.config/zellij
   ln -sf ~/dotfiles/.config/zellij/config.kdl ~/.config/zellij/config.kdl
-
-  current_status "Setting up Claude config"
-  mkdir -p ~/.claude/commands
-  ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
-  ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
-  ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
-  ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-commit.md
 
   current_status "Setting up Obsidian backup"
   mkdir -p ~/Documents/backups/obsidian
@@ -99,6 +87,18 @@ vim.g.clipboard = {
 EOF
   fi
 fi
+
+current_status "Setting up tmux"
+mkdir -p ~/.config/tmux/plugins
+[ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
+
+current_status "Setting up Claude config"
+mkdir -p ~/.claude/commands
+ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
+ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
+ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
+ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-commit.md
 
 current_status "Linking .vim directory"
 
