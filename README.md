@@ -40,6 +40,12 @@ gh auth login
 
 On Windows, run `windows/windows_setup.ps1` as Administrator before the steps above. This installs WSL2, WezTerm, win32yank, Obsidian, Cursor, and JetBrains Mono Nerd Font. Reboot if prompted, then follow the steps above inside the WSL2 Ubuntu terminal.
 
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nithinbekal/dotfiles/main/windows/windows_setup.ps1" -OutFile "$env:TEMP\windows_setup.ps1"
+& "$env:TEMP\windows_setup.ps1"
+```
+
 `install.sh` detects WSL2 and handles apt packages, Rust, mise, Claude Code, and the win32yank Neovim clipboard bridge automatically.
 
 ## Agent config
