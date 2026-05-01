@@ -18,7 +18,8 @@ $apps = @(
   @{ Id = "wez.wezterm";        Name = "WezTerm" },
   @{ Id = "equalsraf.win32yank"; Name = "win32yank" },
   @{ Id = "Obsidian.Obsidian";  Name = "Obsidian" },
-  @{ Id = "Anysphere.Cursor";   Name = "Cursor" }
+  @{ Id = "Anysphere.Cursor";    Name = "Cursor" },
+  @{ Id = "ElementLabs.LMStudio"; Name = "LM Studio" }
 )
 
 foreach ($app in $apps) {
