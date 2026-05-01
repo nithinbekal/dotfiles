@@ -116,16 +116,14 @@ ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
 current_status "Installing languages via mise"
 mise install
 
-if is_wsl2; then
-  current_status "Installing Claude Code"
-  if ! command -v claude > /dev/null 2>&1; then
-    npm install -g @anthropic-ai/claude-code
-  fi
+current_status "Installing Claude Code"
+if ! command -v claude > /dev/null 2>&1; then
+  npm install -g @anthropic-ai/claude-code
+fi
 
-  current_status "Installing Pi coding agent"
-  if ! command -v pi > /dev/null 2>&1; then
-    npm install -g @mariozechner/pi-coding-agent
-  fi
+current_status "Installing Pi coding agent"
+if ! command -v pi > /dev/null 2>&1; then
+  npm install -g @mariozechner/pi-coding-agent
 fi
 
 current_status "Setting up IRB config"
