@@ -103,25 +103,8 @@ ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
 ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 
 if is_wsl2; then
-  clipboard_lua="$HOME/.config/nvim/lua/clipboard.lua"
-  if [ ! -f "$clipboard_lua" ]; then
-    mkdir -p "$(dirname "$clipboard_lua")"
-    cat > "$clipboard_lua" << 'EOF'
--- WSL2 clipboard bridge via win32yank
-vim.g.clipboard = {
-  name = "win32yank",
-  copy = {
-    ["+"] = "win32yank.exe -i --crlf",
-    ["*"] = "win32yank.exe -i --crlf",
-  },
-  paste = {
-    ["+"] = "win32yank.exe -o --lf",
-    ["*"] = "win32yank.exe -o --lf",
-  },
-  cache_enabled = 0,
-}
-EOF
-  fi
+  mkdir -p ~/.config/nvim/lua
+  ln -sf ~/dotfiles/.config/nvim/lua/windows-clipboard.lua ~/.config/nvim/lua/windows-clipboard.lua
 fi
 
 current_status "Installing lazy.nvim for neovim"
