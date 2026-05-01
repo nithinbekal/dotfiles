@@ -71,6 +71,7 @@ IC_DB=$'\xef\x87\x80'       # U+F1C0
 R=$'\e[0m'
 DIM=$'\e[2m'
 ACC=$'\e[38;5;135m'
+CLAUDE=$'\e[38;2;217;119;87m'
 GRN=$'\e[38;5;71m'
 YLW=$'\e[38;5;214m'
 RED=$'\e[38;5;196m'
@@ -86,7 +87,7 @@ esac
 
 SEP="${DIM} ❯ ${R}"
 
-p1="${ACC}π${R}"
+p1="${CLAUDE}✻${R}"
 p2="${ACC}⚙ ${R}${WHT}${model_label}${R}${DIM} [${ctx_size_fmt}]${R}${DIM} ·${R} ${effort_color}● ${R}${WHT}${effort}${R}"
 p3="${GRN}${IC_FOLDER} ${R}${WHT}${dir_name}${R}"
 p4="${YLW}${IC_BRANCH}${R}${WHT}${git_pill}${R}"
