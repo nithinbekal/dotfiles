@@ -71,16 +71,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   mkdir -p ~/.config/ghostty
   ln -sf ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
 
-  current_status "Setting up Zellij config"
-  mkdir -p ~/.config/zellij
-  ln -sf ~/dotfiles/.config/zellij/config.kdl ~/.config/zellij/config.kdl
-
   current_status "Setting up Obsidian backup"
   mkdir -p ~/Documents/backups/obsidian
   ln -sf ~/dotfiles/launchagents/com.nithin.obsidian-backup.plist ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
   launchctl unload ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist 2>/dev/null || true
   launchctl load ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
 fi
+
+current_status "Setting up Zellij config"
+mkdir -p ~/.config/zellij
+ln -sf ~/dotfiles/.config/zellij/config.kdl ~/.config/zellij/config.kdl
 
 current_status "Setting up tmux"
 mkdir -p ~/.config/tmux/plugins
