@@ -22,6 +22,24 @@ do
   ln -sf ~/dotfiles/$file ~/$file
 done
 
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  current_status "Installing packages"
+  sudo apt-get update -qq
+  sudo apt-get install -y build-essential zsh neovim
+
+  current_status "Installing Rust via rustup"
+  if ! command -v rustup > /dev/null 2>&1; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+    source "$HOME/.cargo/env"
+  fi
+
+  current_status "Installing mise"
+  if ! command -v mise > /dev/null 2>&1; then
+    curl https://mise.run | sh
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
+fi
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if ! which brew > /dev/null; then
     current_status "Installing homebrew"
@@ -112,6 +130,13 @@ ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
 
 current_status "Installing languages via mise"
 mise install
+
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  current_status "Installing Claude Code"
+  if ! command -v claude > /dev/null 2>&1; then
+    npm install -g @anthropic-ai/claude-code
+  fi
+fi
 
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
