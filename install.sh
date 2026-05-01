@@ -148,13 +148,14 @@ ln -sf ~/dotfiles/agents/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.jso
 
 current_status "Setting up common agent skills"
 mkdir -p ~/.agents/skills ~/.claude/skills ~/.pi/agent/skills
-for skill in ~/dotfiles/agents/common/skills/*
+shopt -s nullglob
+for skill in ~/dotfiles/agents/common/skills/*/
 do
-  [ -d "$skill" ] || continue
-  skill_name=$(basename "$skill")
+  skill_name=$(basename "${skill%/}")
   ln -sfn "$skill" ~/.agents/skills/$skill_name
   ln -sfn "$skill" ~/.claude/skills/$skill_name
   ln -sfn "$skill" ~/.pi/agent/skills/$skill_name
 done
+shopt -u nullglob
 
 current_status "Installation successful 🚀"
