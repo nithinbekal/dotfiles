@@ -22,18 +22,18 @@ git config --global user.name "Your Name"
 git config --global user.email "your@email.com"
 ```
 
-### GitHub CLI
-
-```bash
-gh auth login
-```
-
 ### Clone and install
 
 ```bash
 git clone git@github.com:nithinbekal/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./install.sh
+```
+
+After install, authenticate the GitHub CLI:
+
+```bash
+gh auth login
 ```
 
 ### Windows
