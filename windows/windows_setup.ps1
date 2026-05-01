@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 function Write-Status($msg) {
-  Write-Host "⭑ $msg" -ForegroundColor Yellow
+  Write-Host "* $msg" -ForegroundColor Yellow
 }
 
 Write-Status "Installing WSL2"
@@ -61,7 +61,7 @@ if ($alreadyInstalled) {
 }
 
 Write-Host ""
-Write-Host "✓ Windows setup complete." -ForegroundColor Green
+Write-Host "Done. Windows setup complete." -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Reboot if WSL2 was just installed for the first time."
