@@ -48,12 +48,14 @@ if ($alreadyInstalled) {
   Invoke-WebRequest -Uri $releaseUrl -OutFile $tmpZip -UseBasicParsing
   Expand-Archive -Path $tmpZip -DestinationPath $tmpDir -Force
 
-  $fontFiles = Get-ChildItem $tmpDir -Filter "*.ttf" |
-    Where-Object { $_.Name -notmatch "Windows Compatible" }
+  $fontFiles = Get-ChildItem $tmpDir -Filter "JetBrainsMonoNerdFont-*.ttf"
 
-  $shellFonts = (New-Object -ComObject Shell.Application).Namespace(0x14)
+  New-Item -ItemType Directory -Force -Path $fontsDir | Out-Null
   foreach ($font in $fontFiles) {
-    $shellFonts.CopyHere($font.FullName, 0x10)
+    Copy-Item $font.FullName $fontsDir -Force
+    New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
+      -Name "$($font.BaseName) (TrueType)" -Value "$fontsDir\$($font.Name)" `
+      -Force | Out-Null
   }
 
   Remove-Item $tmpZip, $tmpDir -Recurse -Force

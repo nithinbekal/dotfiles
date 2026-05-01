@@ -51,7 +51,7 @@ fi
 
 current_status "Installing dependencies via Brewfile"
 if is_wsl2; then
-  brew bundle --file=~/dotfiles/Brewfile --no-cask
+  grep -v '^cask' ~/dotfiles/Brewfile | brew bundle --file=/dev/stdin
 else
   brew bundle --file=~/dotfiles/Brewfile
 fi
