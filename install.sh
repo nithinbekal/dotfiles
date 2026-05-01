@@ -6,10 +6,9 @@ current_status() {
   printf "\e[33m⭑\e[0m %s\n" "$1"
 }
 
-if [ $SPIN ]; then
-  current_status "Installing packages"
-  sudo apt-get install -y neovim ripgrep
-fi
+is_wsl2() {
+  grep -qi microsoft /proc/version 2>/dev/null
+}
 
 current_status "Installing dotfiles"
 
@@ -22,27 +21,42 @@ do
   ln -sf ~/dotfiles/$file ~/$file
 done
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  if ! which brew > /dev/null; then
-    current_status "Installing homebrew"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  fi;
+if is_wsl2; then
+  current_status "Installing packages"
+  sudo apt-get update -qq
+  sudo apt-get install -y build-essential zsh
+fi
 
+current_status "Installing Rust via rustup"
+if ! command -v rustup > /dev/null 2>&1; then
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+  source "$HOME/.cargo/env"
+fi
+
+if ! which brew > /dev/null 2>&1; then
+  current_status "Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
   # Intel and M-series macs have different brew paths
   if [[ "$(uname -m)" == "arm64" ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   else
     eval "$(/usr/local/bin/brew shellenv)"
   fi
+else
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
 
-  current_status "Installing dependencies via Brewfile"
+current_status "Installing dependencies via Brewfile"
+if is_wsl2; then
+  brew bundle --file=~/dotfiles/Brewfile --no-cask
+else
   brew bundle --file=~/dotfiles/Brewfile
+fi
 
-  current_status "Setting up tmux"
-  mkdir -p ~/.config/tmux/plugins
-  [ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
-  ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
-
+if [[ "$OSTYPE" == "darwin"* ]]; then
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
@@ -59,23 +73,21 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   mkdir -p ~/.config/ghostty
   ln -sf ~/dotfiles/.config/ghostty/config ~/.config/ghostty/config
 
-  current_status "Setting up Zellij config"
-  mkdir -p ~/.config/zellij
-  ln -sf ~/dotfiles/.config/zellij/config.kdl ~/.config/zellij/config.kdl
-
-  current_status "Setting up Claude config"
-  mkdir -p ~/.claude/commands
-  ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
-  ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
-  ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
-  ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-commit.md
-
   current_status "Setting up Obsidian backup"
   mkdir -p ~/Documents/backups/obsidian
   ln -sf ~/dotfiles/launchagents/com.nithin.obsidian-backup.plist ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
   launchctl unload ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist 2>/dev/null || true
   launchctl load ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
 fi
+
+current_status "Setting up Zellij config"
+mkdir -p ~/.config/zellij
+ln -sf ~/dotfiles/.config/zellij/config.kdl ~/.config/zellij/config.kdl
+
+current_status "Setting up tmux"
+mkdir -p ~/.config/tmux/plugins
+[ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
 
 current_status "Linking .vim directory"
 
@@ -87,21 +99,43 @@ mkdir -p ~/.config/nvim
 ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
 ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 
+if is_wsl2; then
+  mkdir -p ~/.config/nvim/lua
+  ln -sf ~/dotfiles/.config/nvim/lua/windows-clipboard.lua ~/.config/nvim/lua/windows-clipboard.lua
+fi
+
 current_status "Installing lazy.nvim for neovim"
 
 nvim --headless "+Lazy! sync" +qa > /dev/null 2>&1
-
-current_status "Installing languages via mise"
-mise install ruby@latest
-mise install rust@latest
 
 current_status "Setting up mise config"
 mkdir -p ~/.config/mise
 ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
 
+current_status "Installing languages via mise"
+mise install
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
+current_status "Installing Claude Code"
+if ! command -v claude > /dev/null 2>&1; then
+  npm install -g @anthropic-ai/claude-code
+fi
+
+current_status "Installing Pi coding agent"
+if ! command -v pi > /dev/null 2>&1; then
+  npm install -g @mariozechner/pi-coding-agent
+fi
+
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
 ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
+
+current_status "Setting up Claude config"
+mkdir -p ~/.claude/commands
+ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
+ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
+ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
+ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-commit.md
 
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
