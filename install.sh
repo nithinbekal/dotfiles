@@ -25,12 +25,12 @@ if is_wsl2; then
   current_status "Installing packages"
   sudo apt-get update -qq
   sudo apt-get install -y build-essential zsh
+fi
 
-  current_status "Installing Rust via rustup"
-  if ! command -v rustup > /dev/null 2>&1; then
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
-    source "$HOME/.cargo/env"
-  fi
+current_status "Installing Rust via rustup"
+if ! command -v rustup > /dev/null 2>&1; then
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+  source "$HOME/.cargo/env"
 fi
 
 if ! which brew > /dev/null 2>&1; then
