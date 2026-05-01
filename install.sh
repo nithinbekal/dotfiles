@@ -49,15 +49,14 @@ else
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
+current_status "Installing dependencies via Brewfile"
 if is_wsl2; then
-  current_status "Installing dependencies via Brewfile"
   brew bundle --file=~/dotfiles/Brewfile --no-cask
+else
+  brew bundle --file=~/dotfiles/Brewfile
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  current_status "Installing dependencies via Brewfile"
-  brew bundle --file=~/dotfiles/Brewfile
-
   # Fix VS Code has problems with repeated keystrokes with the vim plugin
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
