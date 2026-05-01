@@ -1,18 +1,46 @@
 # Nithin Bekal's dotfiles
 
-This repo will contain the dotfiles I use to configure my computers.
+## New machine setup
 
-## Install
+### SSH key
 
 ```bash
-git clone git@github.com:nithinbekal/dotfiles.git
-cd dotfiles
+ssh-keygen -t ed25519 -C "your@email.com"
+cat ~/.ssh/id_ed25519.pub
+```
+
+Add the printed key to GitHub → Settings → SSH keys, then test:
+
+```bash
+ssh -T git@github.com
+```
+
+### Git config
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+```
+
+### GitHub CLI
+
+```bash
+gh auth login
+```
+
+### Clone and install
+
+```bash
+git clone git@github.com:nithinbekal/dotfiles.git ~/dotfiles
+cd ~/dotfiles
 ./install.sh
 ```
 
-## Windows setup
+### Windows
 
-See [windows/README.md](windows/README.md) for setting up a Windows + WSL2 development environment.
+On Windows, run `windows/windows_setup.ps1` as Administrator before the steps above. This installs WSL2, WezTerm, win32yank, Obsidian, Cursor, and JetBrains Mono Nerd Font. Reboot if prompted, then follow the steps above inside the WSL2 Ubuntu terminal.
+
+`install.sh` detects WSL2 and handles apt packages, Rust, mise, Claude Code, and the win32yank Neovim clipboard bridge automatically.
 
 ## Agent config
 
