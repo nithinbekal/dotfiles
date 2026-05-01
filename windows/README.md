@@ -19,11 +19,14 @@ This installs:
 
 ## Step 2 — WSL2 Ubuntu terminal
 
+Run the bootstrap script directly from GitHub (curl is available on a fresh Ubuntu install):
+
 ```bash
-bash wsl2_setup.sh
+curl -fsSL https://raw.githubusercontent.com/nithinbekal/dotfiles/main/windows/wsl2_setup.sh | bash
 ```
 
 This installs: git, curl, build-essential, zsh, Neovim, Rust, mise, and Claude Code.
+Clone the dotfiles repo and run `install.sh` once the manual steps below are done.
 
 ## Step 3 — Manual steps inside WSL2
 
