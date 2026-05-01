@@ -77,6 +77,29 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   launchctl load ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
 fi
 
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  current_status "Setting up Neovim clipboard bridge for WSL2"
+  clipboard_lua="$HOME/.config/nvim/lua/clipboard.lua"
+  if [ ! -f "$clipboard_lua" ]; then
+    mkdir -p "$(dirname "$clipboard_lua")"
+    cat > "$clipboard_lua" << 'EOF'
+-- WSL2 clipboard bridge via win32yank
+vim.g.clipboard = {
+  name = "win32yank",
+  copy = {
+    ["+"] = "win32yank.exe -i --crlf",
+    ["*"] = "win32yank.exe -i --crlf",
+  },
+  paste = {
+    ["+"] = "win32yank.exe -o --lf",
+    ["*"] = "win32yank.exe -o --lf",
+  },
+  cache_enabled = 0,
+}
+EOF
+  fi
+fi
+
 current_status "Linking .vim directory"
 
 mkdir -p ~/.vim/tmp
@@ -91,13 +114,12 @@ current_status "Installing lazy.nvim for neovim"
 
 nvim --headless "+Lazy! sync" +qa > /dev/null 2>&1
 
-current_status "Installing languages via mise"
-mise install ruby@latest
-mise install rust@latest
-
 current_status "Setting up mise config"
 mkdir -p ~/.config/mise
 ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
+
+current_status "Installing languages via mise"
+mise install
 
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb

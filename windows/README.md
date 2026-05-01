@@ -1,6 +1,6 @@
 # Windows Setup
 
-Two-step setup: run the PowerShell script on Windows first, then the bash script inside WSL2.
+Three-step setup: PowerShell on Windows, bootstrap inside WSL2, then clone dotfiles and run `install.sh`.
 
 ## Step 1 — Windows (PowerShell as Administrator)
 
@@ -23,7 +23,7 @@ This installs:
 bash wsl2_setup.sh
 ```
 
-This installs: git, curl, build-essential, Neovim, Rust, mise, Claude Code, and sets up the Neovim win32yank clipboard bridge.
+This installs: git, curl, build-essential, zsh, Neovim, Rust, mise, and Claude Code.
 
 ## Step 3 — Manual steps inside WSL2
 
@@ -63,9 +63,10 @@ cd ~/dotfiles
 ./install.sh
 ```
 
+`install.sh` detects WSL2 and writes the win32yank clipboard bridge to `~/.config/nvim/lua/clipboard.lua` automatically. It also runs `mise install` using the versions defined in your dotfiles mise config.
+
 ## Notes
 
 - `wsl2_setup.sh` is idempotent — it skips steps that are already done.
 - `windows_setup.ps1` skips winget apps that are already installed and the font if it is already present.
-- Tool versions installed by `mise install` are defined by the `mise.toml` in your dotfiles, not hardcoded here.
-- The Neovim clipboard file is written to `~/.config/nvim/lua/clipboard.lua`; require it from your `init.lua` if it isn't already.
+- Require `clipboard.lua` from your `init.lua` if it isn't already.

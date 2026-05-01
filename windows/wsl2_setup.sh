@@ -10,7 +10,7 @@ current_status() {
 
 current_status "Updating apt and installing base packages"
 sudo apt-get update -qq
-sudo apt-get install -y git curl build-essential
+sudo apt-get install -y git curl build-essential zsh
 
 # ── Neovim ────────────────────────────────────────────────────────────────────
 
@@ -41,9 +41,6 @@ else
   echo "  mise already installed, skipping"
 fi
 
-current_status "Running mise install (versions defined in dotfiles mise config)"
-mise install
-
 # ── Claude Code ───────────────────────────────────────────────────────────────
 
 current_status "Installing Claude Code"
@@ -53,40 +50,14 @@ else
   echo "  claude already installed, skipping"
 fi
 
-# ── Neovim clipboard bridge (win32yank) ───────────────────────────────────────
-
-current_status "Setting up Neovim clipboard bridge for WSL2"
-clipboard_lua="$HOME/.config/nvim/lua/clipboard.lua"
-if [ ! -f "$clipboard_lua" ]; then
-  mkdir -p "$(dirname "$clipboard_lua")"
-  cat > "$clipboard_lua" << 'EOF'
--- WSL2 clipboard bridge via win32yank
-vim.g.clipboard = {
-  name = "win32yank",
-  copy = {
-    ["+"] = "win32yank.exe -i --crlf",
-    ["*"] = "win32yank.exe -i --crlf",
-  },
-  paste = {
-    ["+"] = "win32yank.exe -o --lf",
-    ["*"] = "win32yank.exe -o --lf",
-  },
-  cache_enabled = 0,
-}
-EOF
-  echo "  Created $clipboard_lua"
-else
-  echo "  $clipboard_lua already exists, skipping"
-fi
-
 # ── Done ──────────────────────────────────────────────────────────────────────
 
 echo ""
-printf "\e[32m✓ WSL2 automated setup complete.\e[0m\n"
+printf "\e[32m✓ WSL2 bootstrap complete.\e[0m\n"
 echo ""
 echo "Manual steps still needed — see windows/README.md for details:"
 echo "  1. SSH key generation and GitHub access"
 echo "  2. git config (name + email)"
 echo "  3. gh auth login"
-echo "  4. Clone dotfiles and run install.sh"
+echo "  4. Clone dotfiles and run ./install.sh"
 echo ""
