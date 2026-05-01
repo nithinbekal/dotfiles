@@ -93,13 +93,6 @@ mkdir -p ~/.config/tmux/plugins
 [ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
 ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
 
-current_status "Setting up Claude config"
-mkdir -p ~/.claude/commands
-ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
-ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
-ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
-ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-commit.md
-
 current_status "Linking .vim directory"
 
 mkdir -p ~/.vim/tmp
@@ -124,6 +117,13 @@ mise install
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
 ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
+
+current_status "Setting up Claude config"
+mkdir -p ~/.claude/commands
+ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
+ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
+ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
+ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-commit.md
 
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
