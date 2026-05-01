@@ -10,6 +10,10 @@ cd dotfiles
 ./install.sh
 ```
 
+## Windows setup
+
+See [windows/README.md](windows/README.md) for setting up a Windows + WSL2 development environment.
+
 ## Agent config
 
 Agent-related files live under `agents/`:
