@@ -118,6 +118,11 @@ if is_wsl2; then
   if ! command -v claude > /dev/null 2>&1; then
     npm install -g @anthropic-ai/claude-code
   fi
+
+  current_status "Installing Pi coding agent"
+  if ! command -v pi > /dev/null 2>&1; then
+    npm install -g @mariozechner/pi-coding-agent
+  fi
 fi
 
 current_status "Setting up IRB config"
