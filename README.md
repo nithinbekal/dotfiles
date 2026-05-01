@@ -42,7 +42,7 @@ On Windows, run `windows/windows_setup.ps1` as Administrator before the steps ab
 
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nithinbekal/dotfiles/main/windows/windows_setup.ps1" -OutFile "$env:TEMP\windows_setup.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nithinbekal/dotfiles/main/windows/windows_setup.ps1" -OutFile "$env:TEMP\windows_setup.ps1" -UseBasicParsing
 & "$env:TEMP\windows_setup.ps1"
 ```
 
