@@ -7,16 +7,12 @@ function Write-Status($msg) {
   Write-Host "⭑ $msg" -ForegroundColor Yellow
 }
 
-# ── WSL2 ─────────────────────────────────────────────────────────────────────
-
 Write-Status "Installing WSL2"
 wsl --install
 
 Write-Status "Adding Windows Defender exclusion for WSL2"
 $wslPath = "$env:LOCALAPPDATA\Packages\CanonicalGroupLimited*"
 Add-MpPreference -ExclusionPath $wslPath
-
-# ── Apps via winget ───────────────────────────────────────────────────────────
 
 $apps = @(
   @{ Id = "wez.wezterm";        Name = "WezTerm" },
@@ -35,8 +31,6 @@ foreach ($app in $apps) {
     winget install --id $app.Id --exact --silent --accept-source-agreements --accept-package-agreements
   }
 }
-
-# ── JetBrains Mono Nerd Font ──────────────────────────────────────────────────
 
 Write-Status "Installing JetBrains Mono Nerd Font"
 
@@ -65,13 +59,11 @@ if ($alreadyInstalled) {
   Write-Host "  JetBrains Mono Nerd Font installed"
 }
 
-# ── Done ──────────────────────────────────────────────────────────────────────
-
 Write-Host ""
 Write-Host "✓ Windows setup complete." -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Reboot if WSL2 was just installed for the first time."
 Write-Host "  2. Open the WSL2 Ubuntu terminal."
-Write-Host "  3. Run: bash wsl2_setup.sh"
+Write-Host "  3. Clone dotfiles and run ./install.sh"
 Write-Host ""
