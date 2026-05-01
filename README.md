@@ -42,7 +42,8 @@ On Windows, run `windows/windows_setup.ps1` as Administrator before the steps ab
 
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force
-.\windows\windows_setup.ps1
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nithinbekal/dotfiles/main/windows/windows_setup.ps1" -OutFile "$env:TEMP\windows_setup.ps1"
+& "$env:TEMP\windows_setup.ps1"
 ```
 
 `install.sh` detects WSL2 and handles apt packages, Rust, mise, Claude Code, and the win32yank Neovim clipboard bridge automatically.
