@@ -24,34 +24,37 @@ done
 if is_wsl2; then
   current_status "Installing packages"
   sudo apt-get update -qq
-  sudo apt-get install -y build-essential zsh neovim
+  sudo apt-get install -y build-essential zsh
 
   current_status "Installing Rust via rustup"
   if ! command -v rustup > /dev/null 2>&1; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
     source "$HOME/.cargo/env"
   fi
+fi
 
-  current_status "Installing mise"
-  if ! command -v mise > /dev/null 2>&1; then
-    curl https://mise.run | sh
-    export PATH="$HOME/.local/bin:$PATH"
-  fi
+if ! which brew > /dev/null 2>&1; then
+  current_status "Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  if ! which brew > /dev/null; then
-    current_status "Installing homebrew"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  fi;
-
   # Intel and M-series macs have different brew paths
   if [[ "$(uname -m)" == "arm64" ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   else
     eval "$(/usr/local/bin/brew shellenv)"
   fi
+else
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
 
+if is_wsl2; then
+  current_status "Installing dependencies via Brewfile"
+  brew bundle --file=~/dotfiles/Brewfile --no-cask
+fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Installing dependencies via Brewfile"
   brew bundle --file=~/dotfiles/Brewfile
 
