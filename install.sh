@@ -65,8 +65,22 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   launchctl load ~/Library/LaunchAgents/com.nithin.obsidian-backup.plist
 fi
 
+current_status "Setting up tmux"
+mkdir -p ~/.config/tmux/plugins
+[ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
+
+current_status "Linking .vim directory"
+
+mkdir -p ~/.vim/tmp
+
+current_status "Setting up Neovim config"
+
+mkdir -p ~/.config/nvim
+ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
+ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
+
 if grep -qi microsoft /proc/version 2>/dev/null; then
-  current_status "Setting up Neovim clipboard bridge for WSL2"
   clipboard_lua="$HOME/.config/nvim/lua/clipboard.lua"
   if [ ! -f "$clipboard_lua" ]; then
     mkdir -p "$(dirname "$clipboard_lua")"
@@ -87,21 +101,6 @@ vim.g.clipboard = {
 EOF
   fi
 fi
-
-current_status "Setting up tmux"
-mkdir -p ~/.config/tmux/plugins
-[ ! -d ~/.config/tmux/plugins/tpm ] && git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
-ln -sf ~/dotfiles/.config/tmux/tmux.conf ~/.config/tmux/tmux.conf
-
-current_status "Linking .vim directory"
-
-mkdir -p ~/.vim/tmp
-
-current_status "Setting up Neovim config"
-
-mkdir -p ~/.config/nvim
-ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
-ln -sf ~/dotfiles/.config/nvim/coc-settings.json ~/.config/nvim/coc-settings.json
 
 current_status "Installing lazy.nvim for neovim"
 
