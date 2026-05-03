@@ -1,37 +1,38 @@
 /**
- * Diff Panel — interactive git status view.
+ * Diff Panel — interactive git diff view.
  *
  * Command:
- *   /diff-panel  - Toggle a right-side overlay showing a list of changed files.
+ *   /diff-panel  - Toggle a right-side overlay showing changed-file diffs.
  *
  * Layout:
- *   Untracked (N) → Unstaged (N) → Staged (N)
+ *   A changed-file tree on the left, selected file diff on the right.
  *
  * Focus model:
- *   /diff-panel grabs focus on open. Press alt+g (or esc) to release focus
- *   to the prompt; alt+g re-focuses the overlay.
+ *   /diff-panel grabs focus on open. Press alt+g to release focus
+ *   to the prompt; alt+g re-focuses the overlay. Esc closes the overlay.
  *
  * Keys (in the overlay, when focused):
- *   j/k or ↑/↓         move cursor between files
- *   space              toggle inline diff under current file
- *   -                  stage (untracked/unstaged) or unstage (staged)
- *   X                  discard changes to current file (press twice to confirm)
- *   c                  commit staged changes (prompts for message)
+ *   j/k or ↑/↓         move cursor between files in the tree
+ *   Enter              focus the selected file's diff
+ *   h/←                return focus from diff to file tree
+ *   j/k or ↑/↓         move the diff line cursor while diff is focused
+ *   ] / [              jump to next / previous diff hunk
+ *   PgUp / PgDn        page the selected file diff
+ *   c                  add a comment on the selected diff line
+ *   x                  remove the latest comment on the selected diff line
  *   r                  refresh status
  *   g / G              first / last file
- *   PgUp / PgDn        scroll viewport one page
- *   alt+g / Esc        release focus back to the prompt
- *   q                  close the overlay
+ *   alt+g              release focus back to the prompt
+ *   Esc / q            close the overlay
  *
  * Auto-refreshes whenever the agent uses write/edit/bash tools.
  *
- * In non-git directories, the overlay falls back to a single "Modified"
- * section built from snapshots taken on first write/edit. Stage/unstage is
- * disabled in that mode.
+ * In non-git directories, the overlay falls back to diffs built from snapshots
+ * taken on first write/edit. Git-only actions are disabled in that mode.
  */
 
 import { execSync } from "node:child_process";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
@@ -40,6 +41,7 @@ import {
 	matchesKey,
 	type OverlayHandle,
 	truncateToWidth,
+	visibleWidth,
 	wrapTextWithAnsi,
 } from "@mariozechner/pi-tui";
 
@@ -61,6 +63,31 @@ interface StatusModel {
 	untracked: FileEntry[];
 }
 
+interface DiffComment {
+	path: string;
+	rawLineIndex: number;
+	text: string;
+	createdAt: number;
+}
+
+interface DiffCommentTarget {
+	path: string;
+	rawLineIndex: number;
+	displayLine: number;
+	preview: string;
+}
+
+interface DiffDisplayRow {
+	text: string;
+	rawLineIndex: number;
+	isLastForRawLine: boolean;
+}
+
+interface DiffLineStats {
+	additions: number;
+	deletions: number;
+}
+
 const EMPTY_STATUS: StatusModel = {
 	branch: "",
 	staged: [],
@@ -76,8 +103,12 @@ interface DiffState {
 	touched: Set<string>;
 	status: StatusModel;
 	lastRefresh: number;
-	/** Cache of raw (unstyled) diff lines per "section:path". Cleared on refresh. */
+	/** Cache of raw (unstyled) diff lines per path. Cleared on refresh. */
 	diffCache: Map<string, string[]>;
+	/** Cache of per-file added/deleted counts, derived from diffCache. Cleared on refresh. */
+	statsCache: Map<string, DiffLineStats>;
+	/** In-memory comments attached to raw diff lines by file path. */
+	comments: Map<string, DiffComment[]>;
 }
 
 const state: DiffState = {
@@ -88,11 +119,13 @@ const state: DiffState = {
 	status: EMPTY_STATUS,
 	lastRefresh: 0,
 	diffCache: new Map(),
+	statsCache: new Map(),
+	comments: new Map(),
 };
 
 /**
  * When the overlay is active, this is set to a callback that re-renders it.
- * Used by tool_result auto-refresh and by stage/unstage actions.
+ * Used by tool_result auto-refresh and panel actions.
  */
 let requestOverlayRender: (() => void) | null = null;
 
@@ -223,13 +256,14 @@ function loadSnapshotStatus(): StatusModel {
 function refreshStatus(): void {
 	state.status = state.isGitRepo ? loadGitStatus(state.cwd) : loadSnapshotStatus();
 	state.diffCache.clear();
+	state.statsCache.clear();
 	state.lastRefresh = Date.now();
 }
 
 // ---------- Per-file diff loading ----------
 
 function diffCacheKey(entry: FileEntry): string {
-	return `${entry.section}:${entry.path}`;
+	return entry.path;
 }
 
 function loadFileDiff(entry: FileEntry): string[] {
@@ -262,9 +296,8 @@ function loadGitFileDiff(entry: FileEntry): string[] {
 		}
 	}
 
-	const flag = entry.section === "staged" ? "--cached" : "";
 	try {
-		const cmd = `git diff ${flag} --no-color -- ${JSON.stringify(entry.path)}`.trim();
+		const cmd = `git diff --no-ext-diff --no-color HEAD -- ${JSON.stringify(entry.path)}`;
 		const out = execSync(cmd, {
 			cwd: state.cwd,
 			encoding: "utf8",
@@ -345,15 +378,14 @@ function trackPath(path: string): void {
 
 const RESET = "\x1b[0m";
 const BOLD = "\x1b[1m";
+const UNDERLINE = "\x1b[4m";
+const UNDERLINE_OFF = "\x1b[24m";
 const DIM = "\x1b[2m";
-const INVERSE = "\x1b[7m";
-const INVERSE_OFF = "\x1b[27m";
 const FG_GREEN = "\x1b[32m";
 const FG_RED = "\x1b[31m";
 const FG_CYAN = "\x1b[36m";
 const FG_YELLOW = "\x1b[33m";
 const FG_GRAY = "\x1b[90m";
-const FG_MAGENTA = "\x1b[35m";
 const BG_GREEN = "\x1b[48;5;22m";
 const BG_RED = "\x1b[48;5;52m";
 
@@ -400,234 +432,254 @@ function statusLetterColor(status: string, section: Section): string {
 	return FG_YELLOW;
 }
 
-// ---------- Stage / unstage / discard actions ----------
+// ---------- File tree construction ----------
 
-function stageOrUnstage(entry: FileEntry): { ok: boolean; message: string } {
-	if (!state.isGitRepo) {
-		return { ok: false, message: "Not a git repo — stage/unstage disabled" };
-	}
-	const quoted = JSON.stringify(entry.path);
-	try {
-		if (entry.section === "staged") {
-			execSync(`git reset -q HEAD -- ${quoted}`, {
-				cwd: state.cwd,
-				stdio: ["ignore", "pipe", "pipe"],
-			});
-			return { ok: true, message: `Unstaged ${entry.path}` };
-		}
-		// untracked or unstaged — `git add -A` handles new/modified/deleted
-		execSync(`git add -A -- ${quoted}`, {
-			cwd: state.cwd,
-			stdio: ["ignore", "pipe", "pipe"],
-		});
-		return { ok: true, message: `Staged ${entry.path}` };
-	} catch (e) {
-		const stderr = (e as { stderr?: Buffer }).stderr?.toString().trim() || (e as Error).message;
-		return { ok: false, message: stderr.split("\n")[0] };
-	}
+interface FileTreeFileNode {
+	kind: "file";
+	name: string;
+	path: string;
+	entry: FileEntry;
 }
 
-/**
- * Discard changes to a file. Behavior depends on the file's section:
- *   untracked → delete the file from disk (UNRECOVERABLE).
- *   unstaged  → `git checkout HEAD -- <path>` (revert worktree to HEAD).
- *   staged    → `git restore --staged --worktree -- <path>` (drop staged + worktree changes).
- *
- * Caller is responsible for confirmation — this just performs the action.
- */
-function discardFile(entry: FileEntry): { ok: boolean; message: string } {
-	if (!state.isGitRepo) {
-		return { ok: false, message: "Not a git repo — discard disabled" };
-	}
-	const quoted = JSON.stringify(entry.path);
-	try {
-		if (entry.section === "untracked") {
-			const abs = resolve(state.cwd, entry.path);
-			rmSync(abs, { force: true });
-			return { ok: true, message: `Deleted ${entry.path}` };
-		}
-		if (entry.section === "staged") {
-			execSync(`git restore --staged --worktree -- ${quoted}`, {
-				cwd: state.cwd,
-				stdio: ["ignore", "pipe", "pipe"],
-			});
-			return { ok: true, message: `Discarded ${entry.path}` };
-		}
-		// unstaged
-		execSync(`git checkout HEAD -- ${quoted}`, {
-			cwd: state.cwd,
-			stdio: ["ignore", "pipe", "pipe"],
-		});
-		return { ok: true, message: `Discarded ${entry.path}` };
-	} catch (e) {
-		const stderr = (e as { stderr?: Buffer }).stderr?.toString().trim() || (e as Error).message;
-		return { ok: false, message: stderr.split("\n")[0] };
-	}
+interface FileTreeDirNode {
+	kind: "dir";
+	name: string;
+	path: string;
+	children: FileTreeNode[];
+	fileCount: number;
 }
 
-// ---------- List row construction ----------
+type FileTreeNode = FileTreeDirNode | FileTreeFileNode;
 
-type RowKind = "header" | "file" | "diff" | "spacer";
-
-interface ListRow {
-	kind: RowKind;
-	/** Pre-styled text, NOT yet width-truncated. */
-	text: string;
-	/** For kind === 'file': index into flat entries. */
-	entryIndex?: number;
-	/** For kind === 'diff' / 'spacer' under a file: index it belongs to. */
-	belongsTo?: number;
+interface FileTreeRow {
+	node: FileTreeNode;
+	depth: number;
 }
 
 function flatEntries(): FileEntry[] {
 	const s = state.status;
-	return [...s.untracked, ...s.unstaged, ...s.staged];
-}
-
-function sectionList(section: Section): FileEntry[] {
-	const s = state.status;
-	if (section === "untracked") return s.untracked;
-	if (section === "unstaged") return s.unstaged;
-	return s.staged;
-}
-
-function sectionStart(section: Section): number {
-	const s = state.status;
-	if (section === "untracked") return 0;
-	if (section === "unstaged") return s.untracked.length;
-	return s.untracked.length + s.unstaged.length;
-}
-
-/**
- * After a stage/unstage that moves a file out of `prevSection`, pick a flat
- * cursor index that keeps focus in the same section on the file that has
- * shifted into the previous slot (or the new last file if at the end). If the
- * section is now empty, fall through to the next non-empty section in display
- * order, then back to earlier sections as a last resort.
- */
-function pickCursorAfterMutation(prevSection: Section, prevSectionIdx: number): number {
-	const order: Section[] = ["untracked", "unstaged", "staged"];
-	const start = order.indexOf(prevSection);
-	const tryOrder: Section[] = [
-		prevSection,
-		...order.slice(start + 1),
-		...order.slice(0, start).reverse(),
-	];
-	for (const sec of tryOrder) {
-		const list = sectionList(sec);
-		if (list.length === 0) continue;
-		const within = sec === prevSection ? Math.min(prevSectionIdx, list.length - 1) : 0;
-		return sectionStart(sec) + within;
+	const entries: FileEntry[] = [];
+	const seen = new Set<string>();
+	for (const entry of [...s.untracked, ...s.unstaged, ...s.staged]) {
+		if (seen.has(entry.path)) continue;
+		seen.add(entry.path);
+		entries.push(entry);
 	}
-	return 0;
+	entries.sort((a, b) => a.path.localeCompare(b.path));
+	return entries;
 }
 
-function sectionHeader(label: string, count: number, color: string): string {
-	return `${BOLD}${color}${label}${RESET} ${FG_GRAY}(${count})${RESET}`;
-}
+function buildFileTree(entries: FileEntry[]): FileTreeDirNode {
+	const root: FileTreeDirNode = { kind: "dir", name: "", path: "", children: [], fileCount: 0 };
 
-function fileRowText(entry: FileEntry, isCursor: boolean): string {
-	const color = statusLetterColor(entry.status, entry.section);
-	const letter = entry.status === "?" ? "?" : entry.status;
-	const marker = isCursor ? `${FG_MAGENTA}${BOLD}▶${RESET}` : " ";
-	const inner = `${marker}  ${BOLD}${color}${letter}${RESET}  ${entry.path}`;
-	return isCursor ? `${INVERSE}${inner}${INVERSE_OFF}` : inner;
-}
+	for (const entry of entries) {
+		const parts = entry.path.split("/").filter((part) => part.length > 0);
+		if (parts.length === 0) continue;
 
-function buildRows(cursorEntryIndex: number, expanded: Set<string>, innerWidth: number): ListRow[] {
-	const rows: ListRow[] = [];
-	const s = state.status;
+		let current = root;
+		let currentPath = "";
+		for (let i = 0; i < parts.length; i++) {
+			const part = parts[i]!;
+			const isLast = i === parts.length - 1;
+			currentPath = currentPath ? `${currentPath}/${part}` : part;
 
-	// Header line
-	const headLabel = state.isGitRepo ? "HEAD" : "(snapshot mode)";
-	const headValue = state.isGitRepo ? s.branch || "(unknown)" : state.cwd;
-	rows.push({
-		kind: "header",
-		text: `${BOLD}${FG_GRAY}${headLabel}:${RESET} ${headValue}`,
-	});
-	rows.push({ kind: "spacer", text: "" });
-
-	const entries = flatEntries();
-	let entryIdx = 0;
-
-	const renderSection = (label: string, list: FileEntry[], color: string) => {
-		if (list.length === 0) return;
-		rows.push({ kind: "header", text: sectionHeader(label, list.length, color) });
-		for (const entry of list) {
-			const isCursor = entryIdx === cursorEntryIndex;
-			rows.push({
-				kind: "file",
-				text: fileRowText(entry, isCursor),
-				entryIndex: entryIdx,
-			});
-			if (expanded.has(diffCacheKey(entry))) {
-				const diffLines = loadFileDiff(entry);
-				const indent = "    ";
-				// Wrap each diff line within the available width minus indent.
-				const wrapWidth = Math.max(10, innerWidth - indent.length - 2);
-				for (const raw of diffLines) {
-					const styled = styleDiffLine(raw);
-					const pieces = wrapTextWithAnsi(styled, wrapWidth);
-					for (const p of pieces) {
-						rows.push({
-							kind: "diff",
-							text: `${indent}${p}`,
-							belongsTo: entryIdx,
-						});
-					}
-				}
-				rows.push({ kind: "spacer", text: "", belongsTo: entryIdx });
+			if (isLast) {
+				current.children.push({ kind: "file", name: part, path: currentPath, entry });
+				continue;
 			}
-			entryIdx++;
+
+			let next = current.children.find(
+				(child): child is FileTreeDirNode => child.kind === "dir" && child.path === currentPath,
+			);
+			if (!next) {
+				next = { kind: "dir", name: part, path: currentPath, children: [], fileCount: 0 };
+				current.children.push(next);
+			}
+			current = next;
 		}
-		rows.push({ kind: "spacer", text: "" });
-	};
-
-	renderSection("Untracked", s.untracked, FG_CYAN);
-	renderSection("Unstaged", s.unstaged, FG_YELLOW);
-	renderSection("Staged", s.staged, FG_GREEN);
-
-	if (entries.length === 0) {
-		rows.push({
-			kind: "header",
-			text: `${DIM}nothing to commit, working tree clean${RESET}`,
-		});
 	}
 
+	sortFileTree(root);
+	computeFileCounts(root);
+	return root;
+}
+
+function sortFileTree(node: FileTreeDirNode): void {
+	node.children.sort((a, b) => {
+		if (a.kind !== b.kind) return a.kind === "dir" ? -1 : 1;
+		return a.name.localeCompare(b.name);
+	});
+	for (const child of node.children) {
+		if (child.kind === "dir") sortFileTree(child);
+	}
+}
+
+function computeFileCounts(node: FileTreeDirNode): number {
+	let count = 0;
+	for (const child of node.children) {
+		count += child.kind === "file" ? 1 : computeFileCounts(child);
+	}
+	node.fileCount = count;
+	return count;
+}
+
+function flattenFileTree(node: FileTreeDirNode, depth = 0): FileTreeRow[] {
+	const rows: FileTreeRow[] = [];
+	for (const child of node.children) {
+		rows.push({ node: child, depth });
+		if (child.kind === "dir") rows.push(...flattenFileTree(child, depth + 1));
+	}
 	return rows;
+}
+
+function fitLine(line: string, width: number): string {
+	if (width <= 0) return "";
+	const truncated = truncateToWidth(line, width, "", true);
+	const padding = Math.max(0, width - visibleWidth(truncated));
+	return truncated + " ".repeat(padding);
+}
+
+function fitLeftRight(left: string, right: string, width: number): string {
+	if (width <= 0) return "";
+	if (!right) return fitLine(left, width);
+
+	const rightWidth = visibleWidth(right);
+	if (rightWidth + 1 >= width) return fitLine(left, width);
+
+	const leftWidth = Math.max(0, width - rightWidth - 1);
+	const fittedLeft = truncateToWidth(left, leftWidth, "", true);
+	const padding = Math.max(1, width - visibleWidth(fittedLeft) - rightWidth);
+	return `${fittedLeft}${" ".repeat(padding)}${right}`;
+}
+
+function stripAnsi(line: string): string {
+	return line.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "");
+}
+
+function addDiffComment(comment: DiffComment): void {
+	const comments = state.comments.get(comment.path) ?? [];
+	comments.push(comment);
+	state.comments.set(comment.path, comments);
+}
+
+function removeLatestDiffComment(path: string, rawLineIndex: number): DiffComment | null {
+	const comments = state.comments.get(path);
+	if (!comments) return null;
+
+	const index = comments.findLastIndex((comment) => comment.rawLineIndex === rawLineIndex);
+	if (index < 0) return null;
+
+	const [removed] = comments.splice(index, 1);
+	if (comments.length === 0) state.comments.delete(path);
+	else state.comments.set(path, comments);
+	return removed ?? null;
+}
+
+function commentsForLine(path: string, rawLineIndex: number): DiffComment[] {
+	return (state.comments.get(path) ?? []).filter((comment) => comment.rawLineIndex === rawLineIndex);
+}
+
+function allDiffComments(): DiffComment[] {
+	return [...state.comments.values()]
+		.flat()
+		.sort((a, b) => a.path.localeCompare(b.path) || a.rawLineIndex - b.rawLineIndex || a.createdAt - b.createdAt);
+}
+
+function diffLinesForPath(path: string): string[] {
+	const entry = flatEntries().find((candidate) => candidate.path === path);
+	if (entry) return loadFileDiff(entry);
+	return state.diffCache.get(path) ?? ["(diff unavailable)"];
+}
+
+function commentContext(lines: string[], rawLineIndex: number): string[] {
+	if (lines.length === 0) return ["(diff unavailable)"];
+	const lineIndex = Math.max(0, Math.min(rawLineIndex, lines.length - 1));
+	const hunkIndex = lines.findLastIndex((line, index) => index <= lineIndex && line.startsWith("@@"));
+	const start = Math.max(0, lineIndex - 3);
+	const end = Math.min(lines.length, lineIndex + 4);
+	const context = lines.slice(start, end);
+	if (hunkIndex >= 0 && hunkIndex < start) context.unshift(lines[hunkIndex]!);
+	return context;
+}
+
+function formatCommentsForPrompt(): string | null {
+	const comments = allDiffComments();
+	if (comments.length === 0) return null;
+
+	const lines: string[] = ["Diff review comments:"];
+	let currentPath = "";
+	comments.forEach((comment, index) => {
+		if (comment.path !== currentPath) {
+			currentPath = comment.path;
+			lines.push("", `## ${comment.path}`);
+		}
+		const diffLines = diffLinesForPath(comment.path);
+		const lineIndex = Math.max(0, Math.min(comment.rawLineIndex, diffLines.length - 1));
+		lines.push("", `### Comment ${index + 1} on diff line ${lineIndex + 1}`);
+		lines.push("````diff", ...commentContext(diffLines, lineIndex), "````");
+		lines.push("", `Comment: ${comment.text}`);
+	});
+	return `${lines.join("\n").trimEnd()}\n---\n\n`;
+}
+
+function diffLineStats(entry: FileEntry): DiffLineStats {
+	const key = diffCacheKey(entry);
+	const cached = state.statsCache.get(key);
+	if (cached) return cached;
+
+	let additions = 0;
+	let deletions = 0;
+	for (const line of loadFileDiff(entry)) {
+		if (line.startsWith("+")) additions++;
+		else if (line.startsWith("-")) deletions++;
+	}
+	const stats = { additions, deletions };
+	state.statsCache.set(key, stats);
+	return stats;
+}
+
+function statusBadge(entry: FileEntry): string {
+	const letter = entry.status === "?" ? "?" : entry.status;
+	return `${BOLD}${statusLetterColor(entry.status, entry.section)}${letter}${RESET}`;
+}
+
+function diffStatsBadge(entry: FileEntry): string {
+	const { additions, deletions } = diffLineStats(entry);
+	const additionColor = additions > 0 ? FG_GREEN : FG_GRAY;
+	const deletionColor = deletions > 0 ? FG_RED : FG_GRAY;
+	return `${additionColor}+${additions}${RESET} ${deletionColor}-${deletions}${RESET}`;
 }
 
 // ---------- Overlay component ----------
 
+type PaneFocus = "tree" | "diff";
+
 class StatusOverlay implements Component {
 	private cursor = 0;
-	private expanded: Set<string> = new Set();
-	private scroll = 0;
-	private lastWidth = 0;
-	private cachedRows: ListRow[] = [];
-	private lastDiffStamp = -1;
+	private focusedPane: PaneFocus = "tree";
+	private treeScroll = 0;
+	private diffScroll = 0;
+	private diffCursor = 0;
+	private diffPaneWidth = 80;
 	private visibleHeight = 30;
-	/** Path of the entry pending a discard confirmation, if any. Cleared by any other action. */
-	private pendingDiscard: string | null = null;
 
-	// top border, header, blank, scroll info, hint, bottom border
-	private static readonly CHROME_ROWS = 6;
+	// top border, header, divider, pane title, scroll info, hint, bottom border
+	private static readonly CHROME_ROWS = 7;
 
 	constructor(
 		private theme: Theme,
 		private done: () => void,
 		private requestRender: () => void,
 		private notify: (msg: string, level?: "info" | "warning" | "error") => void,
-		private onCommit: () => void,
+		private onComment: (target: DiffCommentTarget) => void,
+		private onSubmitComments: () => void,
 		private releaseFocus: () => void,
 	) {
 		refreshStatus();
 	}
 
-	/** Force the next render to rebuild rows. Called from outside on auto-refresh. */
+	/** Force the next render to rebuild from latest status. Called from outside on auto-refresh. */
 	invalidate(): void {
-		this.cachedRows = [];
-		this.lastDiffStamp = -1;
 		this.clampCursor();
 	}
 
@@ -641,139 +693,182 @@ class StatusOverlay implements Component {
 		const total = flatEntries().length;
 		if (total === 0) {
 			this.cursor = 0;
+			this.focusedPane = "tree";
+			this.diffScroll = 0;
+			this.diffCursor = 0;
+			this.treeScroll = 0;
 			return;
 		}
 		if (this.cursor < 0) this.cursor = 0;
 		if (this.cursor >= total) this.cursor = total - 1;
 	}
 
-	/** Find the row index of the given entry index in the cached rows. */
-	private cursorRowIndex(): number {
-		for (let i = 0; i < this.cachedRows.length; i++) {
-			if (this.cachedRows[i].kind === "file" && this.cachedRows[i].entryIndex === this.cursor) {
-				return i;
-			}
+	private moveCursor(next: number): void {
+		const entries = flatEntries();
+		if (entries.length === 0) return;
+		const previousPath = entries[this.cursor]?.path;
+		this.cursor = Math.max(0, Math.min(entries.length - 1, next));
+		if (entries[this.cursor]?.path !== previousPath) {
+			this.diffScroll = 0;
+			this.diffCursor = 0;
 		}
-		return 0;
+	}
+
+	private focusDiff(): void {
+		if (!this.currentEntry()) return;
+		this.focusedPane = "diff";
+		this.diffCursor = this.diffScroll;
+	}
+
+	private focusTree(): void {
+		this.focusedPane = "tree";
+	}
+
+	private scrollDiff(delta: number): void {
+		this.diffScroll = Math.max(0, this.diffScroll + delta);
+	}
+
+	private moveDiffCursor(delta: number): void {
+		this.diffCursor = Math.max(0, this.diffCursor + delta);
+	}
+
+	private jumpHunk(direction: 1 | -1): void {
+		const entry = this.currentEntry();
+		if (!entry) return;
+		const hunkLines = this.hunkLineIndexes(entry, this.diffPaneWidth);
+		if (hunkLines.length === 0) return;
+		const wasDiffFocused = this.focusedPane === "diff";
+		this.focusedPane = "diff";
+		const base = wasDiffFocused ? this.diffCursor : direction > 0 ? -1 : Number.MAX_SAFE_INTEGER;
+		const target =
+			direction > 0
+				? hunkLines.find((line) => line > base)
+				: hunkLines.findLast((line) => line < base);
+		if (target === undefined) return;
+		this.diffCursor = target;
+	}
+
+	private currentCommentTarget(): DiffCommentTarget | null {
+		const entry = this.currentEntry();
+		if (!entry) return null;
+		const rows = this.diffDisplayRows(entry, this.diffPaneWidth);
+		if (rows.length === 0) return null;
+		this.clampDiffCursor(rows.length);
+		const row = rows[this.diffCursor];
+		if (!row) return null;
+		return {
+			path: entry.path,
+			rawLineIndex: row.rawLineIndex,
+			displayLine: this.diffCursor,
+			preview: truncateToWidth(stripAnsi(row.text).trim(), 80, "…", true),
+		};
 	}
 
 	handleInput(data: string): void {
-		// Capture-then-clear: any keypress other than another X cancels a pending discard.
-		const armedDiscard = this.pendingDiscard;
-		if (data !== "X") this.pendingDiscard = null;
-
-		// Esc / alt+g return focus to the prompt but keep the overlay open.
-		if (matchesKey(data, "escape") || matchesKey(data, FOCUS_OVERLAY_KEY)) {
-			this.releaseFocus();
-			return;
-		}
-		// q closes the overlay entirely.
-		if (data === "q" || data === "Q") {
-			this.done();
-			return;
-		}
-		if (data === "X") {
-			const entry = this.currentEntry();
-			if (!entry) return;
-			if (armedDiscard !== entry.path) {
-				this.pendingDiscard = entry.path;
-				const what = entry.section === "untracked" ? "DELETE" : "discard changes to";
-				this.notify(`Press X again to ${what} ${entry.path}`, "warning");
-				return;
-			}
-			const result = discardFile(entry);
-			if (!result.ok) {
-				this.notify(result.message, "error");
-				return;
-			}
-			this.notify(result.message, "info");
-			refreshStatus();
-			this.clampCursor();
-			this.invalidate();
+		if (data === "[" || data === "]") {
+			this.jumpHunk(data === "]" ? 1 : -1);
 			this.requestRender();
 			return;
 		}
+
+		// Alt+g returns focus to the prompt but keeps the overlay open.
+		if (matchesKey(data, FOCUS_OVERLAY_KEY)) {
+			this.releaseFocus();
+			return;
+		}
+		// Esc / q close the overlay entirely.
+		if (matchesKey(data, "escape") || data === "q" || data === "Q") {
+			this.done();
+			return;
+		}
 		if (data === "c" || data === "C") {
-			this.onCommit();
+			const target = this.currentCommentTarget();
+			if (!target) return;
+			this.focusedPane = "diff";
+			this.onComment(target);
+			this.requestRender();
+			return;
+		}
+		if (data === "x" || data === "X") {
+			const target = this.currentCommentTarget();
+			if (!target) return;
+			this.focusedPane = "diff";
+			const removed = removeLatestDiffComment(target.path, target.rawLineIndex);
+			if (removed) this.notify(`Removed comment from ${target.path}`, "info");
+			else this.notify("No comment on highlighted diff line", "warning");
+			this.requestRender();
+			return;
+		}
+		if (data === "s" || data === "S") {
+			this.onSubmitComments();
 			return;
 		}
 		if (data === "r" || data === "R") {
 			refreshStatus();
-			this.invalidate();
 			this.clampCursor();
+			this.diffScroll = 0;
+			this.diffCursor = 0;
 			this.requestRender();
 			return;
 		}
 
 		const total = flatEntries().length;
 
+		if (matchesKey(data, "return")) {
+			if (this.focusedPane === "tree") this.focusDiff();
+			else this.focusTree();
+			this.requestRender();
+			return;
+		}
+		if (this.focusedPane === "diff" && (matchesKey(data, "left") || data === "h")) {
+			this.focusTree();
+			this.requestRender();
+			return;
+		}
+		if (this.focusedPane === "tree" && (matchesKey(data, "right") || data === "l")) {
+			this.focusDiff();
+			this.requestRender();
+			return;
+		}
 		if (matchesKey(data, "up") || data === "k") {
-			if (total === 0) return;
-			this.cursor = Math.max(0, this.cursor - 1);
-			this.invalidate();
+			if (this.focusedPane === "diff") this.moveDiffCursor(-1);
+			else {
+				if (total === 0) return;
+				this.moveCursor(this.cursor - 1);
+			}
 			this.requestRender();
 			return;
 		}
 		if (matchesKey(data, "down") || data === "j") {
-			if (total === 0) return;
-			this.cursor = Math.min(total - 1, this.cursor + 1);
-			this.invalidate();
+			if (this.focusedPane === "diff") this.moveDiffCursor(1);
+			else {
+				if (total === 0) return;
+				this.moveCursor(this.cursor + 1);
+			}
 			this.requestRender();
 			return;
 		}
 		if (matchesKey(data, "home") || data === "g") {
-			this.cursor = 0;
-			this.invalidate();
+			if (this.focusedPane === "diff") this.diffCursor = 0;
+			else this.moveCursor(0);
 			this.requestRender();
 			return;
 		}
 		if (matchesKey(data, "end") || data === "G") {
-			this.cursor = Math.max(0, total - 1);
-			this.invalidate();
+			if (this.focusedPane === "diff") this.diffCursor = Number.MAX_SAFE_INTEGER;
+			else this.moveCursor(Math.max(0, total - 1));
 			this.requestRender();
 			return;
 		}
 		if (matchesKey(data, "pageUp") || data === "\x15" /* C-u */) {
-			this.scroll = Math.max(0, this.scroll - this.visibleHeight);
+			if (this.focusedPane === "diff") this.moveDiffCursor(-this.visibleHeight);
+			else this.scrollDiff(-this.visibleHeight);
 			this.requestRender();
 			return;
 		}
 		if (matchesKey(data, "pageDown") || data === "\x04" /* C-d */) {
-			const maxScroll = Math.max(0, this.cachedRows.length - this.visibleHeight);
-			this.scroll = Math.min(maxScroll, this.scroll + this.visibleHeight);
-			this.requestRender();
-			return;
-		}
-
-		if (data === " ") {
-			const entry = this.currentEntry();
-			if (!entry) return;
-			const key = diffCacheKey(entry);
-			if (this.expanded.has(key)) this.expanded.delete(key);
-			else this.expanded.add(key);
-			this.invalidate();
-			this.requestRender();
-			return;
-		}
-
-		if (data === "-") {
-			const entry = this.currentEntry();
-			if (!entry) return;
-			// Remember position within the section so we can land on the *next*
-			// file in the same section after staging/unstaging, instead of
-			// chasing the file to its new section.
-			const prevSection = entry.section;
-			const prevSectionList = sectionList(prevSection);
-			const prevSectionIdx = prevSectionList.indexOf(entry);
-
-			const result = stageOrUnstage(entry);
-			if (!result.ok) {
-				this.notify(result.message, "warning");
-				return;
-			}
-			refreshStatus();
-			this.cursor = pickCursorAfterMutation(prevSection, prevSectionIdx);
-			this.invalidate();
+			if (this.focusedPane === "diff") this.moveDiffCursor(this.visibleHeight);
+			else this.scrollDiff(this.visibleHeight);
 			this.requestRender();
 			return;
 		}
@@ -782,32 +877,18 @@ class StatusOverlay implements Component {
 	render(width: number): string[] {
 		const th = this.theme;
 		const innerW = Math.max(20, width - 2);
-
-		if (
-			this.cachedRows.length === 0 ||
-			this.lastWidth !== width ||
-			this.lastDiffStamp !== state.lastRefresh
-		) {
-			this.cachedRows = buildRows(this.cursor, this.expanded, innerW);
-			this.lastWidth = width;
-			this.lastDiffStamp = state.lastRefresh;
-		}
-
 		const entries = flatEntries();
-		const stagedCount = state.status.staged.length;
-		const totalCount = entries.length;
+		this.clampCursor();
 
-		const title = th.bold(th.fg("accent", "📋 Git Status"));
-		const stats = th.fg(
-			"muted",
-			`  ${totalCount} file${totalCount === 1 ? "" : "s"}  •  ${stagedCount} staged`,
-		);
+		const totalCount = entries.length;
+		const title = th.bold(th.fg("accent", "📋 Git Diff"));
+		const branch = state.isGitRepo ? state.status.branch || "(unknown)" : "snapshot";
+		const stats = th.fg("muted", `  ${totalCount} changed file${totalCount === 1 ? "" : "s"}  •  ${branch}`);
 		const mode = th.fg("dim", state.isGitRepo ? "git" : "snapshot");
 
 		const top = th.fg("border", "╭" + "─".repeat(innerW) + "╮");
 		const bottom = th.fg("border", "╰" + "─".repeat(innerW) + "╯");
-		const row = (s: string) =>
-			th.fg("border", "│") + truncateToWidth(s, innerW, "", true) + th.fg("border", "│");
+		const row = (s: string) => th.fg("border", "│") + fitLine(s, innerW) + th.fg("border", "│");
 
 		const lines: string[] = [];
 		lines.push(top);
@@ -818,37 +899,217 @@ class StatusOverlay implements Component {
 		const contentHeight = Math.max(5, termRows - StatusOverlay.CHROME_ROWS - 2);
 		this.visibleHeight = contentHeight;
 
-		// Auto-scroll so cursor row stays visible.
-		const cursorRow = this.cursorRowIndex();
-		if (cursorRow < this.scroll) this.scroll = Math.max(0, cursorRow - 1);
-		if (cursorRow >= this.scroll + contentHeight) {
-			this.scroll = Math.max(0, cursorRow - contentHeight + 2);
+		const showTree = entries.length > 0 && innerW >= 60;
+		const leftWidth = showTree ? Math.max(18, Math.min(40, Math.floor(innerW * 0.3), innerW - 31)) : 0;
+		const separator = th.fg("border", "│");
+		const rightWidth = showTree ? Math.max(1, innerW - leftWidth - 1) : innerW;
+		this.diffPaneWidth = rightWidth;
+		const currentEntry = this.currentEntry();
+
+		if (showTree) {
+			const leftLabel = `${this.focusedPane === "tree" ? "▸" : " "} Files (${totalCount})`;
+			const rightLabel = `${this.focusedPane === "diff" ? "▸" : " "} ${currentEntry ? currentEntry.path : "Diff"}`;
+			const leftTitle = th.fg(this.focusedPane === "tree" ? "accent" : "muted", this.focusedPane === "tree" ? th.bold(leftLabel) : leftLabel);
+			const rightTitle = th.fg(this.focusedPane === "diff" ? "accent" : "muted", this.focusedPane === "diff" ? th.bold(rightLabel) : rightLabel);
+			lines.push(row(fitLine(leftTitle, leftWidth) + separator + fitLine(rightTitle, rightWidth)));
+
+			const treeLines = this.renderTreeLines(entries, leftWidth, contentHeight);
+			const diffLines = this.renderDiffLines(currentEntry, rightWidth, contentHeight);
+			for (let i = 0; i < contentHeight; i++) {
+				lines.push(row((treeLines[i] ?? " ".repeat(leftWidth)) + separator + (diffLines[i] ?? " ".repeat(rightWidth))));
+			}
+		} else {
+			const rightTitle = currentEntry ? th.fg("accent", th.bold(currentEntry.path)) : th.fg("muted", "Diff");
+			lines.push(row(rightTitle));
+			lines.push(...this.renderDiffLines(currentEntry, innerW, contentHeight).map(row));
 		}
-		const maxScroll = Math.max(0, this.cachedRows.length - contentHeight);
-		if (this.scroll > maxScroll) this.scroll = maxScroll;
 
-		const visible = this.cachedRows.slice(this.scroll, this.scroll + contentHeight);
-		for (const r of visible) lines.push(row(" " + r.text + " "));
-		for (let i = visible.length; i < contentHeight; i++) lines.push(row(""));
-
-		const end = Math.min(this.scroll + contentHeight, this.cachedRows.length);
-		const scrollInfo =
-			this.cachedRows.length > contentHeight
-				? `${this.scroll + 1}-${end} / ${this.cachedRows.length}`
-				: `${this.cachedRows.length} rows`;
-		lines.push(row(th.fg("dim", ` ${scrollInfo}`)));
+		const diffInfo = this.diffScrollInfo(currentEntry, rightWidth);
+		const fileInfo = totalCount > 0 ? `file ${this.cursor + 1}/${totalCount}` : "0 files";
+		lines.push(row(th.fg("dim", ` ${fileInfo}${diffInfo ? ` • ${diffInfo}` : ""}`)));
+		const paneHelp =
+			this.focusedPane === "diff"
+				? " j/k line • [/] hunks • h/← files • PgUp/PgDn page • "
+				: " j/k files • enter diff • [/] hunks • PgUp/PgDn diff • ";
 		lines.push(
 			row(
 				th.fg(
 					"dim",
-					" j/k move • space expand • - stage • X discard • c commit • r refresh • " +
-						FOCUS_OVERLAY_KEY + "/esc unfocus • q close",
+					paneHelp + "c comment • x remove comment • s submit comments • r refresh • " + FOCUS_OVERLAY_KEY + " unfocus • esc/q close",
 				),
 			),
 		);
 		lines.push(bottom);
 
 		return lines;
+	}
+
+	private renderTreeLines(entries: FileEntry[], width: number, height: number): string[] {
+		if (width <= 0) return new Array(height).fill("");
+		if (entries.length === 0) return this.fillVertical([this.theme.fg("muted", "Working tree clean")], width, height);
+
+		const rows = flattenFileTree(buildFileTree(entries));
+		const selectedPath = this.currentEntry()?.path;
+		const selectedRowIndex = rows.findIndex((row) => row.node.kind === "file" && row.node.path === selectedPath);
+		this.ensureTreeSelectionVisible(selectedRowIndex, rows.length, height);
+
+		const visible = rows.slice(this.treeScroll, this.treeScroll + height);
+		return this.fillVertical(
+			visible.map((row) => this.renderTreeRow(row, width, row.node.kind === "file" && row.node.path === selectedPath)),
+			width,
+			height,
+			true,
+		);
+	}
+
+	private renderTreeRow(row: FileTreeRow, width: number, selected: boolean): string {
+		const indent = "  ".repeat(row.depth);
+		const marker = row.node.kind === "dir" ? this.theme.fg("muted", "▾ ") : `${statusBadge(row.node.entry)} `;
+		const label = row.node.kind === "dir" ? this.theme.fg("muted", row.node.name) : this.theme.fg("text", row.node.name);
+		const count = row.node.kind === "dir" ? this.theme.fg("dim", ` (${row.node.fileCount})`) : "";
+		const left = `${indent}${marker}${label}${count}`;
+		const stats = row.node.kind === "file" ? diffStatsBadge(row.node.entry) : "";
+		const fitted = fitLeftRight(left, stats, width);
+		return selected && this.focusedPane === "tree" ? this.theme.bg("selectedBg", fitted) : fitted;
+	}
+
+	private renderDiffLines(entry: FileEntry | null, width: number, height: number): string[] {
+		if (width <= 0) return new Array(height).fill("");
+		if (!entry) return this.fillVertical([this.theme.fg("muted", "working tree clean")], width, height);
+
+		const rows = this.diffDisplayRows(entry, width);
+		const maxScroll = Math.max(0, rows.length - height);
+		if (this.diffScroll > maxScroll) this.diffScroll = maxScroll;
+		if (this.diffScroll < 0) this.diffScroll = 0;
+		if (this.focusedPane === "diff") {
+			this.clampDiffCursor(rows.length);
+			this.ensureDiffCursorVisible(rows.length, height);
+		}
+
+		const visible: string[] = [];
+		for (let absoluteLine = this.diffScroll; absoluteLine < rows.length && visible.length < height; absoluteLine++) {
+			const diffRow = rows[absoluteLine]!;
+			const fitted = fitLine(diffRow.text, width);
+			visible.push(this.focusedPane === "diff" && absoluteLine === this.diffCursor ? this.highlightLine(fitted) : fitted);
+			if (diffRow.isLastForRawLine) {
+				for (const comment of commentsForLine(entry.path, diffRow.rawLineIndex)) {
+					for (const commentLine of this.renderCommentLines(comment, width)) {
+						if (visible.length >= height) break;
+						visible.push(commentLine);
+					}
+					if (visible.length >= height) break;
+				}
+			}
+		}
+		return this.fillVertical(visible, width, height, true);
+	}
+
+	private wrappedDiffLines(entry: FileEntry, width: number): string[] {
+		return this.diffDisplayRows(entry, width).map((row) => row.text);
+	}
+
+	private diffDisplayRows(entry: FileEntry, width: number): DiffDisplayRow[] {
+		const wrapWidth = Math.max(10, width - 2);
+		const rows: DiffDisplayRow[] = [];
+		loadFileDiff(entry).forEach((raw, rawLineIndex) => {
+			const styled = styleDiffLine(raw);
+			const pieces = styled.length === 0 ? [""] : wrapTextWithAnsi(styled, wrapWidth);
+			pieces.forEach((piece, index) => {
+				rows.push({
+					text: ` ${piece}`,
+					rawLineIndex,
+					isLastForRawLine: index === pieces.length - 1,
+				});
+			});
+		});
+		if (rows.length === 0) {
+			rows.push({ text: this.theme.fg("muted", "(no diff)"), rawLineIndex: 0, isLastForRawLine: true });
+		}
+		return rows;
+	}
+
+	private renderCommentLines(comment: DiffComment, width: number): string[] {
+		const indentCols = Math.min(10, Math.max(0, width - 12));
+		const indent = " ".repeat(indentCols);
+		const boxWidth = Math.max(8, width - indentCols);
+		const contentWidth = Math.max(1, boxWidth - 4);
+		const border = (text: string) => this.theme.fg("accent", text);
+		const body = this.theme.fg("muted", `💬 ${comment.text}`);
+		const pieces = wrapTextWithAnsi(body, contentWidth);
+		const lines = [
+			`${indent}${border(`╭${"─".repeat(boxWidth - 2)}╮`)}`,
+			...(pieces.length ? pieces : [""]).map((piece) => `${indent}${border("│ ")}${fitLine(piece, contentWidth)}${border(" │")}`),
+			`${indent}${border(`╰${"─".repeat(boxWidth - 2)}╯`)}`,
+		];
+		return lines.map((line) => fitLine(line, width));
+	}
+
+	private hunkLineIndexes(entry: FileEntry, width: number): number[] {
+		const wrapWidth = Math.max(10, width - 2);
+		const hunks: number[] = [];
+		let row = 0;
+		for (const raw of loadFileDiff(entry)) {
+			if (raw.startsWith("@@")) hunks.push(row);
+			const styled = styleDiffLine(raw);
+			row += styled.length === 0 ? 1 : Math.max(1, wrapTextWithAnsi(styled, wrapWidth).length);
+		}
+		return hunks;
+	}
+
+	private highlightLine(line: string): string {
+		const selectedBg = this.theme.bg("selectedBg", "").replace(/\x1b\[49m$/, "");
+		const marker = `${BOLD}${FG_YELLOW}▌${RESET}`;
+		const width = visibleWidth(line);
+		const body = line.startsWith(" ") ? line.slice(1) : truncateToWidth(line, Math.max(0, width - 1), "", true);
+		const markedLine = `${marker}${body}`;
+		return (
+			selectedBg +
+			UNDERLINE +
+			markedLine.replaceAll(RESET, `${RESET}${selectedBg}${UNDERLINE}`) +
+			UNDERLINE_OFF +
+			"\x1b[49m"
+		);
+	}
+
+	private clampDiffCursor(lineCount: number): void {
+		const max = Math.max(0, lineCount - 1);
+		if (this.diffCursor < 0) this.diffCursor = 0;
+		if (this.diffCursor > max) this.diffCursor = max;
+	}
+
+	private ensureDiffCursorVisible(lineCount: number, height: number): void {
+		if (height <= 0) return;
+		const maxScroll = Math.max(0, lineCount - height);
+		if (this.diffCursor < this.diffScroll) this.diffScroll = this.diffCursor;
+		if (this.diffCursor >= this.diffScroll + height) this.diffScroll = this.diffCursor - height + 1;
+		if (this.diffScroll > maxScroll) this.diffScroll = maxScroll;
+		if (this.diffScroll < 0) this.diffScroll = 0;
+	}
+
+	private diffScrollInfo(entry: FileEntry | null, width: number): string {
+		if (!entry) return "";
+		const lineCount = this.wrappedDiffLines(entry, width).length;
+		const lineCursor = Math.min(this.diffCursor + 1, lineCount);
+		const cursorInfo = this.focusedPane === "diff" ? ` • line ${lineCursor}/${lineCount}` : "";
+		if (lineCount <= this.visibleHeight) return `${lineCount} diff rows${cursorInfo}`;
+		const start = Math.min(this.diffScroll + 1, lineCount);
+		const end = Math.min(this.diffScroll + this.visibleHeight, lineCount);
+		return `diff ${start}-${end}/${lineCount}${cursorInfo}`;
+	}
+
+	private ensureTreeSelectionVisible(selectedRowIndex: number, rowCount: number, height: number): void {
+		if (selectedRowIndex < 0 || height <= 0) return;
+		if (selectedRowIndex < this.treeScroll) this.treeScroll = selectedRowIndex;
+		if (selectedRowIndex >= this.treeScroll + height) this.treeScroll = selectedRowIndex - height + 1;
+		const maxScroll = Math.max(0, rowCount - height);
+		if (this.treeScroll > maxScroll) this.treeScroll = maxScroll;
+		if (this.treeScroll < 0) this.treeScroll = 0;
+	}
+
+	private fillVertical(lines: string[], width: number, height: number, prefit = false): string[] {
+		const out = prefit ? [...lines] : lines.map((line) => fitLine(line, width));
+		while (out.length < height) out.push(" ".repeat(width));
+		return out.slice(0, height);
 	}
 }
 
@@ -867,6 +1128,7 @@ function pathsFromToolCall(toolName: string, input: unknown): string[] {
 export default function diffPanelExtension(pi: ExtensionAPI): void {
 	let overlayActive = false;
 	let overlayDone: (() => void) | null = null;
+	let compactOverlayHandle: OverlayHandle | null = null;
 
 	pi.on("session_start", async (_event, ctx) => {
 		state.cwd = ctx.cwd;
@@ -895,54 +1157,38 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 		}
 	});
 
-	async function commitFlow(ctx: ExtensionContext): Promise<void> {
-		if (!state.isGitRepo) {
-			ctx.ui.notify("Not a git repo — cannot commit", "warning");
-			return;
-		}
-		let stagedCount = 0;
-		try {
-			const staged = execSync("git diff --cached --name-only", {
-				cwd: state.cwd,
-				encoding: "utf8",
-			}).trim();
-			stagedCount = staged ? staged.split("\n").length : 0;
-		} catch {
-			stagedCount = 0;
-		}
-		if (stagedCount === 0) {
-			ctx.ui.notify("No staged changes — press '-' to stage files first", "warning");
-			return;
-		}
-
-		const message = await ctx.ui.input(
-			`Commit message (${stagedCount} file${stagedCount === 1 ? "" : "s"} staged)`,
-			"e.g. fix: handle edge case",
+	async function commentFlow(ctx: ExtensionContext, target: DiffCommentTarget): Promise<void> {
+		const comment = await ctx.ui.input(
+			`Comment on ${target.path} diff line ${target.displayLine + 1}`,
+			target.preview || "Add a review note",
 		);
-		if (!message || !message.trim()) {
-			ctx.ui.notify("Commit cancelled", "info");
+		if (!comment || !comment.trim()) {
+			ctx.ui.notify("Comment cancelled", "info");
 			return;
 		}
 
-		try {
-			execSync(`git commit -m ${JSON.stringify(message.trim())}`, {
-				cwd: state.cwd,
-				stdio: ["ignore", "pipe", "pipe"],
-			});
-			const sha = execSync("git rev-parse --short HEAD", {
-				cwd: state.cwd,
-				encoding: "utf8",
-			}).trim();
-			ctx.ui.notify(`Committed ${sha}: ${message.trim()}`, "info");
-			refreshStatus();
-		} catch (e) {
-			const stderr = (e as { stderr?: Buffer }).stderr?.toString().trim() || (e as Error).message;
-			ctx.ui.notify(`Commit failed: ${stderr.split("\n")[0]}`, "error");
+		addDiffComment({
+			path: target.path,
+			rawLineIndex: target.rawLineIndex,
+			text: comment.trim(),
+			createdAt: Date.now(),
+		});
+		ctx.ui.notify(`Comment added to ${target.path}`, "info");
+	}
+
+	function submitCommentsToPrompt(ctx: ExtensionContext): boolean {
+		const prompt = formatCommentsForPrompt();
+		if (!prompt) {
+			ctx.ui.notify("No comments to submit", "warning");
+			return false;
 		}
+		ctx.ui.setEditorText(prompt);
+		ctx.ui.notify("Comments added to prompt", "info");
+		return true;
 	}
 
 	pi.registerCommand("diff-panel", {
-		description: "Toggle the side diff panel (interactive git status)",
+		description: "Toggle the side diff panel (interactive git diff)",
 		handler: async (_args, ctx) => {
 			if (overlayActive) {
 				overlayDone?.();
@@ -961,32 +1207,57 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			// command again.
 			void ctx.ui.custom<void>(
 				(tui, theme, _kb, done) => {
+					let overlay: StatusOverlay;
+					const hideCompactOverlay = () => {
+						compactOverlayHandle?.hide();
+						compactOverlayHandle = null;
+					};
+					const showCompactOverlay = () => {
+						if (compactOverlayHandle) return;
+						compactOverlayHandle = tui.showOverlay(overlay, {
+							width: "40%",
+							minWidth: 50,
+							maxHeight: "100%",
+							anchor: "top-right",
+							margin: { top: 1, right: 1, bottom: 1 },
+							nonCapturing: true,
+						});
+					};
 					overlayDone = () => {
+						hideCompactOverlay();
 						done();
 						overlayActive = false;
 						overlayDone = null;
 						requestOverlayRender = null;
 						overlayHandle = null;
 					};
-					// Run the commit flow inline without closing the overlay. The
-					// input dialog replaces the prompt editor, so the overlay stays
-					// pinned top-right and shows the result of the commit when done.
-					const onCommit = () => {
-						void commitFlow(ctx).then(() => {
-							refreshStatus();
+					// The input dialog renders in the prompt editor area. Hide the panel
+					// while it is open so the overlay does not cover the comment field.
+					const onComment = (target: DiffCommentTarget) => {
+						overlayHandle?.setHidden(true);
+						tui.requestRender();
+						void commentFlow(ctx, target).then(() => {
+							overlayHandle?.setHidden(false);
 							requestOverlayRender?.();
+							overlayHandle?.focus();
 						});
 					};
 					const releaseFocus = () => {
-						overlayHandle?.unfocus();
+						overlayHandle?.setHidden(true);
+						showCompactOverlay();
 						tui.requestRender();
 					};
-					const overlay = new StatusOverlay(
+					const onSubmitComments = () => {
+						if (!submitCommentsToPrompt(ctx)) return;
+						releaseFocus();
+					};
+					overlay = new StatusOverlay(
 						theme,
 						() => overlayDone!(),
 						() => tui.requestRender(),
 						(msg, level) => ctx.ui.notify(msg, level ?? "info"),
-						onCommit,
+						onComment,
+						onSubmitComments,
 						releaseFocus,
 					);
 					requestOverlayRender = () => {
@@ -998,15 +1269,14 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 				{
 					overlay: true,
 					overlayOptions: {
-						width: "50%",
+						width: "90%",
 						minWidth: 50,
 						maxHeight: "100%",
 						anchor: "top-right",
 						margin: { top: 1, right: 1, bottom: 1 },
-						// Capturing overlay: framework focuses it on open and reliably
-						// restores focus to the prompt editor on `handle.unfocus()`
-						// (via entry.preFocus). Press alt+g/esc to unfocus; alt+g
-						// from the prompt re-focuses via the registered shortcut.
+						// Capturing overlay: framework focuses it on open. Press alt+g
+						// to hide this full panel and show a non-capturing compact panel;
+						// alt+g from the prompt restores the full focused panel.
 					},
 					onHandle: (handle) => {
 						overlayHandle = handle;
@@ -1016,14 +1286,23 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 		},
 	});
 
-	// Global shortcut: focus the overlay so j/k, space, -, c, r work.
+	// Global shortcut: focus the overlay so j/k, PgUp/PgDn, c, r work.
 	// No-op when the overlay is closed or already focused.
 	pi.registerShortcut(FOCUS_OVERLAY_KEY, {
 		description: "Focus the diff panel overlay (when open)",
 		handler: () => {
 			if (!overlayHandle) return;
+			if (compactOverlayHandle) {
+				compactOverlayHandle.hide();
+				compactOverlayHandle = null;
+				overlayHandle.setHidden(false);
+				overlayHandle.focus();
+				requestOverlayRender?.();
+				return;
+			}
 			if (overlayHandle.isFocused()) return;
 			overlayHandle.focus();
+			requestOverlayRender?.();
 		},
 	});
 }
