@@ -67,7 +67,7 @@ Keys:
   arrows    move selection
   ctrl-p    toggle pane preview
   ctrl-r    refresh
-  q/esc     cancel
+  esc       cancel
 
 Options:
   --list    print discovered agent windows without opening the TUI
@@ -452,16 +452,6 @@ cleanup() {
   fi
 }
 
-read_escape_sequence() {
-  local old_stty seq
-
-  old_stty=$(stty -g 2>/dev/null || true)
-  stty -icanon min 0 time 1 2>/dev/null || true
-  IFS= read -rsn2 seq || true
-  [ -n "$old_stty" ] && stty "$old_stty" 2>/dev/null || true
-  printf '%s' "$seq"
-}
-
 capture_preview() {
   local pane_id="$1"
   local lines="$2"
@@ -713,7 +703,7 @@ run_tui() {
       $'\025')
         clear_filter
         ;;
-      q|Q|$'\003')
+      $'\003')
         exit 0
         ;;
       '')
@@ -740,12 +730,7 @@ run_tui() {
         fi
         ;;
       $'\e')
-        seq=$(read_escape_sequence)
-        case "$seq" in
-          '[A') move_up ;;
-          '[B') move_down ;;
-          *) exit 0 ;;
-        esac
+        exit 0
         ;;
       [[:print:]])
         append_filter_char "$key"
