@@ -67,7 +67,7 @@ Keys:
   arrows    move selection
   ctrl-p    toggle pane preview
   ctrl-r    refresh
-  esc       cancel
+  q/esc     cancel
 
 Options:
   --list    print discovered agent windows without opening the TUI
@@ -456,7 +456,7 @@ read_escape_sequence() {
   local old_stty seq
 
   old_stty=$(stty -g 2>/dev/null || true)
-  stty min 0 time 1 2>/dev/null || true
+  stty -icanon min 0 time 1 2>/dev/null || true
   IFS= read -rsn2 seq || true
   [ -n "$old_stty" ] && stty "$old_stty" 2>/dev/null || true
   printf '%s' "$seq"
@@ -712,6 +712,9 @@ run_tui() {
         ;;
       $'\025')
         clear_filter
+        ;;
+      q|Q|$'\003')
+        exit 0
         ;;
       '')
         if [ "${#filtered_indices[@]}" -gt 0 ]; then
