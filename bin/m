@@ -420,11 +420,11 @@ refresh_entries() {
 print_entries() {
   local i status path
 
-  printf '%-5s %-28s %-14s %-24s %-10s %s\n' "AI" "SESSION" "PROJECT" "FEATURE" "STATUS" "PATH"
+  printf 'AI    %-28s %-14s %-24s %-10s %s\n' "SESSION" "PROJECT" "FEATURE" "STATUS" "PATH"
   for ((i = 0; i < ${#sessions[@]}; i++)); do
     status=$(status_for_activity "${activities[$i]}")
     path=$(short_path "${paths[$i]}")
-    printf '%-5s %-28s %-14s %-24s %-10s %s\n' \
+    printf '%s    %-28s %-14s %-24s %-10s %s\n' \
       "$(agent_logo "${agents[$i]}")" \
       "${sessions[$i]}:${window_indexes[$i]}" \
       "${projects[$i]}" \
@@ -567,7 +567,7 @@ render() {
   print_padding
   printf '%s%s' "$COLOR_MUTED" "$COLOR_BOLD"
   printf '    '
-  pad_truncate 'AI' "$agent_width"
+  printf 'AI '
   printf ' '
   pad_truncate 'SESSION' "$session_width"
   printf ' '
@@ -606,8 +606,7 @@ render() {
 
     print_padding
     printf '%s %s  ' "$row_style" "$number"
-    printf '%s' "$agent_style"
-    pad_truncate "$(agent_logo "${agents[$i]}")" "$agent_width"
+    printf '%s%s  ' "$agent_style" "$(agent_logo "${agents[$i]}")"
     printf '%s%s ' "$COLOR_RESET" "$row_style"
     pad_truncate "${sessions[$i]}:${window_indexes[$i]}" "$session_width"
     printf ' '
