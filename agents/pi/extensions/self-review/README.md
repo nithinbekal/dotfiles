@@ -1,10 +1,10 @@
-# diff-panel
+# self-review
 
-Interactive git diff overlay for the current pi session. Single command: `/diff-panel`.
+Interactive self-review overlay for the current pi session. Single command: `/self-review`.
 
 ## Command
 
-`/diff-panel` toggles a scrollable overlay anchored to the right side of the terminal. It shows a changed-file tree in the left sidebar and the selected file's diff on the right, auto-refreshing on every `write`/`edit`/`bash` tool call.
+`/self-review` toggles a scrollable overlay anchored to the right side of the terminal. It shows a changed-file tree in the left sidebar and the selected file's diff on the right, auto-refreshing on every `write`/`edit`/`bash` tool call.
 
 The overlay **takes keyboard focus on open** so its keys work immediately. Press `Alt+G` to hand control back to the prompt; press `Alt+G` again to re-focus the overlay. Press `Esc` to close it.
 
@@ -30,7 +30,7 @@ The overlay **takes keyboard focus on open** so its keys work immediately. Press
 
 - `Alt+G` — re-focus the overlay
 
-Run `/diff-panel` again at any time to close it.
+Run `/self-review` again at any time to close it.
 
 ## Behavior
 

@@ -1,14 +1,14 @@
 /**
- * Diff Panel — interactive git diff view.
+ * Self Review — interactive git diff view.
  *
  * Command:
- *   /diff-panel  - Toggle a right-side overlay showing changed-file diffs.
+ *   /self-review  - Toggle a right-side overlay showing changed-file diffs.
  *
  * Layout:
  *   A changed-file tree on the left, selected file diff on the right.
  *
  * Focus model:
- *   /diff-panel grabs focus on open. Press alt+g to release focus
+ *   /self-review grabs focus on open. Press alt+g to release focus
  *   to the prompt; alt+g re-focuses the overlay. Esc closes the overlay.
  *
  * Keys (in the overlay, when focused):
@@ -881,7 +881,7 @@ class StatusOverlay implements Component {
 		this.clampCursor();
 
 		const totalCount = entries.length;
-		const title = th.bold(th.fg("accent", "📋 Git Diff"));
+		const title = th.bold(th.fg("accent", "📋 Self Review"));
 		const branch = state.isGitRepo ? state.status.branch || "(unknown)" : "snapshot";
 		const stats = th.fg("muted", `  ${totalCount} changed file${totalCount === 1 ? "" : "s"}  •  ${branch}`);
 		const mode = th.fg("dim", state.isGitRepo ? "git" : "snapshot");
@@ -1187,8 +1187,8 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 		return true;
 	}
 
-	pi.registerCommand("diff-panel", {
-		description: "Toggle the side diff panel (interactive git diff)",
+	pi.registerCommand("self-review", {
+		description: "Toggle the self-review diff panel",
 		handler: async (_args, ctx) => {
 			if (overlayActive) {
 				overlayDone?.();
@@ -1197,7 +1197,7 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			refreshStatus();
 			overlayActive = true;
 			// Fire-and-forget: don't await the overlay's lifetime, otherwise the
-			// /diff-panel command itself never returns, which keeps the main
+			// /self-review command itself never returns, which keeps the main
 			// interactive loop blocked inside session.prompt(). With the loop
 			// blocked, getUserInput() never re-arms onInputCallback, so any
 			// subsequent Enter in the prompt clears the editor without sending
@@ -1289,7 +1289,7 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 	// Global shortcut: focus the overlay so j/k, PgUp/PgDn, c, r work.
 	// No-op when the overlay is closed or already focused.
 	pi.registerShortcut(FOCUS_OVERLAY_KEY, {
-		description: "Focus the diff panel overlay (when open)",
+		description: "Focus the self-review overlay (when open)",
 		handler: () => {
 			if (!overlayHandle) return;
 			if (compactOverlayHandle) {
