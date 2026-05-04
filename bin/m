@@ -44,6 +44,8 @@ COLOR_GREEN=""
 COLOR_YELLOW=""
 COLOR_RED=""
 COLOR_SELECTED_BG=""
+COLOR_PI=""
+COLOR_CLAUDE=""
 
 usage() {
   cat <<'EOF'
@@ -106,6 +108,8 @@ init_colors() {
   COLOR_GREEN=$'\033[32m'
   COLOR_YELLOW=$'\033[33m'
   COLOR_RED=$'\033[31m'
+  COLOR_PI=$'\033[38;2;128;203;196m' # Pi status-line accent: #80CBC4
+  COLOR_CLAUDE=$'\033[38;2;217;119;87m' # Claude status-line mark: #d97757
 
   if [ "$colors" -ge 256 ]; then
     COLOR_SELECTED_BG=$'\033[48;5;236m'
@@ -131,9 +135,17 @@ status_color() {
 
 agent_color() {
   case "$1" in
-    pi) printf '%s' "$COLOR_ACCENT$COLOR_BOLD" ;;
-    claude) printf '%s' "$COLOR_TITLE$COLOR_BOLD" ;;
+    pi) printf '%s%s' "$COLOR_PI" "$COLOR_BOLD" ;;
+    claude) printf '%s%s' "$COLOR_CLAUDE" "$COLOR_BOLD" ;;
     *) printf '%s' "$COLOR_MUTED" ;;
+  esac
+}
+
+agent_logo() {
+  case "$1" in
+    pi) printf 'π' ;;
+    claude) printf '✻' ;;
+    *) printf '?' ;;
   esac
 }
 
@@ -408,12 +420,12 @@ refresh_entries() {
 print_entries() {
   local i status path
 
-  printf '%-8s %-28s %-14s %-24s %-10s %s\n' "AGENT" "SESSION" "PROJECT" "FEATURE" "STATUS" "PATH"
+  printf '%-5s %-28s %-14s %-24s %-10s %s\n' "AI" "SESSION" "PROJECT" "FEATURE" "STATUS" "PATH"
   for ((i = 0; i < ${#sessions[@]}; i++)); do
     status=$(status_for_activity "${activities[$i]}")
     path=$(short_path "${paths[$i]}")
-    printf '%-8s %-28s %-14s %-24s %-10s %s\n' \
-      "${agents[$i]}" \
+    printf '%-5s %-28s %-14s %-24s %-10s %s\n' \
+      "$(agent_logo "${agents[$i]}")" \
       "${sessions[$i]}:${window_indexes[$i]}" \
       "${projects[$i]}" \
       "${features[$i]}" \
@@ -537,7 +549,7 @@ render() {
 
   current_window_id=$(tmux display-message -p '#{window_id}' 2>/dev/null || true)
 
-  agent_width=7
+  agent_width=3
   status_width=10
   if [ "$cols" -ge 100 ]; then
     session_width=26
@@ -555,7 +567,7 @@ render() {
   print_padding
   printf '%s%s' "$COLOR_MUTED" "$COLOR_BOLD"
   printf '    '
-  pad_truncate 'AGENT' "$agent_width"
+  pad_truncate 'AI' "$agent_width"
   printf ' '
   pad_truncate 'SESSION' "$session_width"
   printf ' '
@@ -595,7 +607,7 @@ render() {
     print_padding
     printf '%s %s  ' "$row_style" "$number"
     printf '%s' "$agent_style"
-    pad_truncate "${agents[$i]}" "$agent_width"
+    pad_truncate "$(agent_logo "${agents[$i]}")" "$agent_width"
     printf '%s%s ' "$COLOR_RESET" "$row_style"
     pad_truncate "${sessions[$i]}:${window_indexes[$i]}" "$session_width"
     printf ' '
