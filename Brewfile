@@ -5,6 +5,7 @@ brew "neovim"
 brew "tree-sitter"
 brew "tree-sitter-cli"
 brew "ripgrep"
+brew "tmux"
 brew "watchman" # required by Sorbet LSP to detect file changes
 brew "zellij"
 
