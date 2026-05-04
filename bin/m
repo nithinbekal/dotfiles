@@ -5,7 +5,7 @@
 # Finds tmux windows running pi or Claude Code and jumps to the selected window.
 # It is designed to run inside a tmux popup, e.g. from ~/.config/tmux/tmux.conf:
 #
-#   bind m display-popup -E -b rounded -w 82% -h 14 "$HOME/dotfiles/bin/m"
+#   bind m display-popup -E -b rounded -w 82% -h 22 "$HOME/dotfiles/bin/m"
 
 set -u
 
@@ -54,7 +54,7 @@ A tiny tmux switcher for coding-agent windows.
 It discovers tmux windows running pi or Claude Code, shows their session/project/worktree,
 and jumps to the selected window. It works best as a tmux popup:
 
-  bind m display-popup -E -b rounded -w 82% -h 14 "$HOME/dotfiles/bin/m"
+  bind m display-popup -E -b rounded -w 82% -h 22 "$HOME/dotfiles/bin/m"
 
 Keys:
   type      filter sessions
