@@ -140,7 +140,8 @@ ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
 ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
-ln -sfn ~/dotfiles/agents/pi/extensions/diff-panel ~/.pi/agent/extensions/diff-panel
+[ ! -L ~/.pi/agent/extensions/diff-panel ] || rm ~/.pi/agent/extensions/diff-panel
+ln -sfn ~/dotfiles/agents/pi/extensions/self-review ~/.pi/agent/extensions/self-review
 ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.pi/agent/prompts/pr.md
 ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.pi/agent/prompts/push-commit.md
 ln -sf ~/dotfiles/agents/pi/settings.json ~/.pi/agent/settings.json
