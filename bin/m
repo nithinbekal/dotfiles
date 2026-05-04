@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-# m - tmux popup switcher for pi coding-agent windows.
+# m - tmux popup switcher for coding-agent windows.
 #
-# Finds tmux windows named "pi" and jumps to the selected window. It is designed
-# to run inside a tmux popup, e.g. from ~/.config/tmux/tmux.conf:
+# Finds tmux windows running pi or Claude Code and jumps to the selected window.
+# It is designed to run inside a tmux popup, e.g. from ~/.config/tmux/tmux.conf:
 #
 #   bind m display-popup -E -b rounded -w 82% -h 14 "$HOME/dotfiles/bin/m"
 
 set -u
 
-WINDOW_NAMES="${M_WINDOW_NAMES:-pi}"
+WINDOW_NAMES="${M_WINDOW_NAMES:-}"
 PREVIEW_LINES="${M_PREVIEW_LINES:-0}"
 PREVIEW_TOGGLE_LINES="${M_PREVIEW_TOGGLE_LINES:-12}"
 PADDING="${M_PADDING:-2}"
@@ -24,6 +24,7 @@ paths=()
 projects=()
 features=()
 commands=()
+agents=()
 filtered_indices=()
 
 filter_query=""
@@ -48,10 +49,10 @@ usage() {
   cat <<'EOF'
 Usage: m [--list] [--help]
 
-A tiny tmux switcher for pi coding-agent windows.
+A tiny tmux switcher for coding-agent windows.
 
-It discovers tmux windows named "pi", shows their session/project/worktree, and
-jumps to the selected window. It works best as a tmux popup:
+It discovers tmux windows running pi or Claude Code, shows their session/project/worktree,
+and jumps to the selected window. It works best as a tmux popup:
 
   bind m display-popup -E -b rounded -w 82% -h 14 "$HOME/dotfiles/bin/m"
 
@@ -59,19 +60,19 @@ Keys:
   type      filter sessions
   /         start filter before typing numbers
   backspace delete filter character
-  1-9       jump to that numbered pi window when filter is empty
+  1-9       jump to that numbered agent window when filter is empty
   enter     jump to selected window
   arrows    move selection
   ctrl-p    toggle pane preview
   ctrl-r    refresh
-  esc       clear filter, then cancel
+  esc       cancel
 
 Options:
-  --list    print discovered pi windows without opening the TUI
+  --list    print discovered agent windows without opening the TUI
   --help    show this help
 
 Environment:
-  M_WINDOW_NAMES          comma-separated tmux window names to include (default: pi)
+  M_WINDOW_NAMES          optional comma-separated window names to include before agent detection
   M_PREVIEW_LINES         preview lines to show by default (default: 0)
   M_PREVIEW_TOGGLE_LINES  preview lines to show when toggled with Ctrl-P (default: 12)
   M_PADDING               spaces between popup border and content (default: 2)
@@ -126,6 +127,40 @@ status_color() {
     idle*) printf '%s' "$COLOR_YELLOW" ;;
     *) printf '%s' "$COLOR_MUTED" ;;
   esac
+}
+
+agent_color() {
+  case "$1" in
+    pi) printf '%s' "$COLOR_ACCENT$COLOR_BOLD" ;;
+    claude) printf '%s' "$COLOR_TITLE$COLOR_BOLD" ;;
+    *) printf '%s' "$COLOR_MUTED" ;;
+  esac
+}
+
+pane_process_commands() {
+  local pane_tty="$1"
+
+  [ -n "$pane_tty" ] || return
+  ps -t "${pane_tty#/dev/}" -o command= 2>/dev/null || true
+}
+
+detect_agent() {
+  local pane_tty="$1"
+  local pane_command="$2"
+  local commands
+
+  commands="$pane_command
+$(pane_process_commands "$pane_tty")"
+
+  if printf '%s\n' "$commands" | grep -Eiq '(^|[ /-])d?pi([[:space:]]|$)|\.pi/pkg/pi-|/pi([[:space:]]|$)'; then
+    printf 'pi'
+    return
+  fi
+
+  if printf '%s\n' "$commands" | grep -Eiq '(^|[ /.-])claude([[:space:].-]|$)|@anthropic-ai/claude-code'; then
+    printf 'claude'
+    return
+  fi
 }
 
 matches_window_name() {
@@ -263,6 +298,7 @@ entry_search_text() {
     "${features[$index]}" \
     "${paths[$index]}" \
     "${commands[$index]}" \
+    "${agents[$index]}" \
     "${sessions[$index]}:${window_indexes[$index]}"
 }
 
@@ -326,20 +362,27 @@ clear_entries() {
   projects=()
   features=()
   commands=()
+  agents=()
   filtered_indices=()
 }
 
 refresh_entries() {
-  local line session window_index window_id window_name pane_id active activity path command feature project
+  local line session window_index window_id window_name pane_id active activity path command pane_tty feature project agent
 
   clear_entries
 
-  while IFS=$'\t' read -r session window_index window_id window_name pane_id active activity path command; do
+  while IFS=$'\t' read -r session window_index window_id window_name pane_id active activity path command pane_tty; do
     [ -n "${session:-}" ] || continue
-    matches_window_name "$window_name" || continue
+    if [ -n "$WINDOW_NAMES" ] && ! matches_window_name "$window_name"; then
+      continue
+    fi
 
     path="${path:-}"
     command="${command:-}"
+    pane_tty="${pane_tty:-}"
+    agent=$(detect_agent "$pane_tty" "$command")
+    [ -n "$agent" ] || continue
+
     feature=$(infer_feature "$path")
     project=$(infer_project "$session" "$path" "$feature")
 
@@ -353,8 +396,9 @@ refresh_entries() {
     projects+=("$project")
     features+=("$feature")
     commands+=("$command")
+    agents+=("$agent")
   done < <(
-    tmux list-windows -a -F '#{session_name}	#{window_index}	#{window_id}	#{window_name}	#{pane_id}	#{window_active}	#{window_activity}	#{pane_current_path}	#{pane_current_command}' 2>/dev/null |
+    tmux list-panes -a -F '#{session_name}	#{window_index}	#{window_id}	#{window_name}	#{pane_id}	#{window_active}	#{window_activity}	#{pane_current_path}	#{pane_current_command}	#{pane_tty}' 2>/dev/null |
       sort -t $'\t' -k7,7nr
   )
 
@@ -364,11 +408,12 @@ refresh_entries() {
 print_entries() {
   local i status path
 
-  printf '%-28s %-14s %-24s %-10s %s\n' "SESSION" "PROJECT" "FEATURE" "STATUS" "PATH"
+  printf '%-8s %-28s %-14s %-24s %-10s %s\n' "AGENT" "SESSION" "PROJECT" "FEATURE" "STATUS" "PATH"
   for ((i = 0; i < ${#sessions[@]}; i++)); do
     status=$(status_for_activity "${activities[$i]}")
     path=$(short_path "${paths[$i]}")
-    printf '%-28s %-14s %-24s %-10s %s\n' \
+    printf '%-8s %-28s %-14s %-24s %-10s %s\n' \
+      "${agents[$i]}" \
       "${sessions[$i]}:${window_indexes[$i]}" \
       "${projects[$i]}" \
       "${features[$i]}" \
@@ -414,7 +459,7 @@ capture_preview() {
 
 render() {
   local rows cols content_cols total count preview_height list_height max_start end display_i i line_no status path number current_window_id preview_title
-  local session_width work_width status_width path_width work filter_display row_style row_reset status_style
+  local session_width work_width agent_width status_width path_width work filter_display row_style row_reset status_style agent_style
 
   rows=$(tput lines 2>/dev/null || printf '24')
   cols=$(tput cols 2>/dev/null || printf '80')
@@ -428,7 +473,7 @@ render() {
   printf '\n'
 
   print_padding
-  printf '%s%s' "$COLOR_TITLE$COLOR_BOLD" 'm - pi windows'
+  printf '%s%s' "$COLOR_TITLE$COLOR_BOLD" 'm - agent windows'
   printf '%s' "$COLOR_RESET"
   if [ -n "$filter_query" ]; then
     printf ' %s(%d/%d)%s' "$COLOR_MUTED" "$count" "$total" "$COLOR_RESET"
@@ -446,7 +491,7 @@ render() {
   if [ "$total" -eq 0 ]; then
     printf '\n'
     print_padding
-    printf '%sNo tmux windows named %s.%s\n\n' "$COLOR_YELLOW" "$WINDOW_NAMES" "$COLOR_RESET"
+    printf '%sNo pi or Claude Code windows found.%s\n\n' "$COLOR_YELLOW" "$COLOR_RESET"
     print_padding
     printf '%sPress Ctrl-R to refresh or esc to cancel.%s\n' "$COLOR_MUTED" "$COLOR_RESET"
     printf '%s\033[J' "$COLOR_RESET"
@@ -492,23 +537,26 @@ render() {
 
   current_window_id=$(tmux display-message -p '#{window_id}' 2>/dev/null || true)
 
+  agent_width=7
   status_width=10
   if [ "$cols" -ge 100 ]; then
-    session_width=28
-    work_width=30
-  elif [ "$cols" -ge 80 ]; then
     session_width=26
-    work_width=24
+    work_width=28
+  elif [ "$cols" -ge 80 ]; then
+    session_width=24
+    work_width=22
   else
-    session_width=20
-    work_width=18
+    session_width=18
+    work_width=16
   fi
-  path_width=$((cols - 4 - session_width - 1 - work_width - 1 - status_width - 1))
+  path_width=$((cols - 4 - agent_width - 1 - session_width - 1 - work_width - 1 - status_width - 1))
   [ "$path_width" -lt 0 ] && path_width=0
 
   print_padding
   printf '%s%s' "$COLOR_MUTED" "$COLOR_BOLD"
   printf '    '
+  pad_truncate 'AGENT' "$agent_width"
+  printf ' '
   pad_truncate 'SESSION' "$session_width"
   printf ' '
   pad_truncate 'WORK' "$work_width"
@@ -542,9 +590,13 @@ render() {
     number=' '
     [ "$line_no" -le 9 ] && number="$line_no"
     status_style=$(status_color "$status")
+    agent_style=$(agent_color "${agents[$i]}")
 
     print_padding
     printf '%s %s  ' "$row_style" "$number"
+    printf '%s' "$agent_style"
+    pad_truncate "${agents[$i]}" "$agent_width"
+    printf '%s%s ' "$COLOR_RESET" "$row_style"
     pad_truncate "${sessions[$i]}:${window_indexes[$i]}" "$session_width"
     printf ' '
     pad_truncate "$work" "$work_width"
