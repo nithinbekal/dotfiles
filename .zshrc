@@ -36,6 +36,7 @@ export PATH=$HOME/.local/bin:$PATH
 alias bx="bundle exec"
 alias dotf="cd ~/dotfiles"
 alias la="ls -lAh"
+alias ta="tmux a"
 alias v="nvim"
 alias zj='zellij attach --create "$(basename $PWD)"'
 
