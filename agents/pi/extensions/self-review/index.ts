@@ -31,7 +31,7 @@
  * taken on first write/edit. Git-only actions are disabled in that mode.
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
@@ -97,6 +97,7 @@ const EMPTY_STATUS: StatusModel = {
 
 interface DiffState {
 	cwd: string;
+	gitRoot: string | null;
 	isGitRepo: boolean;
 	// Non-git fallback: path -> original contents at first touch (null = did not exist).
 	snapshots: Map<string, string | null>;
@@ -113,6 +114,7 @@ interface DiffState {
 
 const state: DiffState = {
 	cwd: process.cwd(),
+	gitRoot: null,
 	isGitRepo: false,
 	snapshots: new Map(),
 	touched: new Set(),
@@ -141,21 +143,25 @@ const FOCUS_OVERLAY_KEY = "alt+g";
 
 // ---------- Git helpers ----------
 
-function detectGitRepo(cwd: string): boolean {
+function findGitRoot(cwd: string): string | null {
 	try {
-		execSync("git rev-parse --is-inside-work-tree", {
+		return execFileSync("git", ["rev-parse", "--show-toplevel"], {
 			cwd,
+			encoding: "utf8",
 			stdio: ["ignore", "pipe", "ignore"],
-		});
-		return true;
+		}).trim();
 	} catch {
-		return false;
+		return null;
 	}
+}
+
+function gitCommandCwd(): string {
+	return state.gitRoot ?? state.cwd;
 }
 
 function getCurrentBranch(cwd: string): string {
 	try {
-		const out = execSync("git rev-parse --abbrev-ref HEAD", {
+		const out = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
 			cwd,
 			encoding: "utf8",
 			stdio: ["ignore", "pipe", "ignore"],
@@ -163,7 +169,7 @@ function getCurrentBranch(cwd: string): string {
 		if (out === "HEAD") {
 			// Detached: show short SHA
 			try {
-				const sha = execSync("git rev-parse --short HEAD", {
+				const sha = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
 					cwd,
 					encoding: "utf8",
 					stdio: ["ignore", "pipe", "ignore"],
@@ -187,7 +193,7 @@ function loadGitStatus(cwd: string): StatusModel {
 
 	let raw: string;
 	try {
-		raw = execSync("git status --porcelain=v1 -uall --no-renames", {
+		raw = execFileSync("git", ["status", "--porcelain=v1", "-uall", "--no-renames"], {
 			cwd,
 			encoding: "utf8",
 			maxBuffer: 4 * 1024 * 1024,
@@ -254,7 +260,8 @@ function loadSnapshotStatus(): StatusModel {
 }
 
 function refreshStatus(): void {
-	state.status = state.isGitRepo ? loadGitStatus(state.cwd) : loadSnapshotStatus();
+	if (state.isGitRepo && !state.gitRoot) state.gitRoot = findGitRoot(state.cwd);
+	state.status = state.isGitRepo ? loadGitStatus(gitCommandCwd()) : loadSnapshotStatus();
 	state.diffCache.clear();
 	state.statsCache.clear();
 	state.lastRefresh = Date.now();
@@ -283,7 +290,7 @@ function loadFileDiff(entry: FileEntry): string[] {
 
 function loadGitFileDiff(entry: FileEntry): string[] {
 	if (entry.section === "untracked") {
-		const abs = resolve(state.cwd, entry.path);
+		const abs = resolve(gitCommandCwd(), entry.path);
 		try {
 			const content = readFileSync(abs, "utf8");
 			const fileLines = content.split("\n");
@@ -297,9 +304,8 @@ function loadGitFileDiff(entry: FileEntry): string[] {
 	}
 
 	try {
-		const cmd = `git diff --no-ext-diff --no-color HEAD -- ${JSON.stringify(entry.path)}`;
-		const out = execSync(cmd, {
-			cwd: state.cwd,
+		const out = execFileSync("git", ["diff", "-p", "--no-ext-diff", "--no-color", "HEAD", "--", entry.path], {
+			cwd: gitCommandCwd(),
 			encoding: "utf8",
 			maxBuffer: 16 * 1024 * 1024,
 		});
@@ -1132,7 +1138,8 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 
 	pi.on("session_start", async (_event, ctx) => {
 		state.cwd = ctx.cwd;
-		state.isGitRepo = detectGitRepo(ctx.cwd);
+		state.gitRoot = findGitRoot(ctx.cwd);
+		state.isGitRepo = state.gitRoot !== null;
 		refreshStatus();
 	});
 
