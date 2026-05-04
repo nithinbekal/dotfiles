@@ -21,6 +21,7 @@
  *   c                  add a comment on the selected diff line
  *   x                  remove the latest comment on the selected diff line
  *   r                  refresh status
+ *   }                  toggle working tree vs parent-branch diff
  *   g / G              first / last file
  *   alt+g              release focus back to the prompt
  *   Esc / q            close the overlay
@@ -48,6 +49,7 @@ import {
 // ---------- Types ----------
 
 type Section = "untracked" | "unstaged" | "staged";
+type ReviewMode = "working" | "branch";
 
 interface FileEntry {
 	section: Section;
@@ -99,6 +101,8 @@ interface DiffState {
 	cwd: string;
 	gitRoot: string | null;
 	isGitRepo: boolean;
+	reviewMode: ReviewMode;
+	parentRef: string | null;
 	// Non-git fallback: path -> original contents at first touch (null = did not exist).
 	snapshots: Map<string, string | null>;
 	touched: Set<string>;
@@ -116,6 +120,8 @@ const state: DiffState = {
 	cwd: process.cwd(),
 	gitRoot: null,
 	isGitRepo: false,
+	reviewMode: "working",
+	parentRef: null,
 	snapshots: new Map(),
 	touched: new Set(),
 	status: EMPTY_STATUS,
@@ -185,6 +191,55 @@ function getCurrentBranch(cwd: string): string {
 	}
 }
 
+function gitOutput(args: string[], cwd = gitCommandCwd()): string | null {
+	try {
+		return execFileSync("git", args, {
+			cwd,
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+	} catch {
+		return null;
+	}
+}
+
+function refExists(ref: string, cwd = gitCommandCwd()): boolean {
+	return gitOutput(["rev-parse", "--verify", `${ref}^{commit}`], cwd) !== null;
+}
+
+function normalizeParentRef(candidate: string | null, currentBranch: string, cwd = gitCommandCwd()): string | null {
+	if (!candidate) return null;
+	const ref = candidate.trim();
+	if (!ref || ref === currentBranch) return null;
+	if (refExists(ref, cwd)) return ref;
+	const originRef = `origin/${ref}`;
+	if (refExists(originRef, cwd)) return originRef;
+	return null;
+}
+
+function resolveParentRef(cwd = gitCommandCwd()): string | null {
+	const currentBranch = getCurrentBranch(cwd);
+	if (!currentBranch || currentBranch.startsWith("(detached")) return null;
+
+	const configuredBase = gitOutput(["config", "--get", `branch.${currentBranch}.github-pr-base-branch`], cwd);
+	if (configuredBase) {
+		const base = configuredBase.includes("#") ? configuredBase.split("#").pop()! : configuredBase;
+		const normalized = normalizeParentRef(base, currentBranch, cwd);
+		if (normalized) return normalized;
+	}
+
+	const vscodeMergeBase = gitOutput(["config", "--get", `branch.${currentBranch}.vscode-merge-base`], cwd);
+	const normalizedMergeBase = normalizeParentRef(vscodeMergeBase, currentBranch, cwd);
+	if (normalizedMergeBase) return normalizedMergeBase;
+
+	for (const candidate of ["main", "master"]) {
+		const normalized = normalizeParentRef(candidate, currentBranch, cwd);
+		if (normalized) return normalized;
+	}
+
+	return null;
+}
+
 function loadGitStatus(cwd: string): StatusModel {
 	const branch = getCurrentBranch(cwd);
 	const staged: FileEntry[] = [];
@@ -236,6 +291,34 @@ function loadGitStatus(cwd: string): StatusModel {
 	return { branch, staged, unstaged, untracked };
 }
 
+function loadBranchStatus(cwd: string): StatusModel {
+	const branch = getCurrentBranch(cwd);
+	const parentRef = resolveParentRef(cwd);
+	state.parentRef = parentRef;
+	if (!parentRef) return { branch: `${branch || "HEAD"} ↔ (no parent)`, staged: [], unstaged: [], untracked: [] };
+
+	const entries: FileEntry[] = [];
+	let raw: string;
+	try {
+		raw = execFileSync("git", ["diff", "--name-status", "--no-renames", `${parentRef}...HEAD`], {
+			cwd,
+			encoding: "utf8",
+			maxBuffer: 4 * 1024 * 1024,
+		});
+	} catch {
+		return { branch: `${branch || "HEAD"} ↔ ${parentRef}`, staged: [], unstaged: [], untracked: [] };
+	}
+
+	for (const rawLine of raw.split("\n")) {
+		if (!rawLine) continue;
+		const [status = "M", path = ""] = rawLine.split("\t");
+		if (!path) continue;
+		entries.push({ section: "unstaged", path, status: status[0] ?? "M" });
+	}
+
+	return { branch: `${branch || "HEAD"} ↔ ${parentRef}`, staged: [], unstaged: entries, untracked: [] };
+}
+
 function loadSnapshotStatus(): StatusModel {
 	// Build a single "unstaged" section from touched files in non-git mode.
 	const unstaged: FileEntry[] = [];
@@ -261,7 +344,15 @@ function loadSnapshotStatus(): StatusModel {
 
 function refreshStatus(): void {
 	if (state.isGitRepo && !state.gitRoot) state.gitRoot = findGitRoot(state.cwd);
-	state.status = state.isGitRepo ? loadGitStatus(gitCommandCwd()) : loadSnapshotStatus();
+	state.parentRef = null;
+	if (!state.isGitRepo) {
+		state.reviewMode = "working";
+		state.status = loadSnapshotStatus();
+	} else if (state.reviewMode === "branch") {
+		state.status = loadBranchStatus(gitCommandCwd());
+	} else {
+		state.status = loadGitStatus(gitCommandCwd());
+	}
 	state.diffCache.clear();
 	state.statsCache.clear();
 	state.lastRefresh = Date.now();
@@ -289,6 +380,26 @@ function loadFileDiff(entry: FileEntry): string[] {
 }
 
 function loadGitFileDiff(entry: FileEntry): string[] {
+	if (state.reviewMode === "branch") {
+		const parentRef = state.parentRef ?? resolveParentRef();
+		if (!parentRef) return ["(no parent branch found)"];
+		try {
+			const out = execFileSync("git", ["diff", "-p", "--no-ext-diff", "--no-color", `${parentRef}...HEAD`, "--", entry.path], {
+				cwd: gitCommandCwd(),
+				encoding: "utf8",
+				maxBuffer: 16 * 1024 * 1024,
+			});
+			const all = out.split("\n");
+			const hunkIdx = all.findIndex((l) => l.startsWith("@@"));
+			const sliced = hunkIdx >= 0 ? all.slice(hunkIdx) : all;
+			while (sliced.length && !sliced[sliced.length - 1]) sliced.pop();
+			if (sliced.length === 0) return ["(no diff)"];
+			return sliced;
+		} catch (e) {
+			return [`(diff failed: ${(e as Error).message})`];
+		}
+	}
+
 	if (entry.section === "untracked") {
 		const abs = resolve(gitCommandCwd(), entry.path);
 		try {
@@ -734,6 +845,20 @@ class StatusOverlay implements Component {
 		this.diffScroll = Math.max(0, this.diffScroll + delta);
 	}
 
+	private toggleReviewMode(): void {
+		if (!state.isGitRepo) {
+			this.notify("Parent-branch diff is only available in git repositories", "warning");
+			return;
+		}
+		state.reviewMode = state.reviewMode === "working" ? "branch" : "working";
+		refreshStatus();
+		this.clampCursor();
+		this.focusedPane = "tree";
+		this.treeScroll = 0;
+		this.diffScroll = 0;
+		this.diffCursor = 0;
+	}
+
 	private moveDiffCursor(delta: number): void {
 		this.diffCursor = Math.max(0, this.diffCursor + delta);
 	}
@@ -773,6 +898,11 @@ class StatusOverlay implements Component {
 	handleInput(data: string): void {
 		if (data === "[" || data === "]") {
 			this.jumpHunk(data === "]" ? 1 : -1);
+			this.requestRender();
+			return;
+		}
+		if (data === "}") {
+			this.toggleReviewMode();
 			this.requestRender();
 			return;
 		}
@@ -889,8 +1019,9 @@ class StatusOverlay implements Component {
 		const totalCount = entries.length;
 		const title = th.bold(th.fg("accent", "📋 Self Review"));
 		const branch = state.isGitRepo ? state.status.branch || "(unknown)" : "snapshot";
+		const modeLabel = state.isGitRepo ? (state.reviewMode === "branch" ? "parent diff" : "working tree") : "snapshot";
 		const stats = th.fg("muted", `  ${totalCount} changed file${totalCount === 1 ? "" : "s"}  •  ${branch}`);
-		const mode = th.fg("dim", state.isGitRepo ? "git" : "snapshot");
+		const mode = th.fg("dim", modeLabel);
 
 		const top = th.fg("border", "╭" + "─".repeat(innerW) + "╮");
 		const bottom = th.fg("border", "╰" + "─".repeat(innerW) + "╯");
@@ -935,8 +1066,8 @@ class StatusOverlay implements Component {
 		lines.push(row(th.fg("dim", ` ${fileInfo}${diffInfo ? ` • ${diffInfo}` : ""}`)));
 		const paneHelp =
 			this.focusedPane === "diff"
-				? " j/k line • [/] hunks • h/← files • PgUp/PgDn page • "
-				: " j/k files • enter diff • [/] hunks • PgUp/PgDn diff • ";
+				? " j/k line • [/] hunks • } toggle diff • h/← files • PgUp/PgDn page • "
+				: " j/k files • enter diff • [/] hunks • } toggle diff • PgUp/PgDn diff • ";
 		lines.push(
 			row(
 				th.fg(
