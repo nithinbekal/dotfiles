@@ -64,7 +64,6 @@ Keys:
   backspace delete filter character
   1-9       jump to that numbered agent window when filter is empty
   enter     jump to selected window
-  arrows    move selection
   ctrl-p    toggle pane preview
   ctrl-r    refresh
   esc       cancel
