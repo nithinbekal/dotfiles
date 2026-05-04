@@ -1,0 +1,723 @@
+#!/usr/bin/env bash
+
+# m - tmux popup switcher for pi coding-agent windows.
+#
+# Finds tmux windows named "pi" and jumps to the selected window. It is designed
+# to run inside a tmux popup, e.g. from ~/.config/tmux/tmux.conf:
+#
+#   bind m display-popup -E -b rounded -w 82% -h 14 "$HOME/dotfiles/bin/m"
+
+set -u
+
+WINDOW_NAMES="${M_WINDOW_NAMES:-pi}"
+PREVIEW_LINES="${M_PREVIEW_LINES:-0}"
+PREVIEW_TOGGLE_LINES="${M_PREVIEW_TOGGLE_LINES:-12}"
+PADDING="${M_PADDING:-2}"
+
+sessions=()
+window_indexes=()
+window_ids=()
+window_names=()
+pane_ids=()
+activities=()
+paths=()
+projects=()
+features=()
+commands=()
+filtered_indices=()
+
+filter_query=""
+filter_active=0
+selected=0
+scroll=0
+alt_screen=0
+cursor_hidden=0
+
+COLOR_RESET=""
+COLOR_BOLD=""
+COLOR_DIM=""
+COLOR_MUTED=""
+COLOR_TITLE=""
+COLOR_ACCENT=""
+COLOR_GREEN=""
+COLOR_YELLOW=""
+COLOR_RED=""
+COLOR_SELECTED_BG=""
+
+usage() {
+  cat <<'EOF'
+Usage: m [--list] [--help]
+
+A tiny tmux switcher for pi coding-agent windows.
+
+It discovers tmux windows named "pi", shows their session/project/worktree, and
+jumps to the selected window. It works best as a tmux popup:
+
+  bind m display-popup -E -b rounded -w 82% -h 14 "$HOME/dotfiles/bin/m"
+
+Keys:
+  type      filter sessions
+  /         start filter before typing numbers
+  backspace delete filter character
+  1-9       jump to that numbered pi window when filter is empty
+  enter     jump to selected window
+  arrows    move selection
+  ctrl-p    toggle pane preview
+  ctrl-r    refresh
+  esc       clear filter, then cancel
+
+Options:
+  --list    print discovered pi windows without opening the TUI
+  --help    show this help
+
+Environment:
+  M_WINDOW_NAMES          comma-separated tmux window names to include (default: pi)
+  M_PREVIEW_LINES         preview lines to show by default (default: 0)
+  M_PREVIEW_TOGGLE_LINES  preview lines to show when toggled with Ctrl-P (default: 12)
+  M_PADDING               spaces between popup border and content (default: 2)
+EOF
+}
+
+require_tmux() {
+  if ! command -v tmux >/dev/null 2>&1; then
+    echo "m: tmux is required" >&2
+    exit 1
+  fi
+
+  if ! tmux list-sessions >/dev/null 2>&1; then
+    echo "m: no tmux server is running" >&2
+    exit 1
+  fi
+}
+
+init_colors() {
+  local colors
+
+  [ -z "${NO_COLOR:-}" ] || return
+  colors=$(tput colors 2>/dev/null || printf '0')
+  [ "$colors" -ge 8 ] || return
+
+  COLOR_RESET=$'\033[0m'
+  COLOR_BOLD=$'\033[1m'
+  COLOR_DIM=$'\033[2m'
+  COLOR_TITLE=$'\033[36m'
+  COLOR_ACCENT=$'\033[34m'
+  COLOR_GREEN=$'\033[32m'
+  COLOR_YELLOW=$'\033[33m'
+  COLOR_RED=$'\033[31m'
+
+  if [ "$colors" -ge 256 ]; then
+    COLOR_SELECTED_BG=$'\033[48;5;236m'
+  else
+    COLOR_SELECTED_BG=$'\033[44m'
+  fi
+
+  if [ "$colors" -ge 16 ]; then
+    COLOR_MUTED=$'\033[90m'
+  else
+    COLOR_MUTED="$COLOR_DIM"
+  fi
+}
+
+status_color() {
+  case "$1" in
+    current) printf '%s' "$COLOR_ACCENT$COLOR_BOLD" ;;
+    active) printf '%s' "$COLOR_GREEN" ;;
+    idle*) printf '%s' "$COLOR_YELLOW" ;;
+    *) printf '%s' "$COLOR_MUTED" ;;
+  esac
+}
+
+matches_window_name() {
+  local candidate="$1"
+  local old_ifs="$IFS"
+  local name
+
+  IFS=','
+  set -- $WINDOW_NAMES
+  IFS="$old_ifs"
+
+  for name in "$@"; do
+    [ "$candidate" = "$name" ] && return 0
+  done
+
+  return 1
+}
+
+short_path() {
+  local path="$1"
+  if [ -n "${HOME:-}" ]; then
+    path="${path/#$HOME/~}"
+  fi
+  printf '%s' "$path"
+}
+
+truncate() {
+  local value="$1"
+  local width="$2"
+
+  if [ "$width" -le 0 ]; then
+    return
+  fi
+
+  if [ "${#value}" -le "$width" ]; then
+    printf '%s' "$value"
+  elif [ "$width" -le 3 ]; then
+    printf '%s' "${value:0:$width}"
+  else
+    printf '%s...' "${value:0:$((width - 3))}"
+  fi
+}
+
+pad_truncate() {
+  local value="$1"
+  local width="$2"
+  local clipped
+
+  [ "$width" -le 0 ] && return
+  clipped=$(truncate "$value" "$width")
+  printf '%-*s' "$width" "$clipped"
+}
+
+print_padding() {
+  printf '%*s' "$PADDING" ''
+}
+
+infer_feature() {
+  local path="$1"
+  local rest="$path"
+
+  rest="${rest#*/world/trees/}"
+  if [ "$rest" != "$path" ]; then
+    printf '%s' "${rest%%/src*}"
+    return
+  fi
+
+  printf '%s' "-"
+}
+
+infer_project() {
+  local session="$1"
+  local path="$2"
+  local feature="$3"
+  local rest="$path"
+  local from_session
+
+  rest="${rest#*/areas/core/}"
+  if [ "$rest" != "$path" ]; then
+    printf '%s' "${rest%%/*}"
+    return
+  fi
+
+  if [ "$feature" != "-" ]; then
+    from_session="${session%-$feature}"
+    if [ -n "$from_session" ] && [ "$from_session" != "$session" ]; then
+      printf '%s' "$from_session"
+      return
+    fi
+  fi
+
+  basename "$path"
+}
+
+fmt_age() {
+  local seconds="$1"
+
+  if [ "$seconds" -lt 60 ]; then
+    printf 'now'
+  elif [ "$seconds" -lt 3600 ]; then
+    printf '%dm' "$((seconds / 60))"
+  elif [ "$seconds" -lt 86400 ]; then
+    printf '%dh' "$((seconds / 3600))"
+  else
+    printf '%dd' "$((seconds / 86400))"
+  fi
+}
+
+status_for_activity() {
+  local activity="$1"
+  local now age age_text
+
+  now=$(date +%s)
+  age=$((now - activity))
+  [ "$age" -lt 0 ] && age=0
+  age_text=$(fmt_age "$age")
+
+  if [ "$age" -lt 60 ]; then
+    printf 'active'
+  elif [ "$age" -lt 900 ]; then
+    printf '%s' "$age_text"
+  else
+    printf 'idle %s' "$age_text"
+  fi
+}
+
+entry_search_text() {
+  local index="$1"
+
+  printf '%s %s %s %s %s %s %s %s' \
+    "${sessions[$index]}" \
+    "${window_indexes[$index]}" \
+    "${window_names[$index]}" \
+    "${projects[$index]}" \
+    "${features[$index]}" \
+    "${paths[$index]}" \
+    "${commands[$index]}" \
+    "${sessions[$index]}:${window_indexes[$index]}"
+}
+
+entry_matches_filter() {
+  local index="$1"
+
+  [ -z "$filter_query" ] && return 0
+  entry_search_text "$index" | grep -qiF -- "$filter_query"
+}
+
+rebuild_filtered_indices() {
+  local i count
+
+  filtered_indices=()
+  for ((i = 0; i < ${#sessions[@]}; i++)); do
+    if entry_matches_filter "$i"; then
+      filtered_indices+=("$i")
+    fi
+  done
+
+  count=${#filtered_indices[@]}
+  if [ "$selected" -ge "$count" ]; then
+    selected=$((count - 1))
+  fi
+  [ "$selected" -lt 0 ] && selected=0
+  [ "$scroll" -lt 0 ] && scroll=0
+}
+
+reset_filter_selection() {
+  selected=0
+  scroll=0
+  rebuild_filtered_indices
+}
+
+append_filter_char() {
+  filter_query="${filter_query}$1"
+  filter_active=1
+  reset_filter_selection
+}
+
+delete_filter_char() {
+  [ -n "$filter_query" ] || return
+  filter_query="${filter_query%?}"
+  reset_filter_selection
+}
+
+clear_filter() {
+  filter_query=""
+  filter_active=0
+  reset_filter_selection
+}
+
+clear_entries() {
+  sessions=()
+  window_indexes=()
+  window_ids=()
+  window_names=()
+  pane_ids=()
+  activities=()
+  paths=()
+  projects=()
+  features=()
+  commands=()
+  filtered_indices=()
+}
+
+refresh_entries() {
+  local line session window_index window_id window_name pane_id active activity path command feature project
+
+  clear_entries
+
+  while IFS=$'\t' read -r session window_index window_id window_name pane_id active activity path command; do
+    [ -n "${session:-}" ] || continue
+    matches_window_name "$window_name" || continue
+
+    path="${path:-}"
+    command="${command:-}"
+    feature=$(infer_feature "$path")
+    project=$(infer_project "$session" "$path" "$feature")
+
+    sessions+=("$session")
+    window_indexes+=("$window_index")
+    window_ids+=("$window_id")
+    window_names+=("$window_name")
+    pane_ids+=("$pane_id")
+    activities+=("$activity")
+    paths+=("$path")
+    projects+=("$project")
+    features+=("$feature")
+    commands+=("$command")
+  done < <(
+    tmux list-windows -a -F '#{session_name}	#{window_index}	#{window_id}	#{window_name}	#{pane_id}	#{window_active}	#{window_activity}	#{pane_current_path}	#{pane_current_command}' 2>/dev/null |
+      sort -t $'\t' -k7,7nr
+  )
+
+  rebuild_filtered_indices
+}
+
+print_entries() {
+  local i status path
+
+  printf '%-28s %-14s %-24s %-10s %s\n' "SESSION" "PROJECT" "FEATURE" "STATUS" "PATH"
+  for ((i = 0; i < ${#sessions[@]}; i++)); do
+    status=$(status_for_activity "${activities[$i]}")
+    path=$(short_path "${paths[$i]}")
+    printf '%-28s %-14s %-24s %-10s %s\n' \
+      "${sessions[$i]}:${window_indexes[$i]}" \
+      "${projects[$i]}" \
+      "${features[$i]}" \
+      "$status" \
+      "$path"
+  done
+}
+
+enter_alt_screen() {
+  if [ -t 1 ]; then
+    tput smcup 2>/dev/null || true
+    alt_screen=1
+    tput civis 2>/dev/null || true
+    cursor_hidden=1
+  fi
+}
+
+cleanup() {
+  if [ "$cursor_hidden" -eq 1 ]; then
+    tput cnorm 2>/dev/null || true
+  fi
+  if [ "$alt_screen" -eq 1 ]; then
+    tput rmcup 2>/dev/null || true
+  fi
+}
+
+read_escape_sequence() {
+  local old_stty seq
+
+  old_stty=$(stty -g 2>/dev/null || true)
+  stty min 0 time 1 2>/dev/null || true
+  IFS= read -rsn2 seq || true
+  [ -n "$old_stty" ] && stty "$old_stty" 2>/dev/null || true
+  printf '%s' "$seq"
+}
+
+capture_preview() {
+  local pane_id="$1"
+  local lines="$2"
+
+  tmux capture-pane -p -t "$pane_id" -S "-$lines" 2>/dev/null | tail -n "$lines"
+}
+
+render() {
+  local rows cols content_cols total count preview_height list_height max_start end display_i i line_no status path number current_window_id preview_title
+  local session_width work_width status_width path_width work filter_display row_style row_reset status_style
+
+  rows=$(tput lines 2>/dev/null || printf '24')
+  cols=$(tput cols 2>/dev/null || printf '80')
+  content_cols=$((cols - PADDING * 2))
+  [ "$content_cols" -lt 20 ] && content_cols="$cols"
+  cols="$content_cols"
+  total=${#sessions[@]}
+  count=${#filtered_indices[@]}
+
+  tput cup 0 0 2>/dev/null || printf '\033[H'
+  printf '\n'
+
+  print_padding
+  printf '%s%s' "$COLOR_TITLE$COLOR_BOLD" 'm - pi windows'
+  printf '%s' "$COLOR_RESET"
+  if [ -n "$filter_query" ]; then
+    printf ' %s(%d/%d)%s' "$COLOR_MUTED" "$count" "$total" "$COLOR_RESET"
+  elif [ "$total" -gt 0 ]; then
+    printf ' %s(%d)%s' "$COLOR_MUTED" "$total" "$COLOR_RESET"
+  fi
+  printf '\n'
+  print_padding
+  printf '%stype filter  backspace erase  enter jump  ^P preview  ^R refresh  esc clear/quit%s\n' "$COLOR_MUTED" "$COLOR_RESET"
+  filter_display="$filter_query"
+  [ "$filter_active" -eq 1 ] && filter_display="${filter_display}_"
+  print_padding
+  printf '%sfilter:%s %s%s%s\n\n' "$COLOR_MUTED" "$COLOR_RESET" "$COLOR_ACCENT$COLOR_BOLD" "$filter_display" "$COLOR_RESET"
+
+  if [ "$total" -eq 0 ]; then
+    printf '\n'
+    print_padding
+    printf '%sNo tmux windows named %s.%s\n\n' "$COLOR_YELLOW" "$WINDOW_NAMES" "$COLOR_RESET"
+    print_padding
+    printf '%sPress Ctrl-R to refresh or esc to cancel.%s\n' "$COLOR_MUTED" "$COLOR_RESET"
+    printf '%s\033[J' "$COLOR_RESET"
+    return
+  fi
+
+  if [ "$count" -eq 0 ]; then
+    printf '\n'
+    print_padding
+    printf '%sNo matches for filter:%s %s%s%s\n\n' "$COLOR_YELLOW" "$COLOR_RESET" "$COLOR_ACCENT$COLOR_BOLD" "$filter_query" "$COLOR_RESET"
+    print_padding
+    printf '%sPress backspace or esc to clear the filter.%s\n' "$COLOR_MUTED" "$COLOR_RESET"
+    printf '%s\033[J' "$COLOR_RESET"
+    return
+  fi
+
+  preview_height=$PREVIEW_LINES
+  if [ "$preview_height" -gt $((rows / 2)) ]; then
+    preview_height=$((rows / 2))
+  fi
+  [ "$preview_height" -lt 0 ] && preview_height=0
+
+  list_height=$((rows - preview_height - 7))
+  if [ "$list_height" -lt 5 ]; then
+    list_height=$((rows - 5))
+    preview_height=0
+  fi
+  [ "$list_height" -lt 1 ] && list_height=1
+
+  if [ "$selected" -lt "$scroll" ]; then
+    scroll=$selected
+  fi
+  if [ "$selected" -ge $((scroll + list_height)) ]; then
+    scroll=$((selected - list_height + 1))
+  fi
+  max_start=$((count - list_height))
+  [ "$max_start" -lt 0 ] && max_start=0
+  [ "$scroll" -gt "$max_start" ] && scroll=$max_start
+  [ "$scroll" -lt 0 ] && scroll=0
+
+  end=$((scroll + list_height))
+  [ "$end" -gt "$count" ] && end=$count
+
+  current_window_id=$(tmux display-message -p '#{window_id}' 2>/dev/null || true)
+
+  status_width=10
+  if [ "$cols" -ge 100 ]; then
+    session_width=28
+    work_width=30
+  elif [ "$cols" -ge 80 ]; then
+    session_width=26
+    work_width=24
+  else
+    session_width=20
+    work_width=18
+  fi
+  path_width=$((cols - 4 - session_width - 1 - work_width - 1 - status_width - 1))
+  [ "$path_width" -lt 0 ] && path_width=0
+
+  print_padding
+  printf '%s%s' "$COLOR_MUTED" "$COLOR_BOLD"
+  printf '    '
+  pad_truncate 'SESSION' "$session_width"
+  printf ' '
+  pad_truncate 'WORK' "$work_width"
+  printf ' '
+  pad_truncate 'STATUS' "$status_width"
+  if [ "$path_width" -gt 0 ]; then
+    printf ' '
+    pad_truncate 'PATH' "$path_width"
+  fi
+  printf '%s\n' "$COLOR_RESET"
+
+  for ((display_i = scroll; display_i < end; display_i++)); do
+    i="${filtered_indices[$display_i]}"
+    line_no=$((display_i + 1))
+    status=$(status_for_activity "${activities[$i]}")
+    if [ "${window_ids[$i]}" = "$current_window_id" ]; then
+      status='current'
+    fi
+    path=$(short_path "${paths[$i]}")
+    if [ "${features[$i]}" = "-" ]; then
+      work="${projects[$i]}"
+    else
+      work="${projects[$i]}/${features[$i]}"
+    fi
+    row_style=""
+    row_reset=""
+    if [ "$display_i" -eq "$selected" ]; then
+      row_style="$COLOR_SELECTED_BG$COLOR_BOLD"
+      row_reset="$COLOR_RESET"
+    fi
+    number=' '
+    [ "$line_no" -le 9 ] && number="$line_no"
+    status_style=$(status_color "$status")
+
+    print_padding
+    printf '%s %s  ' "$row_style" "$number"
+    pad_truncate "${sessions[$i]}:${window_indexes[$i]}" "$session_width"
+    printf ' '
+    pad_truncate "$work" "$work_width"
+    printf ' '
+    printf '%s' "$status_style"
+    pad_truncate "$status" "$status_width"
+    printf '%s%s' "$COLOR_RESET" "$row_style"
+    if [ "$path_width" -gt 0 ]; then
+      printf ' '
+      printf '%s' "$COLOR_MUTED"
+      pad_truncate "$path" "$path_width"
+      printf '%s%s' "$COLOR_RESET" "$row_style"
+    fi
+    printf '%s\n' "$row_reset"
+  done
+
+  if [ "$preview_height" -gt 0 ]; then
+    i="${filtered_indices[$selected]}"
+    printf '\n'
+    preview_title="Preview - ${sessions[$i]}:${window_indexes[$i]} ${paths[$i]}"
+    print_padding
+    printf '%s%s' "$COLOR_MUTED" "$COLOR_BOLD"
+    truncate "$preview_title" "$cols"
+    printf '%s\n' "$COLOR_RESET"
+    capture_preview "${pane_ids[$i]}" "$preview_height" | while IFS= read -r line; do
+      print_padding
+      printf '%s' "$COLOR_MUTED"
+      truncate "$line" "$cols"
+      printf '%s\n' "$COLOR_RESET"
+    done
+  fi
+
+  printf '%s\033[J' "$COLOR_RESET"
+}
+
+jump_to() {
+  local index="$1"
+  local session="${sessions[$index]}"
+  local window_id="${window_ids[$index]}"
+
+  if [ -n "${TMUX:-}" ]; then
+    tmux select-window -t "$window_id" 2>/dev/null || true
+    tmux switch-client -t "$session"
+  else
+    tmux select-window -t "$window_id" 2>/dev/null || true
+    exec tmux attach-session -t "$session"
+  fi
+}
+
+jump_to_filtered_index() {
+  local display_index="$1"
+
+  [ "$display_index" -lt "${#filtered_indices[@]}" ] || return
+  jump_to "${filtered_indices[$display_index]}"
+}
+
+move_down() {
+  local count=${#filtered_indices[@]}
+  [ "$count" -eq 0 ] && return
+  selected=$(((selected + 1) % count))
+}
+
+move_up() {
+  local count=${#filtered_indices[@]}
+  [ "$count" -eq 0 ] && return
+  selected=$(((selected + count - 1) % count))
+}
+
+run_tui() {
+  local key seq target
+
+  enter_alt_screen
+  init_colors
+  trap cleanup EXIT INT TERM
+
+  refresh_entries
+
+  while true; do
+    render
+
+    IFS= read -rsn1 key || exit 0
+    case "$key" in
+      $'\020')
+        if [ "$PREVIEW_LINES" -gt 0 ]; then
+          PREVIEW_LINES=0
+        else
+          PREVIEW_LINES="$PREVIEW_TOGGLE_LINES"
+        fi
+        ;;
+      $'\022')
+        refresh_entries
+        ;;
+      /)
+        if [ "$filter_active" -eq 1 ]; then
+          append_filter_char "$key"
+        else
+          filter_active=1
+        fi
+        ;;
+      $'\177'|$'\b')
+        delete_filter_char
+        ;;
+      $'\025')
+        clear_filter
+        ;;
+      '')
+        if [ "${#filtered_indices[@]}" -gt 0 ]; then
+          jump_to_filtered_index "$selected"
+          exit 0
+        fi
+        ;;
+      $'\r')
+        if [ "${#filtered_indices[@]}" -gt 0 ]; then
+          jump_to_filtered_index "$selected"
+          exit 0
+        fi
+        ;;
+      [1-9])
+        if [ "$filter_active" -eq 1 ]; then
+          append_filter_char "$key"
+        else
+          target=$((key - 1))
+          if [ "$target" -lt "${#filtered_indices[@]}" ]; then
+            jump_to_filtered_index "$target"
+            exit 0
+          fi
+        fi
+        ;;
+      $'\e')
+        seq=$(read_escape_sequence)
+        case "$seq" in
+          '[A') move_up ;;
+          '[B') move_down ;;
+          *) exit 0 ;;
+        esac
+        ;;
+      [[:print:]])
+        append_filter_char "$key"
+        ;;
+    esac
+  done
+}
+
+main() {
+  local mode="tui"
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --help|-h)
+        usage
+        exit 0
+        ;;
+      --list|-l)
+        mode="list"
+        shift
+        ;;
+      *)
+        echo "m: unknown option: $1" >&2
+        usage >&2
+        exit 2
+        ;;
+    esac
+  done
+
+  require_tmux
+
+  if [ "$mode" = "list" ]; then
+    refresh_entries
+    print_entries
+    exit 0
+  fi
+
+  run_tui
+}
+
+main "$@"

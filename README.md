@@ -58,6 +58,10 @@ Agent-related files live under `agents/`:
 
 Shared skills are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.pi/agent/skills/`.
 
+## Tmux helpers
+
+- `m` — compact popup switcher for tmux windows named `pi`. Press prefix + `m` inside tmux, type to filter by session/worktree/window, then use `1`-`9`, arrows, or Enter to jump. Press Ctrl-P to toggle pane preview.
+
 ### iTerm settings
 
 After running `./install.sh` on a new computer,
