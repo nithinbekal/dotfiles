@@ -1321,6 +1321,7 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			return false;
 		}
 		ctx.ui.setEditorText(prompt);
+		state.comments.clear();
 		ctx.ui.notify("Comments added to prompt", "info");
 		return true;
 	}
