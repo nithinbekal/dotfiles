@@ -22,6 +22,7 @@ The overlay **takes keyboard focus on open** so its keys work immediately. Press
 - `x` — remove the latest comment on the highlighted diff line
 - `s` — send all comments with diff context to the prompt, ending with `---` and blank space for a final note
 - `r` — force refresh
+- `}` — toggle between uncommitted working-tree changes and current-branch-vs-parent diff
 - `g` / `G` — first / last file
 - `Alt+G` — release focus back to the prompt (overlay stays open)
 - `Esc` or `q` — close the overlay entirely
@@ -34,7 +35,7 @@ Run `/self-review` again at any time to close it.
 
 ## Behavior
 
-- **In a git repo:** Status is parsed from `git status --porcelain=v1 -uall` at the repository root, then deduplicated by root-relative path. A file with both staged and unstaged changes appears once. The file tree right-aligns per-file `+added -deleted` counts. Per-file diffs come from `git diff -p HEAD -- <path>` at the repository root so staged and unstaged changes are shown together, even when pi is started from a subdirectory; untracked files are synthesized as new-file diffs.
+- **In a git repo:** Status is parsed from `git status --porcelain=v1 -uall` at the repository root, then deduplicated by root-relative path. A file with both staged and unstaged changes appears once. The file tree right-aligns per-file `+added -deleted` counts. Per-file diffs come from `git diff -p HEAD -- <path>` at the repository root so staged and unstaged changes are shown together, even when pi is started from a subdirectory; untracked files are synthesized as new-file diffs. Press `}` to toggle to the current-branch-vs-parent diff, backed by `git diff <parent>...HEAD`; press `}` again to return to uncommitted changes.
 - **Comments are session-local annotations.** Press `c` on the highlighted diff line, enter text, and the comment is rendered under that diff line in an indented box. Press `x` to remove the latest comment on the highlighted line. Press `s` to copy all comments with file/hunk context into the prompt followed by `---` and two newlines for a final note. Comments are not written to git or disk yet.
 - **Outside a git repo:** Falls back to diffs built from snapshots taken on first `write`/`edit`. Git-only actions are disabled.
 
