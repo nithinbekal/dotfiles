@@ -729,7 +729,16 @@ run_tui() {
         fi
         ;;
       $'\e')
-        exit 0
+        seq=""
+        if IFS= read -rsn2 -t 0.05 seq; then
+          case "$seq" in
+            '[A') move_up ;;
+            '[B') move_down ;;
+            *) exit 0 ;;
+          esac
+        else
+          exit 0
+        fi
         ;;
       [[:print:]])
         append_filter_char "$key"
