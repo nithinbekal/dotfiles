@@ -714,16 +714,77 @@ function commentContext(lines: string[], rawLineIndex: number): string[] {
 	const hunkIndex = lines.findLastIndex((line, index) => index <= lineIndex && line.startsWith("@@"));
 	const start = Math.max(0, lineIndex - 3);
 	const end = Math.min(lines.length, lineIndex + 4);
-	const context = lines.slice(start, end);
-	if (hunkIndex >= 0 && hunkIndex < start) context.unshift(lines[hunkIndex]!);
-	return context;
+	const context: Array<{ index: number; line: string }> = [];
+	if (hunkIndex >= 0 && hunkIndex < start) context.push({ index: hunkIndex, line: lines[hunkIndex]! });
+	for (let index = start; index < end; index++) {
+		context.push({ index, line: lines[index]! });
+	}
+	return context.map(({ index, line }) => (index === lineIndex ? `>>> ${line}` : line));
+}
+
+interface DiffLineLocation {
+	line: number | null;
+	side: "new" | "old" | "hunk" | "unknown";
+}
+
+function diffLineLocation(lines: string[], rawLineIndex: number): DiffLineLocation {
+	if (lines.length === 0) return { line: null, side: "unknown" };
+	const lineIndex = Math.max(0, Math.min(rawLineIndex, lines.length - 1));
+	let oldLine = 0;
+	let newLine = 0;
+	let inHunk = false;
+
+	for (let index = 0; index <= lineIndex; index++) {
+		const line = lines[index] ?? "";
+		const hunk = line.match(/^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+		if (hunk) {
+			oldLine = Number(hunk[1]);
+			newLine = Number(hunk[2]);
+			inHunk = true;
+			if (index === lineIndex) return { line: newLine, side: "hunk" };
+			continue;
+		}
+
+		if (!inHunk) {
+			if (index === lineIndex) return { line: null, side: "unknown" };
+			continue;
+		}
+
+		if (line.startsWith("+")) {
+			if (index === lineIndex) return { line: newLine, side: "new" };
+			newLine++;
+			continue;
+		}
+		if (line.startsWith("-")) {
+			if (index === lineIndex) return { line: oldLine, side: "old" };
+			oldLine++;
+			continue;
+		}
+		if (line.startsWith("\\ No newline")) {
+			if (index === lineIndex) return { line: null, side: "unknown" };
+			continue;
+		}
+
+		if (index === lineIndex) return { line: newLine, side: "new" };
+		oldLine++;
+		newLine++;
+	}
+
+	return { line: null, side: "unknown" };
+}
+
+function commentTargetLabel(path: string, lines: string[], rawLineIndex: number): string {
+	const location = diffLineLocation(lines, rawLineIndex);
+	if (location.line === null) return `@${path}:diff-line-${rawLineIndex + 1}`;
+	const suffix = location.side === "old" ? " (deleted line)" : location.side === "hunk" ? " (hunk)" : "";
+	return `@${path}:${location.line}${suffix}`;
 }
 
 function formatCommentsForPrompt(): string | null {
 	const comments = allDiffComments();
 	if (comments.length === 0) return null;
 
-	const lines: string[] = ["Diff review comments:"];
+	const lines: string[] = ["Diff review comments (target lines are marked with `>>>`):"];
 	let currentPath = "";
 	comments.forEach((comment, index) => {
 		if (comment.path !== currentPath) {
@@ -732,7 +793,7 @@ function formatCommentsForPrompt(): string | null {
 		}
 		const diffLines = diffLinesForPath(comment.path);
 		const lineIndex = Math.max(0, Math.min(comment.rawLineIndex, diffLines.length - 1));
-		lines.push("", `### Comment ${index + 1} on diff line ${lineIndex + 1}`);
+		lines.push("", `### ${commentTargetLabel(comment.path, diffLines, lineIndex)}`);
 		lines.push("````diff", ...commentContext(diffLines, lineIndex), "````");
 		lines.push("", `Comment: ${comment.text}`);
 	});
