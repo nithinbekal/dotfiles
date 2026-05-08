@@ -20,7 +20,8 @@ $apps = @(
   @{ Id = "Obsidian.Obsidian";  Name = "Obsidian" },
   @{ Id = "Anysphere.Cursor";    Name = "Cursor" },
   @{ Id = "ElementLabs.LMStudio"; Name = "LM Studio" },
-  @{ Id = "Microsoft.PowerToys";  Name = "PowerToys" }
+  @{ Id = "Microsoft.PowerToys";  Name = "PowerToys" },
+  @{ Id = "Git.Git";              Name = "Git" }
 )
 
 foreach ($app in $apps) {
@@ -32,6 +33,14 @@ foreach ($app in $apps) {
   } else {
     winget install --id $app.Id --exact --silent --accept-source-agreements --accept-package-agreements
   }
+}
+
+Write-Status "Cloning dotfiles"
+$dotfilesDir = "$env:USERPROFILE\dotfiles"
+if (Test-Path $dotfilesDir) {
+  Write-Host "  dotfiles already cloned, skipping"
+} else {
+  git clone https://github.com/nithinbekal/dotfiles $dotfilesDir
 }
 
 Write-Status "Configuring PowerToys Keyboard Manager"
