@@ -19,7 +19,8 @@ $apps = @(
   @{ Id = "equalsraf.win32yank"; Name = "win32yank" },
   @{ Id = "Obsidian.Obsidian";  Name = "Obsidian" },
   @{ Id = "Anysphere.Cursor";    Name = "Cursor" },
-  @{ Id = "ElementLabs.LMStudio"; Name = "LM Studio" }
+  @{ Id = "ElementLabs.LMStudio"; Name = "LM Studio" },
+  @{ Id = "Microsoft.PowerToys";  Name = "PowerToys" }
 )
 
 foreach ($app in $apps) {
@@ -32,6 +33,11 @@ foreach ($app in $apps) {
     winget install --id $app.Id --exact --silent --accept-source-agreements --accept-package-agreements
   }
 }
+
+Write-Status "Configuring PowerToys Keyboard Manager"
+$kmDir = "$env:LOCALAPPDATA\Microsoft\PowerToys\Keyboard Manager"
+New-Item -ItemType Directory -Force -Path $kmDir | Out-Null
+Copy-Item "$PSScriptRoot\powertoys-keyboard-manager.json" "$kmDir\default.json" -Force
 
 Write-Status "Installing JetBrains Mono Nerd Font"
 
