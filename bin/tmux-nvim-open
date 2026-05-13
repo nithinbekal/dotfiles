@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Arguments from tmux
+mouse_word="$1"
+mouse_line="$2"
+pane_cwd="$3"
+session="$4"
+current_window="$5"
+current_pane="$6"
+
+# Debug mode: TMUX_NVIM_DEBUG=1
+[[ "${TMUX_NVIM_DEBUG:-0}" == "1" ]] && exec 2>> /tmp/tmux-nvim-open.log && set -x
+
+# Extract file path and line number
+file=""
+line=""
+resolved_path=""
+
+try_candidate() {
+  local candidate="$1"
+  local candidate_line="1"
+  local path_candidate
+
+  # Trim common wrappers/punctuation that appear in test output and stack traces.
+  candidate="${candidate//$'\r'/}"
+  while [[ $candidate =~ ^[[:space:]\"\'\`\<\(\[\{] ]]; do
+    candidate="${candidate:1}"
+  done
+  while [[ $candidate =~ [[:space:]\"\'\`\>\)\]\}\,\;]$ ]]; do
+    candidate="${candidate%?}"
+  done
+
+  [[ -z $candidate ]] && return 1
+
+  # Handle path:line and path:line:col forms.
+  if [[ $candidate =~ ^(.+):([0-9]+)(:([0-9]+))?$ ]]; then
+    path_candidate="${BASH_REMATCH[1]}"
+    candidate_line="${BASH_REMATCH[2]}"
+  else
+    path_candidate="$candidate"
+  fi
+
+  if [[ $path_candidate == "~/"* ]]; then
+    resolved_path="$HOME/${path_candidate#~/}"
+  elif [[ $path_candidate != /* ]]; then
+    resolved_path="$pane_cwd/$path_candidate"
+  else
+    resolved_path="$path_candidate"
+  fi
+
+  [[ -f $resolved_path ]] || return 1
+
+  file="$path_candidate"
+  line="$candidate_line"
+  return 0
+}
+
+# tmux's mouse_word splits on path separators, so prefer it only when it resolves
+# as a real file, then scan the full clicked line for file-looking tokens.
+if ! try_candidate "$mouse_word"; then
+  for token in $mouse_line; do
+    try_candidate "$token" && break
+  done
+fi
+
+# Exit silently if no existing file was found
+[[ -n $resolved_path ]] || exit 0
+
+# Find nvim panes in current session only
+nvim_panes=$(tmux list-panes -s -t "$session" -F "#{window_index}.#{pane_index} #{pane_current_command}" 2>/dev/null \
+  | awk '$2 == "nvim" { print $1 }')
+
+# Prefer same window, then any window in session
+target_pane=""
+target_window=""
+for pane in $nvim_panes; do
+  win_idx="${pane%%.*}"
+  if [[ $win_idx == "$current_window" ]]; then
+    target_pane="$session:$pane"
+    target_window="$win_idx"
+    break
+  fi
+  if [[ -z $target_pane ]]; then
+    target_pane="$session:$pane"
+    target_window="$win_idx"
+  fi
+done
+
+# Escape file path for shell/Vim command contexts.
+safe_path=$(printf '%q' "$resolved_path")
+vim_path=$(printf "%s" "$resolved_path" | sed "s/'/''/g")
+
+# Open in existing nvim or create new split, then focus the nvim pane.
+if [[ -n $target_pane ]]; then
+  tmux send-keys -t "$target_pane" Escape ":execute 'edit +$line ' . fnameescape('$vim_path')" Enter
+  tmux select-window -t "$session:$target_window"
+  tmux select-pane -t "$target_pane"
+else
+  tmux split-window -h -t "$session:$current_window" "nvim +$line $safe_path"
+fi
