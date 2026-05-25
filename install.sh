@@ -136,6 +136,9 @@ ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
 ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
 ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
 ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.claude/commands/push-commit.md
+ln -sf ~/dotfiles/agents/common/commands/issue-implement.md ~/.claude/commands/issue-implement.md
+ln -sf ~/dotfiles/agents/common/commands/issue-investigate.md ~/.claude/commands/issue-investigate.md
+ln -sf ~/dotfiles/agents/common/commands/pr-address-reviews.md ~/.claude/commands/pr-address-reviews.md
 
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
@@ -144,6 +147,9 @@ ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/sta
 ln -sfn ~/dotfiles/agents/pi/extensions/self-review ~/.pi/agent/extensions/self-review
 ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.pi/agent/prompts/pr.md
 ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.pi/agent/prompts/push-commit.md
+ln -sf ~/dotfiles/agents/common/commands/issue-implement.md ~/.pi/agent/prompts/issue-implement.md
+ln -sf ~/dotfiles/agents/common/commands/issue-investigate.md ~/.pi/agent/prompts/issue-investigate.md
+ln -sf ~/dotfiles/agents/common/commands/pr-address-reviews.md ~/.pi/agent/prompts/pr-address-reviews.md
 ln -sf ~/dotfiles/agents/pi/settings.json ~/.pi/agent/settings.json
 ln -sf ~/dotfiles/agents/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
 
