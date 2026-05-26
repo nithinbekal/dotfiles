@@ -207,13 +207,81 @@ function refExists(ref: string, cwd = gitCommandCwd()): boolean {
 	return gitOutput(["rev-parse", "--verify", `${ref}^{commit}`], cwd) !== null;
 }
 
+function shortBranchRef(ref: string): string {
+	return ref.trim().replace(/^refs\/heads\//, "").replace(/^refs\/remotes\//, "");
+}
+
+function remoteNames(cwd = gitCommandCwd()): string[] {
+	return (gitOutput(["remote"], cwd) ?? "")
+		.split(/\r?\n/)
+		.map((remote) => remote.trim())
+		.filter(Boolean);
+}
+
 function normalizeParentRef(candidate: string | null, currentBranch: string, cwd = gitCommandCwd()): string | null {
 	if (!candidate) return null;
-	const ref = candidate.trim();
+	const ref = shortBranchRef(candidate);
 	if (!ref || ref === currentBranch) return null;
 	if (refExists(ref, cwd)) return ref;
-	const originRef = `origin/${ref}`;
-	if (refExists(originRef, cwd)) return originRef;
+
+	for (const remote of remoteNames(cwd)) {
+		const remoteRef = `${remote}/${ref}`;
+		if (refExists(remoteRef, cwd)) return remoteRef;
+	}
+
+	return null;
+}
+
+function sqliteStringLiteral(value: string): string {
+	return `'${value.replaceAll("'", "''")}'`;
+}
+
+function graphiteMetadataDbPath(cwd = gitCommandCwd()): string | null {
+	const commonDir = gitOutput(["rev-parse", "--git-common-dir"], cwd);
+	if (!commonDir) return null;
+	const absoluteCommonDir = commonDir.startsWith("/") ? commonDir : resolve(cwd, commonDir);
+	const dbPath = resolve(absoluteCommonDir, ".graphite_metadata.db");
+	return existsSync(dbPath) ? dbPath : null;
+}
+
+function resolveGraphiteParentRef(currentBranch: string, cwd = gitCommandCwd()): string | null {
+	const dbPath = graphiteMetadataDbPath(cwd);
+	if (!dbPath) return null;
+
+	try {
+		const sql = `SELECT COALESCE(parent_branch_name, ''), COALESCE(parent_branch_revision, '') FROM branch_metadata WHERE branch_name = ${sqliteStringLiteral(currentBranch)} LIMIT 1;`;
+		const raw = execFileSync("sqlite3", ["-noheader", "-batch", "-separator", "\t", dbPath, sql], {
+			cwd,
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+		if (!raw) return null;
+
+		const [parentBranch = "", parentRevision = ""] = raw.split("\t");
+		const normalizedParent = normalizeParentRef(parentBranch, currentBranch, cwd);
+		if (normalizedParent) return normalizedParent;
+		return normalizeParentRef(parentRevision, currentBranch, cwd);
+	} catch {
+		return null;
+	}
+}
+
+function resolveConfiguredGithubBaseRef(currentBranch: string, cwd = gitCommandCwd()): string | null {
+	const configuredBase = gitOutput(["config", "--get", `branch.${currentBranch}.github-pr-base-branch`], cwd);
+	if (!configuredBase) return null;
+	const base = configuredBase.includes("#") ? configuredBase.split("#").pop()! : configuredBase;
+	return normalizeParentRef(base, currentBranch, cwd);
+}
+
+function resolveConfiguredMergeBaseRef(currentBranch: string, cwd = gitCommandCwd()): string | null {
+	const vscodeMergeBase = gitOutput(["config", "--get", `branch.${currentBranch}.vscode-merge-base`], cwd);
+	const normalizedVscodeMergeBase = normalizeParentRef(vscodeMergeBase, currentBranch, cwd);
+	if (normalizedVscodeMergeBase) return normalizedVscodeMergeBase;
+
+	const gitMergeRef = gitOutput(["config", "--get", `branch.${currentBranch}.merge`], cwd);
+	const normalizedGitMergeRef = normalizeParentRef(gitMergeRef, currentBranch, cwd);
+	if (normalizedGitMergeRef) return normalizedGitMergeRef;
+
 	return null;
 }
 
@@ -221,16 +289,14 @@ function resolveParentRef(cwd = gitCommandCwd()): string | null {
 	const currentBranch = getCurrentBranch(cwd);
 	if (!currentBranch || currentBranch.startsWith("(detached")) return null;
 
-	const configuredBase = gitOutput(["config", "--get", `branch.${currentBranch}.github-pr-base-branch`], cwd);
-	if (configuredBase) {
-		const base = configuredBase.includes("#") ? configuredBase.split("#").pop()! : configuredBase;
-		const normalized = normalizeParentRef(base, currentBranch, cwd);
-		if (normalized) return normalized;
-	}
+	const graphiteParent = resolveGraphiteParentRef(currentBranch, cwd);
+	if (graphiteParent) return graphiteParent;
 
-	const vscodeMergeBase = gitOutput(["config", "--get", `branch.${currentBranch}.vscode-merge-base`], cwd);
-	const normalizedMergeBase = normalizeParentRef(vscodeMergeBase, currentBranch, cwd);
-	if (normalizedMergeBase) return normalizedMergeBase;
+	const configuredGithubBase = resolveConfiguredGithubBaseRef(currentBranch, cwd);
+	if (configuredGithubBase) return configuredGithubBase;
+
+	const configuredMergeBase = resolveConfiguredMergeBaseRef(currentBranch, cwd);
+	if (configuredMergeBase) return configuredMergeBase;
 
 	for (const candidate of ["main", "master"]) {
 		const normalized = normalizeParentRef(candidate, currentBranch, cwd);
