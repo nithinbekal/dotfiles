@@ -2,6 +2,8 @@
 
 Interactive self-review overlay for the current pi session. Single command: `/self-review`.
 
+![Self-review overlay screenshot](./self-review.png)
+
 ## Command
 
 `/self-review` toggles a scrollable overlay anchored to the right side of the terminal. It shows a changed-file tree in the left sidebar and the selected file's diff on the right, auto-refreshing on every `write`/`edit`/`bash` tool call.
