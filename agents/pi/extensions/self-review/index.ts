@@ -16,7 +16,7 @@
  *   Enter              focus the selected file's diff
  *   h/←                return focus from diff to file tree
  *   j/k or ↑/↓         move the diff line cursor while diff is focused
- *   ] / [              jump to next / previous diff hunk
+ *   ] / [              jump to next / previous diff hunk, centering it when possible
  *   PgUp / PgDn        page the selected file diff
  *   c                  add a comment on the selected diff line
  *   x                  remove the latest comment on the selected diff line
@@ -1004,6 +1004,7 @@ class StatusOverlay implements Component {
 				: hunkLines.findLast((line) => line < base);
 		if (target === undefined) return;
 		this.diffCursor = target;
+		this.centerDiffCursor(this.diffDisplayRows(entry, this.diffPaneWidth).length, this.visibleHeight);
 	}
 
 	private currentCommentTarget(): DiffCommentTarget | null {
@@ -1348,6 +1349,13 @@ class StatusOverlay implements Component {
 		if (this.diffCursor >= this.diffScroll + height) this.diffScroll = this.diffCursor - height + 1;
 		if (this.diffScroll > maxScroll) this.diffScroll = maxScroll;
 		if (this.diffScroll < 0) this.diffScroll = 0;
+	}
+
+	private centerDiffCursor(lineCount: number, height: number): void {
+		if (height <= 0) return;
+		const maxScroll = Math.max(0, lineCount - height);
+		const centeredScroll = this.diffCursor - Math.floor(height / 2);
+		this.diffScroll = Math.max(0, Math.min(maxScroll, centeredScroll));
 	}
 
 	private diffScrollInfo(entry: FileEntry | null, width: number): string {

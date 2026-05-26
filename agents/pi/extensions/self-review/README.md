@@ -16,7 +16,7 @@ The overlay **takes keyboard focus on open** so its keys work immediately. Press
 - `Enter` or `→` / `l` — focus the selected file's diff
 - `←` / `h` — return focus from the diff to the file tree
 - In diff focus, `↑` / `↓` or `j` / `k` move the highlighted line cursor
-- `]` / `[` — jump to the next / previous diff hunk
+- `]` / `[` — jump to the next / previous diff hunk, centering it in the diff pane when possible
 - `PgUp` / `PgDn` (or `Ctrl+U` / `Ctrl+D`) — move through the selected file's diff by one page
 - `c` — add a comment on the highlighted diff line (prompts for text)
 - `x` — remove the latest comment on the highlighted diff line
