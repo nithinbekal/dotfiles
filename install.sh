@@ -61,11 +61,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 
-  current_status "Remapping caps lock to escape"
-  ln -sf ~/dotfiles/launchagents/com.nithin.remap-keys.plist ~/Library/LaunchAgents/com.nithin.remap-keys.plist
-  launchctl unload ~/Library/LaunchAgents/com.nithin.remap-keys.plist 2>/dev/null || true
-  launchctl load ~/Library/LaunchAgents/com.nithin.remap-keys.plist
-
   current_status "Configuring trackpad"
   # Point & Click
   defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
