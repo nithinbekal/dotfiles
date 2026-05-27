@@ -9,7 +9,7 @@ brew "tmux"
 brew "watchman" # required by Sorbet LSP to detect file changes
 brew "zellij"
 
-cask "antigravity"
+cask "cursor"
 cask "font-fira-code-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
 cask "iterm2"
@@ -17,4 +17,3 @@ cask "monitorcontrol"
 cask "notunes"
 cask "obsidian"
 cask "raycast"
-cask "vlc"
