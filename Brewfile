@@ -13,6 +13,7 @@ brew "zellij"
 
 cask "cursor"
 cask "ghostty"
+cask "lm-studio"
 cask "font-fira-code-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
 cask "iterm2"
