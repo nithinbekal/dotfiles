@@ -11,6 +11,7 @@ brew "watchman" # required by Sorbet LSP to detect file changes
 brew "zellij"
 
 cask "cursor"
+cask "ghostty"
 cask "font-fira-code-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
 cask "iterm2"
