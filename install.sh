@@ -67,11 +67,31 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   launchctl load ~/Library/LaunchAgents/com.nithin.remap-keys.plist
 
   current_status "Configuring trackpad"
+  # Point & Click
   defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
   defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
   defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+  defaults write NSGlobalDomain com.apple.trackpad.scaling -float 3.0
+  defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 1
+  defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 1
+  defaults write NSGlobalDomain com.apple.trackpad.forceClick -bool true
+  defaults write com.apple.AppleMultitouchTrackpad ForceSuppressed -bool false
+  defaults write com.apple.AppleMultitouchTrackpad TrackpadRightClick -bool true
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool true
+  # Three finger drag (Accessibility)
   defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
   defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
+  # More Gestures
+  defaults write NSGlobalDomain AppleEnableSwipeNavigateWithScrolls -bool true
+  defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 2
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 2
+  defaults write com.apple.AppleMultitouchTrackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
+  defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGesture -int 2
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerVertSwipeGesture -int 2
+  defaults write com.apple.dock showMissionControlGestureEnabled -bool true
+  defaults write com.apple.dock showAppExposeGestureEnabled -bool false
+  defaults write com.apple.dock showDesktopGestureEnabled -bool true
 
   # https://stratus3d.com/blog/2015/02/28/sync-iterm2-profile-with-dotfiles-repository/
   current_status "Setting iTerm2 preferences directory"
