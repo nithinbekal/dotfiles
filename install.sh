@@ -59,6 +59,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   current_status "Remapping caps lock to escape"
   hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029}]}'
 
+  current_status "Configuring trackpad"
+  defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+  defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+  defaults write NSGlobalDomain com.apple.trackpad.scaling -float 3.0
+  defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
+
   # https://stratus3d.com/blog/2015/02/28/sync-iterm2-profile-with-dotfiles-repository/
   current_status "Setting iTerm2 preferences directory"
   defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "~/dotfiles/iterm2"
