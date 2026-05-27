@@ -1,5 +1,6 @@
 
 brew "delta"
+brew "gh"
 brew "fzf"
 brew "mise"
 brew "neovim"
