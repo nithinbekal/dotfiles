@@ -61,6 +61,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   # https://wesleywiser.github.io/post/vscode-vim-repeat-osx/
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 
+  current_status "Remapping caps lock to escape"
+  hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029}]}'
+
   current_status "Configuring trackpad"
   # Point & Click
   defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
