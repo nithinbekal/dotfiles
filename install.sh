@@ -39,12 +39,7 @@ if ! which brew > /dev/null 2>&1; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  # Intel and M-series macs have different brew paths
-  if [[ "$(uname -m)" == "arm64" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  else
-    eval "$(/usr/local/bin/brew shellenv)"
-  fi
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 else
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
