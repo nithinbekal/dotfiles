@@ -121,9 +121,19 @@ if ! command -v claude > /dev/null 2>&1; then
   npm install -g @anthropic-ai/claude-code
 fi
 
+current_status "Installing Codex"
+if ! command -v codex > /dev/null 2>&1; then
+  npm install -g @openai/codex
+fi
+
 current_status "Installing Pi coding agent"
 if ! command -v pi > /dev/null 2>&1; then
   npm install -g @mariozechner/pi-coding-agent
+fi
+
+current_status "Installing qmd"
+if ! command -v qmd > /dev/null 2>&1; then
+  npm install -g @tobilu/qmd
 fi
 
 current_status "Setting up IRB config"
