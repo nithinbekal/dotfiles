@@ -17,6 +17,8 @@ ssh -T git@github.com
 
 ### Git config
 
+The first time you run a git command, MacOS will prompt you to install Xcode CLI tools, which will take 5-10 minutes to install.
+
 ```bash
 git config --global user.name "Nithin Bekal"
 git config --global user.email "nithinbekal@gmail.com"
