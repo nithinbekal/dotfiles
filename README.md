@@ -5,7 +5,7 @@
 ### SSH key
 
 ```bash
-ssh-keygen -t ed25519 -C "your@email.com"
+ssh-keygen -t ed25519 -C "nithinbekal@gmail.com"
 cat ~/.ssh/id_ed25519.pub
 ```
 
@@ -18,8 +18,8 @@ ssh -T git@github.com
 ### Git config
 
 ```bash
-git config --global user.name "Your Name"
-git config --global user.email "your@email.com"
+git config --global user.name "Nithin Bekal"
+git config --global user.email "nithinbekal@gmail.com"
 ```
 
 ### Clone and install
