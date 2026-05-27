@@ -1,13 +1,13 @@
 
 brew "delta"
-brew "gh"
 brew "fzf"
+brew "gh"
 brew "mise"
 brew "neovim"
-brew "tree-sitter"
-brew "tree-sitter-cli"
 brew "ripgrep"
 brew "tmux"
+brew "tree-sitter"
+brew "tree-sitter-cli"
 brew "watchman" # required by Sorbet LSP to detect file changes
 brew "zellij"
 
