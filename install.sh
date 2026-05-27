@@ -131,6 +131,11 @@ if ! command -v pi > /dev/null 2>&1; then
   npm install -g @mariozechner/pi-coding-agent
 fi
 
+current_status "Installing qmd"
+if ! command -v qmd > /dev/null 2>&1; then
+  npm install -g @tobilu/qmd
+fi
+
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
 ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
