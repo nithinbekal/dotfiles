@@ -1,4 +1,5 @@
 
+brew "delta"
 brew "fzf"
 brew "mise"
 brew "neovim"

@@ -84,9 +84,6 @@ command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
 
 command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 
-# Added by Antigravity
-export PATH="/Users/nithin/.antigravity/antigravity/bin:$PATH"
-
 # Machine-specific overrides (e.g. work prompt)
 [ -f ~/.zshrc.shopify ] && source ~/.zshrc.shopify
 
