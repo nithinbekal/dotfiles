@@ -91,3 +91,7 @@ command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 
 # Added by tec agent
 [[ -x /Users/nithin/.local/state/tec/profiles/base/current/global/init ]] && eval "$(/Users/nithin/.local/state/tec/profiles/base/current/global/init zsh)"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/nithin/.lmstudio/bin"
+# End of LM Studio CLI section
