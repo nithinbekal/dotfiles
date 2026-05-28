@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/badlogic/pi-mono/main/packages/coding-agent/pi-settings-schema.json",
+  "theme": "moonlight",
+  "defaultThinkingLevel": "medium",
+  "lastChangelogVersion": "0.80.3",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.5",
+  "enabledModels": [
+    "openai-codex/gpt-5.5",
+    "lmstudio/qwen/qwen3.6-27b",
+    "lmstudio/qwen/qwen3.6-35b-a3b"
+  ],
+  "hideThinkingBlock": false
+}
