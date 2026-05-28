@@ -122,26 +122,34 @@ ln -sf ~/dotfiles/.config/mise/config.toml ~/.config/mise/config.toml
 current_status "Installing languages via mise"
 mise install
 export PATH="$HOME/.local/share/mise/shims:$PATH"
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+mkdir -p "$PNPM_HOME"
+
+current_status "Setting up pnpm"
+corepack enable
+corepack prepare pnpm@latest --activate
+
+install_pnpm_global() {
+  package="$1"
+  command="$2"
+
+  if ! command -v "$command" > /dev/null 2>&1 || ! pnpm list -g --depth 0 | grep -Fq "$package"; then
+    pnpm add -g "$package"
+  fi
+}
 
 current_status "Installing Claude Code"
-if ! command -v claude > /dev/null 2>&1; then
-  npm install -g @anthropic-ai/claude-code
-fi
+install_pnpm_global @anthropic-ai/claude-code claude
 
 current_status "Installing Codex"
-if ! command -v codex > /dev/null 2>&1; then
-  npm install -g @openai/codex
-fi
+install_pnpm_global @openai/codex codex
 
 current_status "Installing Pi coding agent"
-if ! command -v pi > /dev/null 2>&1; then
-  npm install -g @mariozechner/pi-coding-agent
-fi
+install_pnpm_global @mariozechner/pi-coding-agent pi
 
 current_status "Installing qmd"
-if ! command -v qmd > /dev/null 2>&1; then
-  npm install -g @tobilu/qmd
-fi
+install_pnpm_global @tobilu/qmd qmd
 
 current_status "Setting up IRB config"
 mkdir -p ~/.config/irb
