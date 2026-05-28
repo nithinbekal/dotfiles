@@ -66,6 +66,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   defaults write NSGlobalDomain com.apple.trackpad.scaling -float 3.0
   defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
   defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
+  defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 0
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 0
+  defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGesture -int 0
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerVertSwipeGesture -int 0
 
   # https://stratus3d.com/blog/2015/02/28/sync-iterm2-profile-with-dotfiles-repository/
   current_status "Setting iTerm2 preferences directory"
