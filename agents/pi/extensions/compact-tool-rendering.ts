@@ -87,7 +87,7 @@ function formatBash(args: unknown, theme: ThemeLike): string {
 	const input = asRecord(args);
 	const command = typeof input.command === "string" && input.command.trim() ? input.command.replace(/\s+/g, " ").trim() : "…";
 	const timeout = typeof input.timeout === "number" ? theme.fg("muted", ` (timeout ${input.timeout}s)`) : "";
-	return `${theme.fg("toolTitle", theme.bold("💻 bash"))} ${theme.fg("toolOutput", command)}${timeout}`;
+	return `${theme.fg("toolTitle", theme.bold("⚙️ bash"))} ${theme.fg("toolOutput", command)}${timeout}`;
 }
 
 function formatResult(result: AgentToolResult<unknown>, options: ToolRenderResultOptions, theme: ThemeLike, summary: string): string {
