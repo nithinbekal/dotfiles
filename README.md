@@ -63,6 +63,7 @@ Shared skills are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.
 ## Tmux helpers
 
 - `m` — compact popup switcher for tmux windows running Pi or Claude Code. Press prefix + `m` inside tmux, type to filter by agent/session/worktree/window, then use `1`-`9` or Enter to jump. Press Ctrl-P to toggle pane preview.
+- `tmux-switcher` — popup switcher for tmux sessions, listing session name, worktree name, and git branch. Press Alt-`s` inside tmux, type to filter, then use `1`-`9` or Enter to jump.
 
 ### iTerm settings
 
