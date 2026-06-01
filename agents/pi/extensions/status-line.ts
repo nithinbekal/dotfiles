@@ -90,7 +90,7 @@ export default function (pi: ExtensionAPI) {
 						+ costPart
 						+ turnsPart;
 
-					return [truncateToWidth(line, width)];
+					return [truncateToWidth(line, width), ""];
 				},
 			};
 		});
