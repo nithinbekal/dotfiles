@@ -35,7 +35,9 @@ brevity; use the full path to the script in this directory.
 ```bash
 subagents roles                  # list available roles (and their models)
 subagents run [-m MODEL] [--effort LEVEL] <role> "<task>"   # start a subagent; -m overrides the role's model
-subagents wait <id> [seconds]    # wait for it to finish (returns early on completion/idle); prints its report
+subagents wait <id> [seconds]    # block until it finishes (returns early on completion/idle); prints its report
+subagents reap                   # print any newly-finished reports (pull mode; non-blocking)
+subagents status                 # show each subagent as working|idle|exited (non-blocking)
 subagents tell <id> "<message>"  # send a follow-up: answer a question, steer, or nudge
 subagents peek <id> [lines]      # show the tail of its pane (watch it work)
 subagents ls                     # list active subagents
@@ -54,10 +56,22 @@ cross-family critic). Otherwise pick per task with `-m`, sized to complexity:
 Use provider-qualified ids (e.g. `anthropic/claude-sonnet-4-6`) to avoid an
 ambiguous-model error. `--effort` sets the thinking level (off..xhigh) for harder tasks.
 
-## Workflow
+## Push mode vs pull mode
+
+If the `subagents-watch` extension is loaded in the lead (it watches the state
+dir), finished reports are **pushed into your conversation automatically** and
+wake you — you don't need to `wait` or poll. Just `run` subagents, keep working,
+and reports arrive as they complete. Use `tell`/`peek` to respond. (Don't also
+`wait` on a subagent the watcher is handling — both consume the same event.)
+
+Without the extension, use **pull mode**: `subagents wait <id>` (block for one),
+or `subagents reap` (drain all newly-finished reports) and `subagents status`
+between your own steps.
+
+## Workflow (pull mode)
 
 1. `subagents run <role> "<task>"` → note the `#id`.
-2. `subagents wait <id>` → read the report it wrote.
+2. `subagents wait <id>` → read the report it wrote (or `reap` to drain all).
 3. If it asks a question or stalls: `subagents peek <id>` to see what's happening,
    then `subagents tell <id> "<answer or nudge>"` and `subagents wait <id>` again.
 4. **Shut it down when done** with `subagents stop <id>`, unless you expect to

@@ -25,9 +25,12 @@
 #                                       thinking level (off|minimal|low|medium|high|xhigh).
 #   subagents tell <id> <message...>    Send a follow-up message to a subagent.
 #   subagents wait <id> [seconds]       Block until it finishes its task; print its report.
+#   subagents events                    Print NEW completion events as TSV (id\trole\tstatus\treportPath). Non-blocking. For the watcher extension.
+#   subagents reap                      Print any newly-finished reports (non-blocking, human-friendly).
+#   subagents status                    Show each subagent as working|idle|exited (non-blocking, no consume).
 #   subagents peek <id> [lines]         Show the tail of a subagent's pane (watch it work).
 #   subagents ls                        List active subagents.
-#   subagents stop <id|--all>           Shut a subagent (or all) down; renames the window.
+#   subagents stop <id|--all>           Shut a subagent (or all) down (window closes when empty).
 #   subagents roles                     List available role files.
 
 set -uo pipefail
@@ -38,6 +41,7 @@ ROLE_DIRS="${SUBAGENTS_ROLE_DIRS:-$HOME/.pi/agent/agents:$PWD/.pi/agents}"
 WIN_PREFIX="subagents"
 SENTINEL="@@DONE@@"
 DEFAULT_WAIT=120
+IDLE_POLLS=4   # consecutive unchanged polls before a subagent counts as idle
 
 mkdir -p "$STATE_DIR"
 
@@ -132,6 +136,70 @@ file, print $SENTINEL, and wait for the reply.
 EOF
 }
 
+# ---- completion detection (shared by wait / events / reap) ----------------
+
+# Snapshot a report to reports/<n>.md and echo its path. Copies $2 (a file) when
+# non-empty, otherwise captures the pane tail. Makes each event immutable.
+snapshot() { # id source-file-or-empty
+	local id="$1" src="$2" dir="$STATE_DIR/$id" n out
+	n=$(cat "$dir/revent" 2>/dev/null || echo 0); n=$((n + 1)); echo "$n" >"$dir/revent"
+	mkdir -p "$dir/reports"; out="$dir/reports/$n.md"
+	if [ -n "$src" ] && [ -s "$src" ]; then
+		cp "$src" "$out"
+	else
+		tmux capture-pane -p -t "$(cat "$dir/pane")" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -40 >"$out"
+	fi
+	echo "$out"
+}
+
+# Detect a NEW completion for one subagent. On a new event, advance its markers
+# and print a TSV line: "<id>\t<role>\t<status>\t<reportPath>" (status = done |
+# idle | exited), returning 0. Otherwise print nothing and return 1.
+# Used on-demand by `reap`/`events` and in a loop by `wait`.
+detect_and_emit() { # id
+	local id="$1" dir="$STATE_DIR/$id"
+	[ -d "$dir" ] && [ -f "$dir/pane" ] || return 1
+	local pane role; pane=$(cat "$dir/pane"); role=$(cat "$dir/role" 2>/dev/null)
+
+	if ! pane_alive "$pane"; then
+		[ -f "$dir/.exited" ] && return 1
+		: >"$dir/.exited"
+		printf '%s\t%s\t%s\t%s\n' "$id" "$role" "exited" "$(snapshot "$id" "$dir/result.md")"
+		return 0
+	fi
+
+	# clean completion: a new sentinel printed, or result.md freshly written
+	local rcount rmtime count mtime
+	rcount=$(cat "$dir/rcount" 2>/dev/null || echo 0)
+	rmtime=$(cat "$dir/rmtime" 2>/dev/null || echo 0)
+	count=$(tmux capture-pane -p -S - -t "$pane" 2>/dev/null | grep -c -- "$SENTINEL"); count=${count:-0}
+	mtime=$(file_mtime "$dir/result.md")
+	if [ "$count" -gt "$rcount" ] || { [ -s "$dir/result.md" ] && [ "$mtime" -gt "$rmtime" ]; }; then
+		echo "$count" >"$dir/rcount"; echo "$mtime" >"$dir/rmtime"
+		echo 0 >"$dir/stable"; echo 0 >"$dir/saw"
+		tmux capture-pane -p -t "$pane" 2>/dev/null | cksum >"$dir/rphash"
+		printf '%s\t%s\t%s\t%s\n' "$id" "$role" "done" "$(snapshot "$id" "$dir/result.md")"
+		return 0
+	fi
+
+	# idle fallback (stateful across calls): answered inline / waiting. Only fires
+	# after we've seen activity and the pane differs from the last reported state.
+	local lhash stable saw rphash cur
+	lhash=$(cat "$dir/lhash" 2>/dev/null || echo "")
+	stable=$(cat "$dir/stable" 2>/dev/null || echo 0)
+	saw=$(cat "$dir/saw" 2>/dev/null || echo 0)
+	rphash=$(cat "$dir/rphash" 2>/dev/null || echo "")
+	cur=$(tmux capture-pane -p -t "$pane" 2>/dev/null | cksum)
+	if [ "$cur" != "$lhash" ]; then stable=0; saw=1; else stable=$((stable + 1)); fi
+	echo "$cur" >"$dir/lhash"; echo "$stable" >"$dir/stable"; echo "$saw" >"$dir/saw"
+	if [ "$stable" -ge "$IDLE_POLLS" ] && [ "$saw" = 1 ] && [ "$cur" != "$rphash" ]; then
+		echo "$cur" >"$dir/rphash"; echo 0 >"$dir/saw"
+		printf '%s\t%s\t%s\t%s\n' "$id" "$role" "idle" "$(snapshot "$id" "")"
+		return 0
+	fi
+	return 1
+}
+
 # ---- commands -------------------------------------------------------------
 
 cmd_run() {
@@ -197,7 +265,8 @@ cmd_run() {
 	echo "$pane" >"$dir/pane"
 	echo "$role" >"$dir/role"
 	echo "$task" >"$dir/task"
-	echo 0 >"$dir/seen"
+	echo 0 >"$dir/rcount"
+	echo 0 >"$dir/rmtime"
 	date +%s >"$dir/sent"
 	tmux select-pane -t "$pane" -T "subagent#$id $role" 2>/dev/null || true
 
@@ -222,44 +291,61 @@ cmd_tell() {
 cmd_wait() {
 	local id="${1:-}"; local secs="${2:-$DEFAULT_WAIT}"
 	[ -n "$id" ] || die "usage: subagents wait <id> [seconds]"
-	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
-	local pane; pane=$(cat "$dir/pane")
-	local seen sent; seen=$(cat "$dir/seen" 2>/dev/null || echo 0); sent=$(cat "$dir/sent" 2>/dev/null || echo 0)
-	local i count rmtime cur prev="" stable=0
-	local STABLE_POLLS=5   # 5 * 2s = 10s of no pane change => idle
+	[ -d "$STATE_DIR/$id" ] || die "no subagent #$id"
+	local i line status path
 	for ((i = 0; i < secs; i += 2)); do
-		if ! pane_alive "$pane"; then
-			echo "=== subagent #$id exited ==="
-			[ -s "$dir/result.md" ] && cat "$dir/result.md" || echo "(no report written)"
-			return 0
-		fi
-		# clean completion: sentinel printed, or result file freshly written
-		count=$(tmux capture-pane -p -S - -t "$pane" 2>/dev/null | grep -c -- "$SENTINEL"); count=${count:-0}
-		rmtime=$(file_mtime "$dir/result.md")
-		if [ "$count" -gt "$seen" ] || { [ -s "$dir/result.md" ] && [ "$rmtime" -gt "$sent" ]; }; then
-			echo "$count" >"$dir/seen"
-			echo "=== subagent #$id report ==="
-			cat "$dir/result.md"
-			return 0
-		fi
-		# idle fallback: pane unchanged for STABLE_POLLS (answered inline / is waiting)
-		cur=$(tmux capture-pane -p -t "$pane" 2>/dev/null | cksum)
-		if [ "$cur" = "$prev" ]; then stable=$((stable + 1)); else stable=0; fi
-		prev="$cur"
-		if [ "$stable" -ge "$STABLE_POLLS" ]; then
-			if [ -s "$dir/result.md" ]; then
-				echo "=== subagent #$id report ==="; cat "$dir/result.md"
-			else
-				echo "=== subagent #$id is idle but wrote no report file ==="
-				echo "(it may have answered inline; captured from its pane — 'subagents tell $id ...' to follow up)"
-				tmux capture-pane -p -t "$pane" | grep -v '^[[:space:]]*$' | tail -25
-			fi
+		if line=$(detect_and_emit "$id") && [ -n "$line" ]; then
+			IFS=$'\t' read -r _ _ status path <<<"$line"
+			echo "=== subagent #$id report ($status) ==="
+			[ -s "$path" ] && cat "$path" || echo "(no report captured)"
 			return 0
 		fi
 		sleep 2
 	done
 	echo "[subagent #$id still working after ${secs}s — 'subagents peek $id' to watch, 'subagents tell $id <msg>' to steer]"
 	return 1
+}
+
+# Print NEW completion events across all subagents as TSV (one pass, non-blocking).
+cmd_events() {
+	local dir id
+	for dir in "$STATE_DIR"/*/; do
+		[ -d "$dir" ] || continue
+		id=$(basename "$dir"); [ -f "$dir/pane" ] || continue
+		detect_and_emit "$id" || true
+	done
+}
+
+# Human-friendly drain of newly-finished reports.
+cmd_reap() {
+	local any=0 id role status path
+	while IFS=$'\t' read -r id role status path; do
+		[ -n "$id" ] || continue
+		any=1
+		echo "=== subagent #$id ($role) — $status ==="
+		[ -s "$path" ] && cat "$path" || echo "(no report captured)"
+		echo
+	done < <(cmd_events)
+	[ "$any" = 1 ] || echo "no new reports"
+}
+
+# Non-blocking live status of each subagent (does not consume events).
+cmd_status() {
+	local dir id pane role st found=0 h1 h2
+	for dir in "$STATE_DIR"/*/; do
+		[ -d "$dir" ] || continue
+		id=$(basename "$dir"); [ -f "$dir/pane" ] || continue
+		pane=$(cat "$dir/pane"); role=$(cat "$dir/role" 2>/dev/null)
+		if ! pane_alive "$pane"; then
+			st="exited"
+		else
+			h1=$(tmux capture-pane -p -t "$pane" 2>/dev/null | cksum); sleep 0.4
+			h2=$(tmux capture-pane -p -t "$pane" 2>/dev/null | cksum)
+			[ "$h1" = "$h2" ] && st="idle" || st="working"
+		fi
+		printf "#%-3s %-14s %s\n" "$id" "$role" "$st"; found=1
+	done
+	[ "$found" = 1 ] || echo "no subagents"
 }
 
 cmd_peek() {
@@ -334,6 +420,9 @@ case "$cmd" in
 	run)       cmd_run   "$@" ;;
 	tell)      cmd_tell  "$@" ;;
 	wait)      cmd_wait  "$@" ;;
+	events)    cmd_events "$@" ;;
+	reap)      cmd_reap  "$@" ;;
+	status)    cmd_status "$@" ;;
 	peek)      cmd_peek  "$@" ;;
 	ls|list)   cmd_ls    "$@" ;;
 	stop|kill) cmd_stop  "$@" ;;
