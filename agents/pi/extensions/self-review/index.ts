@@ -35,12 +35,13 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
-import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, KeybindingsManager, Theme } from "@mariozechner/pi-coding-agent";
+import { ExtensionEditorComponent, isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import {
 	type Component,
 	matchesKey,
 	type OverlayHandle,
+	type TUI,
 	truncateToWidth,
 	visibleWidth,
 	wrapTextWithAnsi,
@@ -906,20 +907,64 @@ class StatusOverlay implements Component {
 	private diffCursor = 0;
 	private diffPaneWidth = 80;
 	private visibleHeight = 30;
+	/** When set, an inline multiline comment editor is open over the diff pane. */
+	private modal: { editor: ExtensionEditorComponent; target: DiffCommentTarget } | null = null;
 
 	// top border, header, divider, pane title, scroll info, hint, bottom border
 	private static readonly CHROME_ROWS = 7;
 
 	constructor(
 		private theme: Theme,
+		private tui: TUI,
+		private kb: KeybindingsManager,
 		private done: () => void,
 		private requestRender: () => void,
 		private notify: (msg: string, level?: "info" | "warning" | "error") => void,
-		private onComment: (target: DiffCommentTarget) => void,
 		private onSubmitComments: () => void,
 		private releaseFocus: () => void,
 	) {
 		refreshStatus();
+	}
+
+	/** Open the inline multiline editor (reuses the prompt's own editor component). */
+	private openCommentModal(target: DiffCommentTarget): void {
+		const editor = new ExtensionEditorComponent(
+			this.tui,
+			this.kb,
+			`Comment on ${target.path}:${target.displayLine + 1}`,
+			undefined,
+			(value: string) => this.saveComment(target, value),
+			() => this.closeModal("Comment cancelled"),
+		);
+		this.modal = { editor, target };
+		this.focusedPane = "diff";
+		this.requestRender();
+	}
+
+	private saveComment(target: DiffCommentTarget, value: string): void {
+		const text = value.trim();
+		this.modal = null;
+		if (text) {
+			addDiffComment({ path: target.path, rawLineIndex: target.rawLineIndex, text, createdAt: Date.now() });
+			this.notify(`Comment added to ${target.path}`, "info");
+		} else {
+			this.notify("Comment cancelled", "info");
+		}
+		this.requestRender();
+	}
+
+	private closeModal(msg?: string): void {
+		this.modal = null;
+		if (msg) this.notify(msg, "info");
+		this.requestRender();
+	}
+
+	/** Render the open editor modal bottom-aligned within the diff pane. */
+	private renderModalLines(width: number, height: number): string[] {
+		const editorLines = this.modal!.editor.render(width);
+		const clipped = editorLines.slice(-height);
+		const pad = Math.max(0, height - clipped.length);
+		return [...new Array(pad).fill(" ".repeat(width)), ...clipped.map((l) => fitLine(l, width))];
 	}
 
 	/** Force the next render to rebuild from latest status. Called from outside on auto-refresh. */
@@ -1024,6 +1069,13 @@ class StatusOverlay implements Component {
 	}
 
 	handleInput(data: string): void {
+		// While the inline comment editor is open, route every key to it
+		// (Enter submits, Shift+Enter newline, Esc cancels, Ctrl+G external editor).
+		if (this.modal) {
+			this.modal.editor.handleInput(data);
+			this.requestRender();
+			return;
+		}
 		if (data === "[" || data === "]") {
 			this.jumpHunk(data === "]" ? 1 : -1);
 			this.requestRender();
@@ -1048,9 +1100,7 @@ class StatusOverlay implements Component {
 		if (data === "c" || data === "C") {
 			const target = this.currentCommentTarget();
 			if (!target) return;
-			this.focusedPane = "diff";
-			this.onComment(target);
-			this.requestRender();
+			this.openCommentModal(target);
 			return;
 		}
 		if (data === "x" || data === "X") {
@@ -1179,14 +1229,19 @@ class StatusOverlay implements Component {
 			lines.push(row(fitLine(leftTitle, leftWidth) + separator + fitLine(rightTitle, rightWidth)));
 
 			const treeLines = this.renderTreeLines(entries, leftWidth, contentHeight);
-			const diffLines = this.renderDiffLines(currentEntry, rightWidth, contentHeight);
+			const diffLines = this.modal
+				? this.renderModalLines(rightWidth, contentHeight)
+				: this.renderDiffLines(currentEntry, rightWidth, contentHeight);
 			for (let i = 0; i < contentHeight; i++) {
 				lines.push(row((treeLines[i] ?? " ".repeat(leftWidth)) + separator + (diffLines[i] ?? " ".repeat(rightWidth))));
 			}
 		} else {
 			const rightTitle = currentEntry ? th.fg("accent", th.bold(currentEntry.path)) : th.fg("muted", "Diff");
 			lines.push(row(rightTitle));
-			lines.push(...this.renderDiffLines(currentEntry, innerW, contentHeight).map(row));
+			const diffOrModal = this.modal
+				? this.renderModalLines(innerW, contentHeight)
+				: this.renderDiffLines(currentEntry, innerW, contentHeight);
+			lines.push(...diffOrModal.map(row));
 		}
 
 		const diffInfo = this.diffScrollInfo(currentEntry, rightWidth);
@@ -1430,25 +1485,6 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 		}
 	});
 
-	async function commentFlow(ctx: ExtensionContext, target: DiffCommentTarget): Promise<void> {
-		const comment = await ctx.ui.input(
-			`Comment on ${target.path} diff line ${target.displayLine + 1}`,
-			target.preview || "Add a review note",
-		);
-		if (!comment || !comment.trim()) {
-			ctx.ui.notify("Comment cancelled", "info");
-			return;
-		}
-
-		addDiffComment({
-			path: target.path,
-			rawLineIndex: target.rawLineIndex,
-			text: comment.trim(),
-			createdAt: Date.now(),
-		});
-		ctx.ui.notify(`Comment added to ${target.path}`, "info");
-	}
-
 	function submitCommentsToPrompt(ctx: ExtensionContext): boolean {
 		const prompt = formatCommentsForPrompt();
 		if (!prompt) {
@@ -1480,7 +1516,7 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 			// independently until the user closes it with `q` or runs the
 			// command again.
 			void ctx.ui.custom<void>(
-				(tui, theme, _kb, done) => {
+				(tui, theme, kb, done) => {
 					let overlay: StatusOverlay;
 					const hideCompactOverlay = () => {
 						compactOverlayHandle?.hide();
@@ -1505,17 +1541,6 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 						requestOverlayRender = null;
 						overlayHandle = null;
 					};
-					// The input dialog renders in the prompt editor area. Hide the panel
-					// while it is open so the overlay does not cover the comment field.
-					const onComment = (target: DiffCommentTarget) => {
-						overlayHandle?.setHidden(true);
-						tui.requestRender();
-						void commentFlow(ctx, target).then(() => {
-							overlayHandle?.setHidden(false);
-							requestOverlayRender?.();
-							overlayHandle?.focus();
-						});
-					};
 					const releaseFocus = () => {
 						overlayHandle?.setHidden(true);
 						showCompactOverlay();
@@ -1527,10 +1552,11 @@ export default function diffPanelExtension(pi: ExtensionAPI): void {
 					};
 					overlay = new StatusOverlay(
 						theme,
+						tui,
+						kb,
 						() => overlayDone!(),
 						() => tui.requestRender(),
 						(msg, level) => ctx.ui.notify(msg, level ?? "info"),
-						onComment,
 						onSubmitComments,
 						releaseFocus,
 					);
