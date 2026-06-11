@@ -786,19 +786,11 @@ function diffLinesForPath(path: string): string[] {
 	return state.diffCache.get(path) ?? ["(diff unavailable)"];
 }
 
-function commentContext(lines: string[], rawLineIndex: number, endRawLineIndex?: number): string[] {
+function commentExcerpt(lines: string[], rawLineIndex: number, endRawLineIndex?: number): string[] {
 	if (lines.length === 0) return ["(diff unavailable)"];
 	const lo = Math.max(0, Math.min(rawLineIndex, lines.length - 1));
 	const hi = Math.max(lo, Math.min(endRawLineIndex ?? rawLineIndex, lines.length - 1));
-	const hunkIndex = lines.findLastIndex((line, index) => index <= lo && line.startsWith("@@"));
-	const start = Math.max(0, lo - 3);
-	const end = Math.min(lines.length, hi + 4);
-	const context: Array<{ index: number; line: string }> = [];
-	if (hunkIndex >= 0 && hunkIndex < start) context.push({ index: hunkIndex, line: lines[hunkIndex]! });
-	for (let index = start; index < end; index++) {
-		context.push({ index, line: lines[index]! });
-	}
-	return context.map(({ index, line }) => (index >= lo && index <= hi ? `>>> ${line}` : line));
+	return lines.slice(lo, hi + 1);
 }
 
 interface DiffLineLocation {
@@ -867,7 +859,7 @@ function formatCommentsForPrompt(): string | null {
 	const comments = allDiffComments();
 	if (comments.length === 0) return null;
 
-	const lines: string[] = ["Diff review comments (target lines are marked with `>>>`):"];
+	const lines: string[] = ["Diff review comments:"];
 	let currentPath = "";
 	comments.forEach((comment, index) => {
 		if (comment.path !== currentPath) {
@@ -879,7 +871,7 @@ function formatCommentsForPrompt(): string | null {
 		const endIndex =
 			comment.endRawLineIndex !== undefined ? Math.max(0, Math.min(comment.endRawLineIndex, diffLines.length - 1)) : undefined;
 		lines.push("", `### ${commentTargetLabel(comment.path, diffLines, lineIndex, endIndex)}`);
-		lines.push("````diff", ...commentContext(diffLines, lineIndex, endIndex), "````");
+		lines.push("````diff", ...commentExcerpt(diffLines, lineIndex, endIndex), "````");
 		lines.push("", `Comment: ${comment.text}`);
 	});
 	return `${lines.join("\n").trimEnd()}\n---\n\n`;
