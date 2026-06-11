@@ -1,0 +1,336 @@
+#!/usr/bin/env bash
+#
+# subagents — run helper agents in a dedicated tmux window and talk to them.
+#
+# Each subagent is an interactive `pi` running in its own pane of a tmux window
+# named "subagents (N)". You hand a subagent a task, watch it work, send it
+# follow-ups (answers / steering / nudges), and collect its final report.
+#
+# Subagents start with built-in tools only (--no-extensions) so they boot fast
+# and clean. The lead drives everything over tmux send-keys + capture-pane.
+#
+# Launcher: subagents are started with `$SUBAGENTS_PI` (default "pi"). If your
+# model provider needs a wrapper command to inject auth, set SUBAGENTS_PI in a
+# private file such as ~/.zshrc.local, e.g.  export SUBAGENTS_PI="some-wrapper pi"
+#
+# Roles: markdown files with optional YAML frontmatter (`model`, `tools`) whose
+# body becomes the subagent's system prompt. Looked up in $SUBAGENTS_ROLE_DIRS
+# (colon-separated), else ~/.pi/agent/agents then ./.pi/agents.
+#
+# Usage:
+#   subagents run  <role> <task...>     Start a subagent from a role, give it the task. Prints its id.
+#   subagents tell <id> <message...>    Send a follow-up message to a subagent.
+#   subagents wait <id> [seconds]       Block until it finishes its task; print its report.
+#   subagents peek <id> [lines]         Show the tail of a subagent's pane (watch it work).
+#   subagents ls                        List active subagents.
+#   subagents stop <id|--all>           Shut a subagent (or all) down; renames the window.
+#   subagents roles                     List available role files.
+
+set -uo pipefail
+
+PI_CMD="${SUBAGENTS_PI:-pi}"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/subagents"
+ROLE_DIRS="${SUBAGENTS_ROLE_DIRS:-$HOME/.pi/agent/agents:$PWD/.pi/agents}"
+WIN_PREFIX="subagents"
+SENTINEL="@@DONE@@"
+DEFAULT_WAIT=600
+
+mkdir -p "$STATE_DIR"
+
+die() { echo "subagents: $*" >&2; exit 1; }
+in_tmux() { [ -n "${TMUX:-}" ]; }
+
+# ---- role files -----------------------------------------------------------
+
+role_file() {
+	local role="$1" dir f
+	IFS=: read -r -a dirs <<<"$ROLE_DIRS"
+	for dir in "${dirs[@]}"; do
+		f="$dir/$role.md"
+		[ -f "$f" ] && { echo "$f"; return 0; }
+	done
+	return 1
+}
+
+# Print the YAML frontmatter block (between the first two --- lines).
+_frontmatter() { awk 'NR==1 && $0=="---"{f=1;next} f && $0=="---"{exit} f{print}' "$1"; }
+
+# Get a scalar frontmatter field, stripped of quotes.
+fm_get() {
+	_frontmatter "$1" | sed -n "s/^$2:[[:space:]]*//p" | head -1 | sed "s/^[\"']//; s/[\"']$//"
+}
+
+# Print the role body (everything after the frontmatter, or the whole file).
+role_body() {
+	awk 'NR==1 && $0=="---"{infm=1;next} infm && $0=="---"{infm=0;next} !infm{print}' "$1"
+}
+
+# Normalize a tools value ("[a, b]" or "a, b") into "a,b".
+normalize_tools() {
+	echo "$1" | tr -d '[]' | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^$' | paste -sd, -
+}
+
+# ---- tmux window / pane helpers -------------------------------------------
+
+current_session() {
+	tmux display-message -pt "${TMUX_PANE:-}" '#{session_name}' 2>/dev/null \
+		|| tmux display-message -p '#{session_name}'
+}
+
+subagents_window() { # session -> window_id of the subagents window (or empty)
+	tmux list-windows -t "$1" -F '#{window_id} #{window_name}' 2>/dev/null \
+		| awk -v p="$WIN_PREFIX" '$2==p || index($2, p" (")==1 {print $1; exit}'
+}
+
+rename_window() { # session
+	local win n
+	win=$(subagents_window "$1") || return 0
+	[ -n "$win" ] || return 0
+	n=$(tmux list-panes -t "$win" -F x 2>/dev/null | wc -l | tr -d ' ')
+	tmux rename-window -t "$win" "$WIN_PREFIX ($n)" 2>/dev/null || true
+}
+
+pane_alive() { # pane_id
+	tmux list-panes -a -F '#{pane_id} #{pane_dead}' 2>/dev/null \
+		| awk -v p="$1" '$1==p{print $2}' | grep -qx 0
+}
+
+send_pane() { # pane_id message...
+	local pane="$1"; shift
+	local msg="$*"
+	msg=${msg//$'\n'/ }   # collapse newlines: a bare Enter submits in pi
+	tmux send-keys -t "$pane" -l -- "$msg"
+	sleep 0.3
+	tmux send-keys -t "$pane" Enter
+}
+
+file_mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo 0; }
+
+next_id() {
+	local seq="$STATE_DIR/.seq" n
+	n=$(cat "$seq" 2>/dev/null || echo 0)
+	n=$((n + 1))
+	echo "$n" >"$seq"
+	echo "$n"
+}
+
+write_protocol() { # result_path
+	cat <<EOF
+# Subagent protocol (important)
+
+You are an autonomous helper running in a tmux pane. A lead agent sends you a
+task and may send follow-up messages. Work autonomously; do not ask for
+confirmation on routine steps.
+
+The lead CANNOT see your screen. The only way it receives your work is the file
+below, so you MUST end every task by writing to it:
+
+1. Write your complete final answer/report to this file, overwriting it each task:
+   $1
+2. Then print a single line containing exactly: $SENTINEL
+3. Then stop and wait for the next message, repeating these steps each time.
+
+Never answer only in chat — always write the file first. If you get blocked and
+need the lead's input, write what you need (plus any partial findings) to the
+file, print $SENTINEL, and wait for the reply.
+EOF
+}
+
+# ---- commands -------------------------------------------------------------
+
+cmd_run() {
+	local role="${1:-}"; shift || true
+	local task="$*"
+	[ -n "$role" ] && [ -n "$task" ] || die "usage: subagents run <role> <task...>"
+	in_tmux || die "subagents requires tmux"
+
+	local rf; rf=$(role_file "$role") || die "role '$role' not found (try: subagents roles)"
+
+	local sess; sess=$(current_session)
+	local id; id=$(next_id)
+	local dir="$STATE_DIR/$id"; mkdir -p "$dir"
+	local result="$dir/result.md"
+	: >"$result"
+
+	role_body "$rf" >"$dir/role.md"
+	write_protocol "$result" >"$dir/protocol.md"
+
+	local model tools modelflag="" toolsflag=""
+	model=$(fm_get "$rf" model)
+	tools=$(fm_get "$rf" tools)
+	[ -n "$model" ] && [ "$model" != "inherit" ] && modelflag="--model $model"
+	if [ -n "$tools" ]; then
+		# always allow `write` so the subagent can produce its report file
+		toolsflag="--tools $(normalize_tools "$tools"),write"
+	fi
+
+	local q_pwd q_role q_proto q_task
+	q_pwd=$(printf %q "$PWD")
+	q_role=$(printf %q "$dir/role.md")
+	q_proto=$(printf %q "$dir/protocol.md")
+	q_task=$(printf %q "${task//$'\n'/ }")
+
+	local picmd="cd $q_pwd && exec $PI_CMD --no-extensions --no-skills --no-prompt-templates --no-session"
+	[ -n "$modelflag" ] && picmd="$picmd $modelflag"
+	[ -n "$toolsflag" ] && picmd="$picmd $toolsflag"
+	picmd="$picmd --append-system-prompt $q_role --append-system-prompt $q_proto $q_task"
+
+	local pane win
+	win=$(subagents_window "$sess")
+	if [ -z "$win" ]; then
+		pane=$(tmux new-window -d -t "$sess" -n "$WIN_PREFIX (1)" -P -F '#{pane_id}' "$picmd")
+	else
+		pane=$(tmux split-window -d -t "$win" -P -F '#{pane_id}' "$picmd")
+		tmux select-layout -t "$win" tiled >/dev/null 2>&1 || true
+	fi
+
+	echo "$pane" >"$dir/pane"
+	echo "$role" >"$dir/role"
+	echo "$task" >"$dir/task"
+	echo 0 >"$dir/seen"
+	date +%s >"$dir/sent"
+	tmux select-pane -t "$pane" -T "subagent#$id $role" 2>/dev/null || true
+	rename_window "$sess"
+
+	echo "started subagent #$id ($role) — pane $pane, model ${model:-inherited}"
+	echo "  watch:   subagents peek $id"
+	echo "  answer:  subagents tell $id <message>"
+	echo "  collect: subagents wait $id"
+}
+
+cmd_tell() {
+	local id="${1:-}"; shift || true
+	local msg="$*"
+	[ -n "$id" ] && [ -n "$msg" ] || die "usage: subagents tell <id> <message...>"
+	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
+	local pane; pane=$(cat "$dir/pane")
+	pane_alive "$pane" || die "subagent #$id is not running"
+	date +%s >"$dir/sent"
+	send_pane "$pane" "$msg"
+	echo "sent to subagent #$id"
+}
+
+cmd_wait() {
+	local id="${1:-}"; local secs="${2:-$DEFAULT_WAIT}"
+	[ -n "$id" ] || die "usage: subagents wait <id> [seconds]"
+	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
+	local pane; pane=$(cat "$dir/pane")
+	local seen sent; seen=$(cat "$dir/seen" 2>/dev/null || echo 0); sent=$(cat "$dir/sent" 2>/dev/null || echo 0)
+	local i count rmtime cur prev="" stable=0
+	local STABLE_POLLS=5   # 5 * 2s = 10s of no pane change => idle
+	for ((i = 0; i < secs; i += 2)); do
+		if ! pane_alive "$pane"; then
+			echo "=== subagent #$id exited ==="
+			[ -s "$dir/result.md" ] && cat "$dir/result.md" || echo "(no report written)"
+			return 0
+		fi
+		# clean completion: sentinel printed, or result file freshly written
+		count=$(tmux capture-pane -p -S - -t "$pane" 2>/dev/null | grep -c -- "$SENTINEL"); count=${count:-0}
+		rmtime=$(file_mtime "$dir/result.md")
+		if [ "$count" -gt "$seen" ] || { [ -s "$dir/result.md" ] && [ "$rmtime" -gt "$sent" ]; }; then
+			echo "$count" >"$dir/seen"
+			echo "=== subagent #$id report ==="
+			cat "$dir/result.md"
+			return 0
+		fi
+		# idle fallback: pane unchanged for STABLE_POLLS (answered inline / is waiting)
+		cur=$(tmux capture-pane -p -t "$pane" 2>/dev/null | cksum)
+		if [ "$cur" = "$prev" ]; then stable=$((stable + 1)); else stable=0; fi
+		prev="$cur"
+		if [ "$stable" -ge "$STABLE_POLLS" ]; then
+			if [ -s "$dir/result.md" ]; then
+				echo "=== subagent #$id report ==="; cat "$dir/result.md"
+			else
+				echo "=== subagent #$id is idle but wrote no report file ==="
+				echo "(it may have answered inline; captured from its pane — 'subagents tell $id ...' to follow up)"
+				tmux capture-pane -p -t "$pane" | grep -v '^[[:space:]]*$' | tail -25
+			fi
+			return 0
+		fi
+		sleep 2
+	done
+	echo "[subagent #$id still working after ${secs}s — 'subagents peek $id' to watch, 'subagents tell $id <msg>' to steer]"
+	return 1
+}
+
+cmd_peek() {
+	local id="${1:-}"; local lines="${2:-40}"
+	[ -n "$id" ] || die "usage: subagents peek <id> [lines]"
+	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
+	local pane; pane=$(cat "$dir/pane")
+	pane_alive "$pane" || { echo "[subagent #$id not running]"; return 0; }
+	tmux capture-pane -p -t "$pane" | grep -v '^[[:space:]]*$' | tail -"$lines"
+}
+
+cmd_ls() {
+	local dir id pane role st task found=0
+	for dir in "$STATE_DIR"/*/; do
+		[ -d "$dir" ] || continue
+		id=$(basename "$dir")
+		[ -f "$dir/pane" ] || continue
+		pane=$(cat "$dir/pane")
+		role=$(cat "$dir/role" 2>/dev/null)
+		if pane_alive "$pane"; then st="alive"; else st="dead"; fi
+		task=$(head -c 64 "$dir/task" 2>/dev/null | tr '\n' ' ')
+		printf "#%-3s %-14s %-6s %s\n" "$id" "$role" "$st" "$task"
+		found=1
+	done
+	[ "$found" = 1 ] || echo "no subagents"
+}
+
+cmd_stop() {
+	local target="${1:-}"
+	[ -n "$target" ] || die "usage: subagents stop <id|--all>"
+	local sess; sess=$(current_session)
+	if [ "$target" = "--all" ]; then
+		local dir id pane
+		for dir in "$STATE_DIR"/*/; do
+			[ -d "$dir" ] || continue
+			id=$(basename "$dir")
+			[ -f "$dir/pane" ] || continue
+			pane=$(cat "$dir/pane")
+			tmux kill-pane -t "$pane" 2>/dev/null || true
+			rm -rf "$dir"
+			echo "stopped subagent #$id"
+		done
+	else
+		local dir="$STATE_DIR/$target"; [ -d "$dir" ] || die "no subagent #$target"
+		local pane; pane=$(cat "$dir/pane")
+		tmux kill-pane -t "$pane" 2>/dev/null || true
+		rm -rf "$dir"
+		echo "stopped subagent #$target"
+	fi
+	rename_window "$sess"
+}
+
+cmd_roles() {
+	local dir f name model
+	IFS=: read -r -a dirs <<<"$ROLE_DIRS"
+	for dir in "${dirs[@]}"; do
+		[ -d "$dir" ] || continue
+		echo "# $dir"
+		for f in "$dir"/*.md; do
+			[ -f "$f" ] || continue
+			name=$(basename "$f" .md)
+			model=$(fm_get "$f" model)
+			printf "  %-20s %s\n" "$name" "${model:+($model)}"
+		done
+	done
+}
+
+usage() { awk 'NR>1 && /^#/{sub(/^# ?/,""); print; next} NR>1 && !/^#/{exit}' "$0"; }
+
+# ---- dispatch -------------------------------------------------------------
+
+cmd="${1:-}"; shift || true
+case "$cmd" in
+	run)       cmd_run   "$@" ;;
+	tell)      cmd_tell  "$@" ;;
+	wait)      cmd_wait  "$@" ;;
+	peek)      cmd_peek  "$@" ;;
+	ls|list)   cmd_ls    "$@" ;;
+	stop|kill) cmd_stop  "$@" ;;
+	roles)     cmd_roles "$@" ;;
+	""|-h|--help|help) usage ;;
+	*) die "unknown command '$cmd' (try: subagents --help)" ;;
+esac
