@@ -750,6 +750,20 @@ function addDiffComment(comment: DiffComment): void {
 	state.comments.set(comment.path, comments);
 }
 
+function updateComment(comment: DiffComment, text: string): void {
+	comment.text = text;
+}
+
+function removeComment(target: DiffComment): void {
+	const comments = state.comments.get(target.path);
+	if (!comments) return;
+	const index = comments.indexOf(target);
+	if (index < 0) return;
+	comments.splice(index, 1);
+	if (comments.length === 0) state.comments.delete(target.path);
+	else state.comments.set(target.path, comments);
+}
+
 function removeLatestDiffComment(path: string, rawLineIndex: number): DiffComment | null {
 	const comments = state.comments.get(path);
 	if (!comments) return null;
@@ -921,6 +935,9 @@ class StatusOverlay implements Component {
 	private modal: { editor: ExtensionEditorComponent; target: DiffCommentTarget } | null = null;
 	/** When set (diff focus), the anchor display-row of an active multi-line range selection. */
 	private rangeAnchor: number | null = null;
+	/** Sub-view: the diff/tree review, or the flat notes list of all comments. */
+	private view: "diff" | "notes" = "diff";
+	private notesCursor = 0;
 
 	// top border, header, divider, pane title, scroll info, hint, bottom border
 	private static readonly CHROME_ROWS = 7;
@@ -989,6 +1006,48 @@ class StatusOverlay implements Component {
 		const clipped = editorLines.slice(-height);
 		const pad = Math.max(0, height - clipped.length);
 		return [...new Array(pad).fill(" ".repeat(width)), ...clipped.map((l) => fitLine(l, width))];
+	}
+
+	/** Pick what fills the content pane: edit modal > notes list > diff. */
+	private renderContentLines(entry: FileEntry | null, width: number, height: number): string[] {
+		if (this.modal) return this.renderModalLines(width, height);
+		if (this.view === "notes") return this.renderNotesLines(width, height);
+		return this.renderDiffLines(entry, width, height);
+	}
+
+	private renderNotesLines(width: number, height: number): string[] {
+		const th = this.theme;
+		const comments = allDiffComments();
+		if (comments.length === 0) {
+			return this.fillVertical(
+				[th.fg("muted", "No review comments yet."), "", th.fg("dim", "Press n to go back, then c on a diff line to add one.")],
+				width,
+				height,
+			);
+		}
+		this.notesCursor = Math.max(0, Math.min(comments.length - 1, this.notesCursor));
+		const out: string[] = [];
+		comments.forEach((comment, index) => {
+			const diffLines = diffLinesForPath(comment.path);
+			const loc = diffLineLocation(diffLines, comment.rawLineIndex);
+			const startNum = loc.line ?? comment.rawLineIndex + 1;
+			let lineLabel = `${startNum}`;
+			if (comment.endRawLineIndex !== undefined && comment.endRawLineIndex !== comment.rawLineIndex) {
+				const endLoc = diffLineLocation(diffLines, comment.endRawLineIndex);
+				lineLabel = `${startNum}-${endLoc.line ?? comment.endRawLineIndex + 1}`;
+			}
+			const selected = index === this.notesCursor;
+			const marker = selected ? th.fg("accent", "▸ ") : "  ";
+			out.push(fitLine(`${marker}${th.fg(selected ? "accent" : "muted", `${comment.path}:${lineLabel}`)}`, width));
+			const firstLine = (comment.text.split("\n")[0] ?? "").trim() || "(empty)";
+			const body = `    ${truncateToWidth(firstLine, Math.max(1, width - 6), "…", true)}`;
+			out.push(fitLine(th.fg(selected ? "muted" : "dim", body), width));
+		});
+		let start = 0;
+		if (out.length > height) {
+			start = Math.max(0, Math.min(this.notesCursor * 2 - Math.floor(height / 2), out.length - height));
+		}
+		return this.fillVertical(out.slice(start, start + height), width, height);
 	}
 
 	/** Force the next render to rebuild from latest status. Called from outside on auto-refresh. */
@@ -1109,12 +1168,138 @@ class StatusOverlay implements Component {
 		};
 	}
 
+	private openNotes(): void {
+		this.view = "notes";
+		this.focusedPane = "diff";
+		this.notesCursor = 0;
+		this.rangeAnchor = null;
+		this.requestRender();
+	}
+
+	private closeNotes(): void {
+		this.view = "diff";
+		this.requestRender();
+	}
+
+	private handleNotesInput(data: string): void {
+		const comments = allDiffComments();
+		if (matchesKey(data, "escape") || data === "n" || data === "N") {
+			this.closeNotes();
+			return;
+		}
+		if (matchesKey(data, FOCUS_OVERLAY_KEY)) {
+			this.releaseFocus();
+			return;
+		}
+		if (data === "q" || data === "Q") {
+			this.done();
+			return;
+		}
+		if (data === "s" || data === "S") {
+			this.onSubmitComments();
+			return;
+		}
+		if (comments.length === 0) return;
+		this.notesCursor = Math.max(0, Math.min(comments.length - 1, this.notesCursor));
+		if (matchesKey(data, "up") || data === "k") {
+			this.notesCursor = Math.max(0, this.notesCursor - 1);
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "down") || data === "j") {
+			this.notesCursor = Math.min(comments.length - 1, this.notesCursor + 1);
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "home") || data === "g") {
+			this.notesCursor = 0;
+			this.requestRender();
+			return;
+		}
+		if (matchesKey(data, "end") || data === "G") {
+			this.notesCursor = comments.length - 1;
+			this.requestRender();
+			return;
+		}
+		const current = comments[this.notesCursor];
+		if (!current) return;
+		if (matchesKey(data, "return")) {
+			this.jumpToComment(current);
+			return;
+		}
+		if (data === "e" || data === "E") {
+			this.openEditModal(current);
+			return;
+		}
+		if (data === "x" || data === "X") {
+			removeComment(current);
+			this.notify(`Removed comment from ${current.path}`, "info");
+			this.notesCursor = Math.max(0, Math.min(allDiffComments().length - 1, this.notesCursor));
+			this.requestRender();
+			return;
+		}
+	}
+
+	private jumpToComment(comment: DiffComment): void {
+		const entries = flatEntries();
+		const idx = entries.findIndex((entry) => entry.path === comment.path);
+		if (idx < 0) {
+			this.notify("That file is no longer in the diff", "warning");
+			return;
+		}
+		this.view = "diff";
+		this.cursor = idx;
+		this.focusedPane = "diff";
+		this.diffScroll = 0;
+		this.diffCursor = 0;
+		const rows = this.diffDisplayRows(entries[idx]!, this.diffPaneWidth);
+		const rowIdx = rows.findIndex((r) => r.rawLineIndex === comment.rawLineIndex);
+		if (rowIdx >= 0) this.diffCursor = rowIdx;
+		this.centerDiffCursor(rows.length, this.visibleHeight);
+		this.requestRender();
+	}
+
+	private openEditModal(comment: DiffComment): void {
+		const editor = new ExtensionEditorComponent(
+			this.tui,
+			this.kb,
+			`Edit comment on ${comment.path}`,
+			comment.text,
+			(value: string) => {
+				const text = value.trim();
+				this.modal = null;
+				if (text) {
+					updateComment(comment, text);
+					this.notify("Comment updated", "info");
+				} else {
+					removeComment(comment);
+					this.notify("Comment removed", "info");
+				}
+				this.notesCursor = Math.max(0, Math.min(allDiffComments().length - 1, this.notesCursor));
+				this.requestRender();
+			},
+			() => {
+				this.modal = null;
+				this.requestRender();
+			},
+		);
+		this.modal = {
+			editor,
+			target: { path: comment.path, rawLineIndex: comment.rawLineIndex, displayLine: 0, preview: "" },
+		};
+		this.requestRender();
+	}
+
 	handleInput(data: string): void {
 		// While the inline comment editor is open, route every key to it
 		// (Enter submits, Shift+Enter newline, Esc cancels, Ctrl+G external editor).
 		if (this.modal) {
 			this.modal.editor.handleInput(data);
 			this.requestRender();
+			return;
+		}
+		if (this.view === "notes") {
+			this.handleNotesInput(data);
 			return;
 		}
 		if (data === "[" || data === "]") {
@@ -1165,6 +1350,10 @@ class StatusOverlay implements Component {
 		}
 		if (data === "s" || data === "S") {
 			this.onSubmitComments();
+			return;
+		}
+		if (data === "n" || data === "N") {
+			this.openNotes();
 			return;
 		}
 		if (data === "r" || data === "R") {
@@ -1273,42 +1462,51 @@ class StatusOverlay implements Component {
 
 		if (showTree) {
 			const leftLabel = `${this.focusedPane === "tree" ? "▸" : " "} Files (${totalCount})`;
-			const rightLabel = `${this.focusedPane === "diff" ? "▸" : " "} ${currentEntry ? currentEntry.path : "Diff"}`;
+			const rightLabel =
+				this.view === "notes"
+					? `${this.focusedPane === "diff" ? "▸" : " "} Notes (${allDiffComments().length})`
+					: `${this.focusedPane === "diff" ? "▸" : " "} ${currentEntry ? currentEntry.path : "Diff"}`;
 			const leftTitle = th.fg(this.focusedPane === "tree" ? "accent" : "muted", this.focusedPane === "tree" ? th.bold(leftLabel) : leftLabel);
 			const rightTitle = th.fg(this.focusedPane === "diff" ? "accent" : "muted", this.focusedPane === "diff" ? th.bold(rightLabel) : rightLabel);
 			lines.push(row(fitLine(leftTitle, leftWidth) + separator + fitLine(rightTitle, rightWidth)));
 
 			const treeLines = this.renderTreeLines(entries, leftWidth, contentHeight);
-			const diffLines = this.modal
-				? this.renderModalLines(rightWidth, contentHeight)
-				: this.renderDiffLines(currentEntry, rightWidth, contentHeight);
+			const diffLines = this.renderContentLines(currentEntry, rightWidth, contentHeight);
 			for (let i = 0; i < contentHeight; i++) {
 				lines.push(row((treeLines[i] ?? " ".repeat(leftWidth)) + separator + (diffLines[i] ?? " ".repeat(rightWidth))));
 			}
 		} else {
-			const rightTitle = currentEntry ? th.fg("accent", th.bold(currentEntry.path)) : th.fg("muted", "Diff");
+			const rightTitle =
+				this.view === "notes"
+					? th.fg("accent", th.bold(`Notes (${allDiffComments().length})`))
+					: currentEntry
+						? th.fg("accent", th.bold(currentEntry.path))
+						: th.fg("muted", "Diff");
 			lines.push(row(rightTitle));
-			const diffOrModal = this.modal
-				? this.renderModalLines(innerW, contentHeight)
-				: this.renderDiffLines(currentEntry, innerW, contentHeight);
-			lines.push(...diffOrModal.map(row));
+			lines.push(...this.renderContentLines(currentEntry, innerW, contentHeight).map(row));
 		}
 
-		const diffInfo = this.diffScrollInfo(currentEntry, rightWidth);
-		const fileInfo = totalCount > 0 ? `file ${this.cursor + 1}/${totalCount}` : "0 files";
+		const diffInfo = this.view === "notes" ? "" : this.diffScrollInfo(currentEntry, rightWidth);
+		const notesCount = allDiffComments().length;
+		const fileInfo =
+			this.view === "notes"
+				? `${notesCount} comment${notesCount === 1 ? "" : "s"}`
+				: totalCount > 0
+					? `file ${this.cursor + 1}/${totalCount}`
+					: "0 files";
 		lines.push(row(th.fg("dim", ` ${fileInfo}${diffInfo ? ` • ${diffInfo}` : ""}`)));
-		const paneHelp =
-			this.focusedPane === "diff"
-				? " j/k line • space range • [/] hunks • } toggle diff • h/← files • PgUp/PgDn page • "
-				: " j/k files • enter diff • [/] hunks • } toggle diff • PgUp/PgDn diff • ";
-		lines.push(
-			row(
-				th.fg(
-					"dim",
-					paneHelp + "c comment • x remove comment • s submit comments • r refresh • " + FOCUS_OVERLAY_KEY + " unfocus • esc/q close",
-				),
-			),
-		);
+		let helpLine: string;
+		if (this.view === "notes") {
+			helpLine = " j/k move • enter jump • e edit • x delete • s submit • n/esc back • q close";
+		} else {
+			const paneHelp =
+				this.focusedPane === "diff"
+					? " j/k line • space range • [/] hunks • } toggle diff • h/← files • PgUp/PgDn page • "
+					: " j/k files • enter diff • [/] hunks • } toggle diff • PgUp/PgDn diff • ";
+			helpLine =
+				paneHelp + "c comment • x remove • s submit • n notes • r refresh • " + FOCUS_OVERLAY_KEY + " unfocus • esc/q close";
+		}
+		lines.push(row(th.fg("dim", helpLine)));
 		lines.push(bottom);
 
 		return lines;
