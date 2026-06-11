@@ -69,6 +69,8 @@ interface StatusModel {
 interface DiffComment {
 	path: string;
 	rawLineIndex: number;
+	/** When set (and > rawLineIndex), the comment spans [rawLineIndex..endRawLineIndex]. */
+	endRawLineIndex?: number;
 	text: string;
 	createdAt: number;
 }
@@ -76,7 +78,9 @@ interface DiffComment {
 interface DiffCommentTarget {
 	path: string;
 	rawLineIndex: number;
+	endRawLineIndex?: number;
 	displayLine: number;
+	displayLineEnd?: number;
 	preview: string;
 }
 
@@ -750,7 +754,11 @@ function removeLatestDiffComment(path: string, rawLineIndex: number): DiffCommen
 	const comments = state.comments.get(path);
 	if (!comments) return null;
 
-	const index = comments.findLastIndex((comment) => comment.rawLineIndex === rawLineIndex);
+	// Match any comment whose span contains the line, so a range comment can be
+	// removed from any line within it.
+	const index = comments.findLastIndex(
+		(comment) => rawLineIndex >= comment.rawLineIndex && rawLineIndex <= (comment.endRawLineIndex ?? comment.rawLineIndex),
+	);
 	if (index < 0) return null;
 
 	const [removed] = comments.splice(index, 1);
@@ -760,7 +768,10 @@ function removeLatestDiffComment(path: string, rawLineIndex: number): DiffCommen
 }
 
 function commentsForLine(path: string, rawLineIndex: number): DiffComment[] {
-	return (state.comments.get(path) ?? []).filter((comment) => comment.rawLineIndex === rawLineIndex);
+	// A comment renders once, at the END of its span.
+	return (state.comments.get(path) ?? []).filter(
+		(comment) => (comment.endRawLineIndex ?? comment.rawLineIndex) === rawLineIndex,
+	);
 }
 
 function allDiffComments(): DiffComment[] {
@@ -775,18 +786,19 @@ function diffLinesForPath(path: string): string[] {
 	return state.diffCache.get(path) ?? ["(diff unavailable)"];
 }
 
-function commentContext(lines: string[], rawLineIndex: number): string[] {
+function commentContext(lines: string[], rawLineIndex: number, endRawLineIndex?: number): string[] {
 	if (lines.length === 0) return ["(diff unavailable)"];
-	const lineIndex = Math.max(0, Math.min(rawLineIndex, lines.length - 1));
-	const hunkIndex = lines.findLastIndex((line, index) => index <= lineIndex && line.startsWith("@@"));
-	const start = Math.max(0, lineIndex - 3);
-	const end = Math.min(lines.length, lineIndex + 4);
+	const lo = Math.max(0, Math.min(rawLineIndex, lines.length - 1));
+	const hi = Math.max(lo, Math.min(endRawLineIndex ?? rawLineIndex, lines.length - 1));
+	const hunkIndex = lines.findLastIndex((line, index) => index <= lo && line.startsWith("@@"));
+	const start = Math.max(0, lo - 3);
+	const end = Math.min(lines.length, hi + 4);
 	const context: Array<{ index: number; line: string }> = [];
 	if (hunkIndex >= 0 && hunkIndex < start) context.push({ index: hunkIndex, line: lines[hunkIndex]! });
 	for (let index = start; index < end; index++) {
 		context.push({ index, line: lines[index]! });
 	}
-	return context.map(({ index, line }) => (index === lineIndex ? `>>> ${line}` : line));
+	return context.map(({ index, line }) => (index >= lo && index <= hi ? `>>> ${line}` : line));
 }
 
 interface DiffLineLocation {
@@ -840,10 +852,14 @@ function diffLineLocation(lines: string[], rawLineIndex: number): DiffLineLocati
 	return { line: null, side: "unknown" };
 }
 
-function commentTargetLabel(path: string, lines: string[], rawLineIndex: number): string {
+function commentTargetLabel(path: string, lines: string[], rawLineIndex: number, endRawLineIndex?: number): string {
 	const location = diffLineLocation(lines, rawLineIndex);
 	if (location.line === null) return `@${path}:diff-line-${rawLineIndex + 1}`;
 	const suffix = location.side === "old" ? " (deleted line)" : location.side === "hunk" ? " (hunk)" : "";
+	if (endRawLineIndex !== undefined && endRawLineIndex !== rawLineIndex) {
+		const endLoc = diffLineLocation(lines, endRawLineIndex);
+		if (endLoc.line !== null && endLoc.line !== location.line) return `@${path}:${location.line}-${endLoc.line}${suffix}`;
+	}
 	return `@${path}:${location.line}${suffix}`;
 }
 
@@ -860,8 +876,10 @@ function formatCommentsForPrompt(): string | null {
 		}
 		const diffLines = diffLinesForPath(comment.path);
 		const lineIndex = Math.max(0, Math.min(comment.rawLineIndex, diffLines.length - 1));
-		lines.push("", `### ${commentTargetLabel(comment.path, diffLines, lineIndex)}`);
-		lines.push("````diff", ...commentContext(diffLines, lineIndex), "````");
+		const endIndex =
+			comment.endRawLineIndex !== undefined ? Math.max(0, Math.min(comment.endRawLineIndex, diffLines.length - 1)) : undefined;
+		lines.push("", `### ${commentTargetLabel(comment.path, diffLines, lineIndex, endIndex)}`);
+		lines.push("````diff", ...commentContext(diffLines, lineIndex, endIndex), "````");
 		lines.push("", `Comment: ${comment.text}`);
 	});
 	return `${lines.join("\n").trimEnd()}\n---\n\n`;
@@ -909,6 +927,8 @@ class StatusOverlay implements Component {
 	private visibleHeight = 30;
 	/** When set, an inline multiline comment editor is open over the diff pane. */
 	private modal: { editor: ExtensionEditorComponent; target: DiffCommentTarget } | null = null;
+	/** When set (diff focus), the anchor display-row of an active multi-line range selection. */
+	private rangeAnchor: number | null = null;
 
 	// top border, header, divider, pane title, scroll info, hint, bottom border
 	private static readonly CHROME_ROWS = 7;
@@ -928,10 +948,14 @@ class StatusOverlay implements Component {
 
 	/** Open the inline multiline editor (reuses the prompt's own editor component). */
 	private openCommentModal(target: DiffCommentTarget): void {
+		const where =
+			target.displayLineEnd !== undefined && target.displayLineEnd !== target.displayLine
+				? `${target.displayLine + 1}-${target.displayLineEnd + 1}`
+				: `${target.displayLine + 1}`;
 		const editor = new ExtensionEditorComponent(
 			this.tui,
 			this.kb,
-			`Comment on ${target.path}:${target.displayLine + 1}`,
+			`Comment on ${target.path}:${where}`,
 			undefined,
 			(value: string) => this.saveComment(target, value),
 			() => this.closeModal("Comment cancelled"),
@@ -944,8 +968,15 @@ class StatusOverlay implements Component {
 	private saveComment(target: DiffCommentTarget, value: string): void {
 		const text = value.trim();
 		this.modal = null;
+		this.rangeAnchor = null;
 		if (text) {
-			addDiffComment({ path: target.path, rawLineIndex: target.rawLineIndex, text, createdAt: Date.now() });
+			addDiffComment({
+				path: target.path,
+				rawLineIndex: target.rawLineIndex,
+				endRawLineIndex: target.endRawLineIndex,
+				text,
+				createdAt: Date.now(),
+			});
 			this.notify(`Comment added to ${target.path}`, "info");
 		} else {
 			this.notify("Comment cancelled", "info");
@@ -955,6 +986,7 @@ class StatusOverlay implements Component {
 
 	private closeModal(msg?: string): void {
 		this.modal = null;
+		this.rangeAnchor = null;
 		if (msg) this.notify(msg, "info");
 		this.requestRender();
 	}
@@ -1000,6 +1032,7 @@ class StatusOverlay implements Component {
 		if (entries[this.cursor]?.path !== previousPath) {
 			this.diffScroll = 0;
 			this.diffCursor = 0;
+			this.rangeAnchor = null;
 		}
 	}
 
@@ -1025,6 +1058,7 @@ class StatusOverlay implements Component {
 		state.reviewMode = state.reviewMode === "working" ? "branch" : "working";
 		refreshStatus();
 		this.clampCursor();
+		this.rangeAnchor = null;
 		this.focusedPane = "tree";
 		this.treeScroll = 0;
 		this.diffScroll = 0;
@@ -1060,6 +1094,21 @@ class StatusOverlay implements Component {
 		this.clampDiffCursor(rows.length);
 		const row = rows[this.diffCursor];
 		if (!row) return null;
+		if (this.rangeAnchor !== null) {
+			const anchor = Math.max(0, Math.min(rows.length - 1, this.rangeAnchor));
+			const lo = Math.min(anchor, this.diffCursor);
+			const hi = Math.max(anchor, this.diffCursor);
+			const rawA = rows[lo]!.rawLineIndex;
+			const rawB = rows[hi]!.rawLineIndex;
+			return {
+				path: entry.path,
+				rawLineIndex: Math.min(rawA, rawB),
+				endRawLineIndex: Math.max(rawA, rawB),
+				displayLine: lo,
+				displayLineEnd: hi,
+				preview: truncateToWidth(stripAnsi(rows[lo]!.text).trim(), 80, "…", true),
+			};
+		}
 		return {
 			path: entry.path,
 			rawLineIndex: row.rawLineIndex,
@@ -1095,6 +1144,15 @@ class StatusOverlay implements Component {
 		// Esc / q close the overlay entirely.
 		if (matchesKey(data, "escape") || data === "q" || data === "Q") {
 			this.done();
+			return;
+		}
+		// Space toggles a multi-line range selection in the diff pane; move the
+		// cursor to extend it, then `c` to comment on the whole span.
+		if (data === " " || matchesKey(data, "space")) {
+			if (this.focusedPane === "diff") {
+				this.rangeAnchor = this.rangeAnchor === null ? this.diffCursor : null;
+				this.requestRender();
+			}
 			return;
 		}
 		if (data === "c" || data === "C") {
@@ -1249,7 +1307,7 @@ class StatusOverlay implements Component {
 		lines.push(row(th.fg("dim", ` ${fileInfo}${diffInfo ? ` • ${diffInfo}` : ""}`)));
 		const paneHelp =
 			this.focusedPane === "diff"
-				? " j/k line • [/] hunks • } toggle diff • h/← files • PgUp/PgDn page • "
+				? " j/k line • space range • [/] hunks • } toggle diff • h/← files • PgUp/PgDn page • "
 				: " j/k files • enter diff • [/] hunks • } toggle diff • PgUp/PgDn diff • ";
 		lines.push(
 			row(
@@ -1306,11 +1364,16 @@ class StatusOverlay implements Component {
 			this.ensureDiffCursorVisible(rows.length, height);
 		}
 
+		const rangeActive = this.focusedPane === "diff" && this.rangeAnchor !== null;
+		const rangeLo = rangeActive ? Math.min(this.rangeAnchor!, this.diffCursor) : -1;
+		const rangeHi = rangeActive ? Math.max(this.rangeAnchor!, this.diffCursor) : -1;
 		const visible: string[] = [];
 		for (let absoluteLine = this.diffScroll; absoluteLine < rows.length && visible.length < height; absoluteLine++) {
 			const diffRow = rows[absoluteLine]!;
 			const fitted = fitLine(diffRow.text, width);
-			visible.push(this.focusedPane === "diff" && absoluteLine === this.diffCursor ? this.highlightLine(fitted) : fitted);
+			if (this.focusedPane === "diff" && absoluteLine === this.diffCursor) visible.push(this.highlightLine(fitted));
+			else if (rangeActive && absoluteLine >= rangeLo && absoluteLine <= rangeHi) visible.push(this.rangeHighlightLine(fitted));
+			else visible.push(fitted);
 			if (diffRow.isLastForRawLine) {
 				for (const comment of commentsForLine(entry.path, diffRow.rawLineIndex)) {
 					for (const commentLine of this.renderCommentLines(comment, width)) {
@@ -1389,6 +1452,12 @@ class StatusOverlay implements Component {
 			UNDERLINE_OFF +
 			"\x1b[49m"
 		);
+	}
+
+	/** Subtle background for lines inside an active range selection (no cursor marker). */
+	private rangeHighlightLine(line: string): string {
+		const bg = this.theme.bg("selectedBg", "").replace(/\x1b\[49m$/, "");
+		return bg + line.replaceAll(RESET, `${RESET}${bg}`) + "\x1b[49m";
 	}
 
 	private clampDiffCursor(lineCount: number): void {
