@@ -41,7 +41,7 @@ ROLE_DIRS="${SUBAGENTS_ROLE_DIRS:-$HOME/.pi/agent/agents:$PWD/.pi/agents}"
 WIN_PREFIX="subagents"
 SENTINEL="@@DONE@@"
 DEFAULT_WAIT=120
-IDLE_POLLS=4   # consecutive unchanged polls before a subagent counts as idle
+IDLE_POLLS=6   # consecutive unchanged polls before a subagent counts as idle
 
 mkdir -p "$STATE_DIR"
 
@@ -215,10 +215,20 @@ detect_and_emit() { # id
 	cur=$(tmux capture-pane -p -t "$pane" 2>/dev/null | cksum)
 	if [ "$cur" != "$lhash" ]; then stable=0; saw=1; else stable=$((stable + 1)); fi
 	echo "$cur" >"$dir/lhash"; echo "$stable" >"$dir/stable"; echo "$saw" >"$dir/saw"
-	if [ "$stable" -ge "$IDLE_POLLS" ] && [ "$saw" = 1 ] && [ "$cur" != "$rphash" ]; then
-		echo "$cur" >"$dir/rphash"; echo 0 >"$dir/saw"
-		printf '%s\t%s\t%s\t%s\n' "$id" "$role" "idle" "$(snapshot "$id" "")"
-		return 0
+	# Only an INLINE answer counts as an idle event: no result file was written,
+	# the pane has gone quiet, and it shows substantive (non-banner) content.
+	if [ "$stable" -ge "$IDLE_POLLS" ] && [ "$saw" = 1 ] && [ "$cur" != "$rphash" ] && [ ! -s "$dir/result.md" ]; then
+		local cap meaningful
+		cap=$(tmux capture-pane -p -t "$pane" 2>/dev/null | grep -v '^[[:space:]]*$')
+		meaningful=$(printf '%s\n' "$cap" | grep -vcE '^[[:space:]]*[][(){}<>=_~|*-]*[─│]*[[:space:]]*$|pi v[0-9]|Package Updates|Press ctrl|escape interrupt|Model scope|Pi can explain|Update Available|Changelog|Run pi update|^\[(Context|Themes|Skills|Prompts)\]')
+		if [ "${meaningful:-0}" -ge 3 ]; then
+			echo "$cur" >"$dir/rphash"; echo 0 >"$dir/saw"
+			local n out; n=$(cat "$dir/revent" 2>/dev/null || echo 0); n=$((n + 1)); echo "$n" >"$dir/revent"
+			mkdir -p "$dir/reports"; out="$dir/reports/$n.md"
+			printf '%s\n' "$cap" | tail -40 >"$out"
+			printf '%s\t%s\t%s\t%s\n' "$id" "$role" "idle" "$out"
+			return 0
+		fi
 	fi
 	return 1
 }
