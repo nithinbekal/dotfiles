@@ -76,6 +76,35 @@ const findTmuxBin = (): string => {
 	return tmuxBinCache;
 };
 
+/** True when you're currently looking at the pi pane, so a notification would
+ *  just be noise. "Watching" means: Ghostty is the frontmost macOS app AND
+ *  pi's tmux pane is the active pane of the active window AND some attached
+ *  client is currently viewing pi's session.
+ *
+ *  Fails open (returns false → notify) when anything can't be determined, so
+ *  you never silently miss a finished task. */
+const isWatchingPi = (): boolean => {
+	const frontAsn = run("lsappinfo", ["front"]);
+	if (!frontAsn) return false;
+	const frontName = run("lsappinfo", ["info", "-only", "name", frontAsn]) ?? "";
+	if (!/ghostty/i.test(frontName)) return false;
+
+	if (process.env.TMUX) {
+		const sock = process.env.TMUX.split(",")[0];
+		const pane = process.env.TMUX_PANE ?? "";
+		if (!sock || !pane) return false;
+		// Active pane AND active window within pi's own session.
+		if (run("tmux", ["-S", sock, "display-message", "-pt", pane, "#{pane_active}#{window_active}"]) !== "11") {
+			return false;
+		}
+		// Some attached client must actually be viewing pi's session right now.
+		const paneSession = run("tmux", ["-S", sock, "display-message", "-pt", pane, "#{session_name}"]);
+		const viewing = (run("tmux", ["-S", sock, "list-clients", "-F", "#{client_session}"]) ?? "").split("\n");
+		if (!paneSession || !viewing.includes(paneSession)) return false;
+	}
+	return true;
+};
+
 let hasTerminalNotifierCache: boolean | undefined;
 const hasTerminalNotifier = (): boolean => {
 	if (hasTerminalNotifierCache === undefined) {
@@ -294,7 +323,9 @@ export default function (pi: ExtensionAPI) {
 		const body = summarize(extractLastText(event.messages ?? []));
 		pendingTimer = setTimeout(() => {
 			pendingTimer = null;
-			if (enabled) notify(title, body);
+			// Skip if you're already looking at the pi pane — only ping when you've
+			// switched to another app, tmux window, or session.
+			if (enabled && !isWatchingPi()) notify(title, body);
 		}, DEBOUNCE_MS);
 	});
 
