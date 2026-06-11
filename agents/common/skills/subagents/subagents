@@ -85,6 +85,24 @@ current_session() {
 		|| tmux display-message -p '#{session_name}'
 }
 
+# Session scoping: every command only sees subagents in the CURRENT tmux session.
+_CUR_SID=""
+cur_sid() {
+	[ -n "$_CUR_SID" ] || _CUR_SID=$(tmux display-message -pt "${TMUX_PANE:-}" '#{session_id}' 2>/dev/null)
+	printf '%s' "$_CUR_SID"
+}
+pane_sid() { # pane_id -> session_id of that pane
+	tmux list-panes -a -F '#{pane_id} #{session_id}' 2>/dev/null | awk -v p="$1" '$1==p{print $2; exit}'
+}
+# True when subagent <id> belongs to the current session. Uses the stored sid
+# (so it still scopes correctly after the pane dies); falls back to the pane's
+# live location for subagents spawned before sid tagging existed.
+in_session() { # id
+	local sid; sid=$(cat "$STATE_DIR/$1/sid" 2>/dev/null)
+	[ -n "$sid" ] || sid=$(pane_sid "$(cat "$STATE_DIR/$1/pane" 2>/dev/null)")
+	[ -n "$sid" ] && [ "$sid" = "$(cur_sid)" ]
+}
+
 subagents_window() { # session -> window_id of the subagents window (or empty)
 	tmux list-windows -t "$1" -F '#{window_id} #{window_name}' 2>/dev/null \
 		| awk -v p="$WIN_PREFIX" '$2==p || index($2, p" (")==1 {print $1; exit}'
@@ -104,7 +122,12 @@ send_pane() { # pane_id message...
 	tmux send-keys -t "$pane" Enter
 }
 
-file_mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null || echo 0; }
+file_mtime() { # path -> mtime epoch; works with GNU coreutils or BSD stat
+	local m
+	m=$(stat -c %Y "$1" 2>/dev/null) || m=$(stat -f %m "$1" 2>/dev/null) || m=0
+	case "$m" in '' | *[!0-9]*) m=0 ;; esac
+	printf '%s\n' "$m"
+}
 
 next_id() {
 	local seq="$STATE_DIR/.seq" n
@@ -263,6 +286,7 @@ cmd_run() {
 	fi
 
 	echo "$pane" >"$dir/pane"
+	printf '%s\n' "$(cur_sid)" >"$dir/sid"
 	echo "$role" >"$dir/role"
 	echo "$task" >"$dir/task"
 	echo 0 >"$dir/rcount"
@@ -281,6 +305,7 @@ cmd_tell() {
 	local msg="$*"
 	[ -n "$id" ] && [ -n "$msg" ] || die "usage: subagents tell <id> <message...>"
 	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
+	in_session "$id" || die "subagent #$id is in another tmux session"
 	local pane; pane=$(cat "$dir/pane")
 	pane_alive "$pane" || die "subagent #$id is not running"
 	date +%s >"$dir/sent"
@@ -292,6 +317,7 @@ cmd_wait() {
 	local id="${1:-}"; local secs="${2:-$DEFAULT_WAIT}"
 	[ -n "$id" ] || die "usage: subagents wait <id> [seconds]"
 	[ -d "$STATE_DIR/$id" ] || die "no subagent #$id"
+	in_session "$id" || die "subagent #$id is in another tmux session"
 	local i line status path
 	for ((i = 0; i < secs; i += 2)); do
 		if line=$(detect_and_emit "$id") && [ -n "$line" ]; then
@@ -312,6 +338,7 @@ cmd_events() {
 	for dir in "$STATE_DIR"/*/; do
 		[ -d "$dir" ] || continue
 		id=$(basename "$dir"); [ -f "$dir/pane" ] || continue
+		in_session "$id" || continue
 		detect_and_emit "$id" || true
 	done
 }
@@ -335,6 +362,7 @@ cmd_status() {
 	for dir in "$STATE_DIR"/*/; do
 		[ -d "$dir" ] || continue
 		id=$(basename "$dir"); [ -f "$dir/pane" ] || continue
+		in_session "$id" || continue
 		pane=$(cat "$dir/pane"); role=$(cat "$dir/role" 2>/dev/null)
 		if ! pane_alive "$pane"; then
 			st="exited"
@@ -352,6 +380,7 @@ cmd_peek() {
 	local id="${1:-}"; local lines="${2:-40}"
 	[ -n "$id" ] || die "usage: subagents peek <id> [lines]"
 	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
+	in_session "$id" || die "subagent #$id is in another tmux session"
 	local pane; pane=$(cat "$dir/pane")
 	pane_alive "$pane" || { echo "[subagent #$id not running]"; return 0; }
 	tmux capture-pane -p -t "$pane" | grep -v '^[[:space:]]*$' | tail -"$lines"
@@ -363,6 +392,7 @@ cmd_ls() {
 		[ -d "$dir" ] || continue
 		id=$(basename "$dir")
 		[ -f "$dir/pane" ] || continue
+		in_session "$id" || continue
 		pane=$(cat "$dir/pane")
 		role=$(cat "$dir/role" 2>/dev/null)
 		if pane_alive "$pane"; then st="alive"; else st="dead"; fi
@@ -382,6 +412,7 @@ cmd_stop() {
 			[ -d "$dir" ] || continue
 			id=$(basename "$dir")
 			[ -f "$dir/pane" ] || continue
+			in_session "$id" || continue
 			pane=$(cat "$dir/pane")
 			tmux kill-pane -t "$pane" 2>/dev/null || true
 			rm -rf "$dir"
@@ -389,6 +420,7 @@ cmd_stop() {
 		done
 	else
 		local dir="$STATE_DIR/$target"; [ -d "$dir" ] || die "no subagent #$target"
+		in_session "$target" || die "subagent #$target is in another tmux session"
 		local pane; pane=$(cat "$dir/pane")
 		tmux kill-pane -t "$pane" 2>/dev/null || true
 		rm -rf "$dir"

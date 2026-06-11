@@ -108,6 +108,9 @@ or it times out:
 
 ## Notes
 
+- **Session-scoped:** every command (and the watcher extension) only sees and
+  acts on subagents in the *current* tmux session. Subagents in other sessions
+  are invisible and protected — `stop --all` never reaches them.
 - Requires tmux. Subagents run with built-in tools only (read, bash, edit, write,
   grep, find, ls), so roles that depend on external/MCP tools won't have them.
 - A role's declared model is used as-is. In an environment with multiple model
