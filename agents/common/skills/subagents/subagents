@@ -175,13 +175,24 @@ snapshot() { # id source-file-or-empty
 	echo "$out"
 }
 
-# Detect a NEW completion for one subagent. On a new event, advance its markers
-# and print a TSV line: "<id>\t<role>\t<status>\t<reportPath>" (status = done |
-# idle | exited), returning 0. Otherwise print nothing and return 1.
-# Used on-demand by `reap`/`events` and in a loop by `wait`.
+# Detect a NEW completion for one subagent and print a TSV line:
+#   "<id>\t<role>\t<status>\t<reportPath>"   (status = done | idle | exited)
+# Returns 0 when an event was emitted, else 1. Idempotent: a given report is
+# emitted once (keyed on the result file's content hash). A per-subagent lock
+# serialises concurrent pollers (watcher extension + a manual `wait`) so the
+# same completion can't be double-emitted.
 detect_and_emit() { # id
 	local id="$1" dir="$STATE_DIR/$id"
 	[ -d "$dir" ] && [ -f "$dir/pane" ] || return 1
+	mkdir "$dir/.lock" 2>/dev/null || return 1   # another poller is mid-detect
+	local rc=1
+	_emit_for "$id" && rc=0
+	rmdir "$dir/.lock" 2>/dev/null
+	return "$rc"
+}
+
+_emit_for() { # id  (runs holding $dir/.lock)
+	local id="$1" dir="$STATE_DIR/$id"
 	local pane role; pane=$(cat "$dir/pane"); role=$(cat "$dir/role" 2>/dev/null)
 
 	if ! pane_alive "$pane"; then
@@ -191,18 +202,19 @@ detect_and_emit() { # id
 		return 0
 	fi
 
-	# clean completion: a new sentinel printed, or result.md freshly written
-	local rcount rmtime count mtime
-	rcount=$(cat "$dir/rcount" 2>/dev/null || echo 0)
-	rmtime=$(cat "$dir/rmtime" 2>/dev/null || echo 0)
-	count=$(tmux capture-pane -p -S - -t "$pane" 2>/dev/null | grep -c -- "$SENTINEL"); count=${count:-0}
-	mtime=$(file_mtime "$dir/result.md")
-	if [ "$count" -gt "$rcount" ] || { [ -s "$dir/result.md" ] && [ "$mtime" -gt "$rmtime" ]; }; then
-		echo "$count" >"$dir/rcount"; echo "$mtime" >"$dir/rmtime"
-		echo 0 >"$dir/stable"; echo 0 >"$dir/saw"
-		tmux capture-pane -p -t "$pane" 2>/dev/null | cksum >"$dir/rphash"
-		printf '%s\t%s\t%s\t%s\n' "$id" "$role" "done" "$(snapshot "$id" "$dir/result.md")"
-		return 0
+	# done: result file holds content we haven't reported yet (keyed on content
+	# hash, so re-renders / repeated polls never re-emit the same report)
+	if [ -s "$dir/result.md" ]; then
+		local rhash curhash
+		rhash=$(cat "$dir/rhash" 2>/dev/null || echo "")
+		curhash=$(cksum <"$dir/result.md" 2>/dev/null)
+		if [ "$curhash" != "$rhash" ]; then
+			printf '%s' "$curhash" >"$dir/rhash"
+			echo 0 >"$dir/stable"; echo 0 >"$dir/saw"
+			tmux capture-pane -p -t "$pane" 2>/dev/null | cksum >"$dir/rphash"
+			printf '%s\t%s\t%s\t%s\n' "$id" "$role" "done" "$(snapshot "$id" "$dir/result.md")"
+			return 0
+		fi
 	fi
 
 	# idle fallback (stateful across calls): answered inline / waiting. Only fires
