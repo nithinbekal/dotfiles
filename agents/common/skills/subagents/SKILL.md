@@ -34,13 +34,25 @@ brevity; use the full path to the script in this directory.
 
 ```bash
 subagents roles                  # list available roles (and their models)
-subagents run  <role> "<task>"   # start a subagent, hand it the task; prints its id
-subagents wait <id> [seconds]    # block until it finishes the current task; prints its report
+subagents run [-m MODEL] [--effort LEVEL] <role> "<task>"   # start a subagent; -m overrides the role's model
+subagents wait <id> [seconds]    # wait for it to finish (returns early on completion/idle); prints its report
 subagents tell <id> "<message>"  # send a follow-up: answer a question, steer, or nudge
 subagents peek <id> [lines]      # show the tail of its pane (watch it work)
 subagents ls                     # list active subagents
 subagents stop <id|--all>        # shut a subagent (or all) down (window closes when empty)
 ```
+
+## Choosing a model
+
+A role may pin a default model (kept where the choice is deliberate, e.g. a
+cross-family critic). Otherwise pick per task with `-m`, sized to complexity:
+
+- trivial / mechanical (list files, simple edits) → a small fast model (e.g. haiku)
+- standard work (most recon, implementation, review) → a mid model (e.g. sonnet)
+- hard reasoning / careful review / adversarial critique → a top model (e.g. opus, gpt-5.x)
+
+Use provider-qualified ids (e.g. `anthropic/claude-sonnet-4-6`) to avoid an
+ambiguous-model error. `--effort` sets the thinking level (off..xhigh) for harder tasks.
 
 ## Workflow
 
@@ -53,6 +65,20 @@ subagents stop <id|--all>        # shut a subagent (or all) down (window closes 
    reuse one for follow-on work rather than spawning a fresh one).
 
 Run several in parallel by issuing multiple `subagents run`s, then `wait` each.
+
+## Responsiveness (how often to check)
+
+`subagents wait` polls every couple seconds and returns as soon as the subagent
+finishes OR goes idle — including when it hits a blocker, since the protocol makes
+it surface the blocker and stop. A single `wait` blocks for at most ~2 min, then
+returns "still working" so you (or the human) can step in; call it again to keep
+waiting, or pass a longer timeout: `subagents wait <id> 600`.
+
+The lead acts one step at a time, so a subagent only gets an answer when you next
+`wait`/`peek`. For work you want to stay on top of, `run` then `wait` (responsive
+within seconds). If you fire several and check only occasionally, expect a blocked
+subagent to wait until your next check — subagents are told to work autonomously
+and stop only for true blockers, so this mostly costs latency, not throughput.
 
 ## Handling stalls
 

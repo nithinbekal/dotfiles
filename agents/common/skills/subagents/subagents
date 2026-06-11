@@ -18,7 +18,11 @@
 # (colon-separated), else ~/.pi/agent/agents then ./.pi/agents.
 #
 # Usage:
-#   subagents run  <role> <task...>     Start a subagent from a role, give it the task. Prints its id.
+#   subagents run [-m MODEL] [--effort LEVEL] <role> <task...>
+#                                       Start a subagent from a role, give it the task. Prints its id.
+#                                       -m/--model overrides the role's model (use a provider-qualified
+#                                       id, e.g. anthropic/claude-sonnet-4-6). --effort sets the
+#                                       thinking level (off|minimal|low|medium|high|xhigh).
 #   subagents tell <id> <message...>    Send a follow-up message to a subagent.
 #   subagents wait <id> [seconds]       Block until it finishes its task; print its report.
 #   subagents peek <id> [lines]         Show the tail of a subagent's pane (watch it work).
@@ -33,7 +37,7 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/subagents"
 ROLE_DIRS="${SUBAGENTS_ROLE_DIRS:-$HOME/.pi/agent/agents:$PWD/.pi/agents}"
 WIN_PREFIX="subagents"
 SENTINEL="@@DONE@@"
-DEFAULT_WAIT=600
+DEFAULT_WAIT=120
 
 mkdir -p "$STATE_DIR"
 
@@ -131,9 +135,19 @@ EOF
 # ---- commands -------------------------------------------------------------
 
 cmd_run() {
+	local model_override="" effort_override=""
+	while [ $# -gt 0 ]; do
+		case "$1" in
+			-m|--model) model_override="${2:-}"; shift 2 || die "-m needs a value" ;;
+			--effort) effort_override="${2:-}"; shift 2 || die "--effort needs a value" ;;
+			--) shift; break ;;
+			-*) die "unknown option '$1'" ;;
+			*) break ;;
+		esac
+	done
 	local role="${1:-}"; shift || true
 	local task="$*"
-	[ -n "$role" ] && [ -n "$task" ] || die "usage: subagents run <role> <task...>"
+	[ -n "$role" ] && [ -n "$task" ] || die "usage: subagents run [-m MODEL] [--effort LEVEL] <role> <task...>"
 	in_tmux || die "subagents requires tmux"
 
 	local rf; rf=$(role_file "$role") || die "role '$role' not found (try: subagents roles)"
@@ -147,10 +161,13 @@ cmd_run() {
 	role_body "$rf" >"$dir/role.md"
 	write_protocol "$result" >"$dir/protocol.md"
 
-	local model tools modelflag="" toolsflag=""
+	local model tools modelflag="" toolsflag="" thinkflag=""
+	# model precedence: -m flag > role frontmatter > launcher default
 	model=$(fm_get "$rf" model)
+	[ -n "$model_override" ] && model="$model_override"
 	tools=$(fm_get "$rf" tools)
 	[ -n "$model" ] && [ "$model" != "inherit" ] && modelflag="--model $model"
+	[ -n "$effort_override" ] && thinkflag="--thinking $effort_override"
 	if [ -n "$tools" ]; then
 		# always allow `write` so the subagent can produce its report file
 		toolsflag="--tools $(normalize_tools "$tools"),write"
@@ -164,6 +181,7 @@ cmd_run() {
 
 	local picmd="cd $q_pwd && exec $PI_CMD --no-extensions --no-skills --no-prompt-templates --no-session"
 	[ -n "$modelflag" ] && picmd="$picmd $modelflag"
+	[ -n "$thinkflag" ] && picmd="$picmd $thinkflag"
 	[ -n "$toolsflag" ] && picmd="$picmd $toolsflag"
 	picmd="$picmd --append-system-prompt $q_role --append-system-prompt $q_proto $q_task"
 
@@ -183,7 +201,7 @@ cmd_run() {
 	date +%s >"$dir/sent"
 	tmux select-pane -t "$pane" -T "subagent#$id $role" 2>/dev/null || true
 
-	echo "started subagent #$id ($role) — pane $pane, model ${model:-inherited}"
+	echo "started subagent #$id ($role) — pane $pane, model ${model:-inherited}${effort_override:+, effort $effort_override}"
 	echo "  watch:   subagents peek $id"
 	echo "  answer:  subagents tell $id <message>"
 	echo "  collect: subagents wait $id"
