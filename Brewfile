@@ -5,6 +5,7 @@ brew "gh"
 brew "mise"
 brew "neovim"
 brew "ripgrep"
+brew "terminal-notifier" # clickable desktop notifications from the pi notify extension
 brew "tmux"
 brew "tree-sitter"
 brew "tree-sitter-cli"

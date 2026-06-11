@@ -170,6 +170,7 @@ current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
 ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
 ln -sf ~/dotfiles/agents/pi/extensions/compact-tool-rendering.ts ~/.pi/agent/extensions/compact-tool-rendering.ts
+ln -sf ~/dotfiles/agents/pi/extensions/notify.ts ~/.pi/agent/extensions/notify.ts
 [ ! -L ~/.pi/agent/extensions/diff-panel ] || rm ~/.pi/agent/extensions/diff-panel
 ln -sfn ~/dotfiles/agents/pi/extensions/self-review ~/.pi/agent/extensions/self-review
 ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.pi/agent/prompts/pr.md
