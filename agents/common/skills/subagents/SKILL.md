@@ -6,8 +6,9 @@ description: Delegate a complex or separable task to a focused subagent running 
 # Subagents
 
 Run focused subagents in a dedicated tmux window and talk to them. Each subagent
-is an isolated `pi` instance in its own pane of a window named `subagents (N)`.
-You hand it a task, watch it, send follow-ups, and collect a report.
+is an isolated `pi` instance in its own pane of a window named `subagents`.
+You hand it a task, watch it, send follow-ups, and collect a report. Members are
+told apart by their pane titles (`subagent#<id> <role>`), not the window name.
 
 This is for **handoff with a channel back**: unlike a one-shot run, you can
 answer a subagent's questions, steer it, or unblock it mid-task.
@@ -38,7 +39,7 @@ subagents wait <id> [seconds]    # block until it finishes the current task; pri
 subagents tell <id> "<message>"  # send a follow-up: answer a question, steer, or nudge
 subagents peek <id> [lines]      # show the tail of its pane (watch it work)
 subagents ls                     # list active subagents
-subagents stop <id|--all>        # shut a subagent (or all) down; window renames/closes
+subagents stop <id|--all>        # shut a subagent (or all) down (window closes when empty)
 ```
 
 ## Workflow
