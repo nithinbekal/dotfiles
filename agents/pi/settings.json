@@ -1,8 +1,0 @@
-{
-  "$schema": "https://raw.githubusercontent.com/badlogic/pi-mono/main/packages/coding-agent/pi-settings-schema.json",
-  "theme": "moonlight",
-  "defaultThinkingLevel": "medium",
-  "lastChangelogVersion": "0.75.5",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5"
-}

@@ -169,6 +169,7 @@ ln -sf ~/dotfiles/agents/common/commands/pr-address-reviews.md ~/.claude/command
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
 ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
+ln -sf ~/dotfiles/agents/pi/extensions/turn-timestamps.ts ~/.pi/agent/extensions/turn-timestamps.ts
 ln -sf ~/dotfiles/agents/pi/extensions/compact-tool-rendering.ts ~/.pi/agent/extensions/compact-tool-rendering.ts
 ln -sf ~/dotfiles/agents/pi/extensions/notify.ts ~/.pi/agent/extensions/notify.ts
 ln -sf ~/dotfiles/agents/pi/extensions/subagents-watch.ts ~/.pi/agent/extensions/subagents-watch.ts
@@ -180,9 +181,9 @@ ln -sf ~/dotfiles/agents/common/commands/push-commit.md ~/.pi/agent/prompts/push
 ln -sf ~/dotfiles/agents/common/commands/issue-implement.md ~/.pi/agent/prompts/issue-implement.md
 ln -sf ~/dotfiles/agents/common/commands/issue-investigate.md ~/.pi/agent/prompts/issue-investigate.md
 ln -sf ~/dotfiles/agents/common/commands/pr-address-reviews.md ~/.pi/agent/prompts/pr-address-reviews.md
-ln -sf ~/dotfiles/agents/pi/settings.json ~/.pi/agent/settings.json
 ln -sf ~/dotfiles/agents/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
 ln -sf ~/dotfiles/agents/pi/themes/moonlight.json ~/.pi/agent/themes/moonlight.json
+ln -sf ~/dotfiles/agents/pi/themes/dark-black-input.json ~/.pi/agent/themes/dark-black-input.json
 
 current_status "Setting up common agent skills"
 mkdir -p ~/.agents/skills ~/.claude/skills ~/.pi/agent/skills
