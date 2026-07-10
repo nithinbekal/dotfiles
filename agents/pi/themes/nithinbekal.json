@@ -1,6 +1,6 @@
 {
 	"$schema": "https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
-	"name": "dark-black-input",
+	"name": "nithinbekal",
 	"vars": {
 		"cyan": "#00d7ff",
 		"blue": "#5f87ff",

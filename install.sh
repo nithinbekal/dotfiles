@@ -183,7 +183,7 @@ ln -sf ~/dotfiles/agents/common/commands/issue-investigate.md ~/.pi/agent/prompt
 ln -sf ~/dotfiles/agents/common/commands/pr-address-reviews.md ~/.pi/agent/prompts/pr-address-reviews.md
 ln -sf ~/dotfiles/agents/pi/themes/nightowl.json ~/.pi/agent/themes/nightowl.json
 ln -sf ~/dotfiles/agents/pi/themes/moonlight.json ~/.pi/agent/themes/moonlight.json
-ln -sf ~/dotfiles/agents/pi/themes/dark-black-input.json ~/.pi/agent/themes/dark-black-input.json
+ln -sf ~/dotfiles/agents/pi/themes/nithinbekal.json ~/.pi/agent/themes/nithinbekal.json
 
 current_status "Setting up common agent skills"
 mkdir -p ~/.agents/skills ~/.claude/skills ~/.pi/agent/skills
