@@ -3,16 +3,20 @@
  *
  * Replaces the normal footer with a compact status bar embedded into the
  * prompt editor's top border:
- *   ╭─ π  model · thinking  cwd  git  ctx  cost ─ session ─╮
+ *   ─ π  model · thinking  folder  worktree  git  ctx  cost ─ session ─
  *
  * Pi's public extension API only exposes custom footers, so this extension uses
  * a small, scoped prototype patch on the built-in CustomEditor to swap its top
  * border for the status bar. The footer itself renders no lines so the old
- * duplicated footer disappears.
+ * duplicated footer disappears. The editor rows are also filled with the
+ * theme's user-message background so the prompt, including its border rows,
+ * reads as one dark panel.
  */
 
+import { basename, resolve } from "node:path";
 import type { AssistantMessage } from "@earendil-works/pi-ai";
 import {
+	AssistantMessageComponent,
 	CustomEditor,
 	type ExtensionAPI,
 	type ExtensionContext,
@@ -22,7 +26,10 @@ import {
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 
 const PATCHED = Symbol.for("nithin.pi.ompStatusLine.patched");
+const THINKING_BLOCK_PATCHED = Symbol.for("nithin.pi.ompStatusLine.thinkingBlockPatched");
 const STATE = Symbol.for("nithin.pi.ompStatusLine.state");
+
+let capturedTheme: Theme | undefined;
 
 type RenderStatusLine = (width: number) => string;
 
@@ -31,8 +38,9 @@ type StatusLineState = {
 	requestRender?: () => void;
 };
 
-const STATUS_BG = "\x1b[48;2;18;18;24m";
-const STATUS_FG = "\x1b[38;2;18;18;24m";
+// A continuous muted teal strip groups the status and complements the theme accent.
+const STATUS_BG = "\x1b[48;2;32;56;59m";
+const ACTIVITY_FG = "\x1b[38;2;255;158;100m";
 const RESET_BG = "\x1b[49m";
 const RESET_FG = "\x1b[39m";
 
@@ -40,25 +48,36 @@ const icons = {
 	pi: "π",
 	model: "",
 	folder: "",
+	worktree: "wt",
 	branch: "",
 	context: "",
 	auto: "🪄",
 	fast: "⚡",
+	thinking: "󰧑",
 	separator: "",
-	end: "",
 };
 
 export default function (pi: ExtensionAPI) {
 	let isStreaming = false;
+	let isThinking = false;
 
 	patchEditorTopBorder();
+	patchHiddenThinkingBlocks();
 
 	pi.on("session_start", async (_event, ctx) => {
 		isStreaming = false;
+		isThinking = false;
+		if (ctx.mode === "tui") {
+			capturedTheme = ctx.ui.theme;
+			ctx.ui.setHiddenThinkingLabel("");
+			ctx.ui.setWorkingVisible(false);
+		}
+		const worktree = await getLinkedWorktreeName(pi, ctx.cwd);
 
 		ctx.ui.setFooter((tui, theme, footerData) => {
 			const state = getState();
-			const render: RenderStatusLine = (width) => buildStatusLine(width, pi, ctx, footerData, theme, isStreaming);
+			const render: RenderStatusLine = (width) =>
+				buildStatusLine(width, pi, ctx, footerData, theme, isStreaming, isThinking, worktree);
 			state.render = render;
 			state.requestRender = () => tui.requestRender();
 
@@ -84,11 +103,24 @@ export default function (pi: ExtensionAPI) {
 
 	pi.on("turn_start", async () => {
 		isStreaming = true;
+		isThinking = false;
 		getState().requestRender?.();
+	});
+
+	pi.on("message_update", async (event) => {
+		const eventType = event.assistantMessageEvent.type;
+		if (eventType === "thinking_start") {
+			isThinking = true;
+			getState().requestRender?.();
+		} else if (eventType === "thinking_end") {
+			isThinking = false;
+			getState().requestRender?.();
+		}
 	});
 
 	pi.on("turn_end", async () => {
 		isStreaming = false;
+		isThinking = false;
 		getState().requestRender?.();
 	});
 
@@ -100,8 +132,13 @@ export default function (pi: ExtensionAPI) {
 		getState().requestRender?.();
 	});
 
-	pi.on("session_shutdown", async () => {
+	pi.on("session_shutdown", async (_event, ctx) => {
 		isStreaming = false;
+		isThinking = false;
+		if (ctx.mode === "tui") {
+			ctx.ui.setHiddenThinkingLabel();
+			ctx.ui.setWorkingVisible(true);
+		}
 	});
 }
 
@@ -109,6 +146,30 @@ function getState(): StatusLineState {
 	const global = globalThis as any;
 	global[STATE] ??= {};
 	return global[STATE] as StatusLineState;
+}
+
+function patchHiddenThinkingBlocks(): void {
+	const proto = AssistantMessageComponent.prototype as any;
+	if (proto[THINKING_BLOCK_PATCHED]) return;
+	proto[THINKING_BLOCK_PATCHED] = true;
+
+	const originalUpdateContent = proto.updateContent as (message: AssistantMessage) => void;
+	proto.updateContent = function (this: any, message: AssistantMessage): void {
+		if (this.hideThinkingBlock && this.hiddenThinkingLabel === "") {
+			const visibleMessage = {
+				...message,
+				content: message.content.filter((content) => content.type !== "thinking"),
+			};
+			originalUpdateContent.call(this, visibleMessage);
+
+			// Keep the original message so changing the setting can restore its
+			// thinking content; only the rendered copy is filtered.
+			this.lastMessage = message;
+			return;
+		}
+
+		originalUpdateContent.call(this, message);
+	};
 }
 
 function patchEditorTopBorder() {
@@ -123,10 +184,13 @@ function patchEditorTopBorder() {
 		const render = getState().render;
 		if (render && lines.length > 0) {
 			lines[0] = render(width);
+			lines.splice(1, 0, "");
 			removeBottomBorderLine(lines);
 			lines.push("");
 		}
-		return lines;
+
+		const theme = capturedTheme;
+		return theme ? lines.map((line) => applyEditorBackground(line, width, theme)) : lines;
 	};
 }
 
@@ -146,6 +210,25 @@ function removeBottomBorderLine(lines: string[]): void {
 	}
 }
 
+function applyEditorBackground(line: string, width: number, theme: Theme): string {
+	const backgroundStart = theme.bg("userMessageBg", "").replace(/\x1b\[49m$/, "");
+	const withBackground = applyBackgroundToLine(line, width, (text) => theme.bg("userMessageBg", text));
+
+	// The editor uses a full reset for its cursor highlight. Reapply the
+	// editor background afterward so the rest of that row stays filled.
+	return withBackground.replace(/\x1b\[0m|\x1b\[49m/g, (reset, offset) =>
+		offset + reset.length === withBackground.length ? reset : `${reset}${backgroundStart}`,
+	);
+}
+
+function applyBackgroundToLine(line: string, width: number, applyBackground: (text: string) => string): string {
+	if (width <= 0) return "";
+
+	const fittedLine = visibleWidth(line) > width ? truncateToWidth(line, width, "") : line;
+	const padding = " ".repeat(Math.max(0, width - visibleWidth(fittedLine)));
+	return applyBackground(`${fittedLine}${padding}`);
+}
+
 function isEditorBorderLine(line: string): boolean {
 	const plain = stripAnsi(line).trim();
 	const horizontal = "[─━═╌┄-]";
@@ -163,6 +246,8 @@ function buildStatusLine(
 	footerData: ReadonlyFooterDataProvider,
 	theme: Theme,
 	isStreaming: boolean,
+	isThinking: boolean,
+	worktree?: string,
 ): string {
 	const sep = theme.fg("dim", ` ${icons.separator} `);
 	const accent = (s: string) => theme.fg("accent", s);
@@ -170,11 +255,11 @@ function buildStatusLine(
 	const warning = (s: string) => theme.fg("warning", s);
 	const success = (s: string) => theme.fg("success", s);
 
-	const leftParts = [
-		accent(` ${icons.pi}`),
-		modelPart(pi, ctx, theme, isStreaming),
-		pathPart(ctx, theme),
-	];
+	const leftParts = [accent(icons.pi), modelPart(pi, ctx, theme), pathPart(ctx, theme)];
+
+	if (worktree) {
+		leftParts.push(worktreePart(worktree, theme));
+	}
 
 	const branch = footerData.getGitBranch();
 	if (branch) {
@@ -188,63 +273,92 @@ function buildStatusLine(
 		leftParts.push(warning(`$${formatCost(cost)}`));
 	}
 
+	if (isStreaming) {
+		leftParts.push(workingPart(isThinking, theme));
+	}
+
 	const left = leftParts.join(sep);
 	const sessionName = ctx.sessionManager.getSessionName?.();
 	const right = sessionName ? success(sessionName) : "";
 
-	return renderBorderLine(width, left, right, theme);
+	return renderStatusBar(width, left, right);
 }
 
-function renderBorderLine(width: number, left: string, right: string, theme: Theme): string {
-	const border = (s: string) => theme.fg("accent", s);
-	const prefix = border("╭─ ");
-	const suffix = border("─╮");
-	const rawRightGroup = right ? ` ${right} ` : "";
-	const endArrowWidth = left ? visibleWidth(icons.end) : 0;
-	const fixedWidth = visibleWidth(prefix) + visibleWidth(suffix) + visibleWidth(rawRightGroup) + endArrowWidth;
-	const minGap = right ? 1 : 0;
+function renderStatusBar(width: number, left: string, right: string): string {
+	if (width <= 0) return "";
+
+	const rightGroup = right ? ` ${right} ` : "";
+	const minGap = left && right ? 1 : 0;
 	const leftPaddingWidth = left ? 1 : 0;
-	const availableLeft = Math.max(0, width - fixedWidth - minGap - leftPaddingWidth);
+	const availableLeft = Math.max(0, width - visibleWidth(rightGroup) - minGap - leftPaddingWidth);
 	const fittedLeft = visibleWidth(left) > availableLeft ? truncateToWidth(left, availableLeft, "") : left;
+	const leftGroup = fittedLeft ? ` ${fittedLeft}` : "";
+	const used = visibleWidth(leftGroup) + visibleWidth(rightGroup);
+	const gap = Math.max(minGap, width - used);
+	const line = truncateToWidth(`${leftGroup}${" ".repeat(gap)}${rightGroup}`, width, "");
+	const padding = " ".repeat(Math.max(0, width - visibleWidth(line)));
 
-	const leftGroup = fittedLeft ? statusBg(`${fittedLeft} `) : "";
-	const endArrow = fittedLeft ? statusEndArrow() : "";
-	const rightGroup = rawRightGroup ? statusBg(rawRightGroup) : "";
-	const used = visibleWidth(prefix) + visibleWidth(leftGroup) + visibleWidth(endArrow) + visibleWidth(rightGroup) + visibleWidth(suffix);
-	const gap = Math.max(0, width - used);
-	const line = `${prefix}${leftGroup}${endArrow}${border("─".repeat(gap))}${rightGroup}${suffix}`;
-
-	return truncateToWidth(line, width, "");
+	return statusBg(`${line}${padding}`);
 }
 
 function statusBg(text: string): string {
 	return `${STATUS_BG}${text}${RESET_BG}`;
 }
 
-function statusEndArrow(): string {
-	return `${STATUS_FG}${icons.end}${RESET_FG}`;
-}
-
-function modelPart(pi: ExtensionAPI, ctx: ExtensionContext, theme: Theme, isStreaming: boolean): string {
+function modelPart(pi: ExtensionAPI, ctx: ExtensionContext, theme: Theme): string {
 	const modelId = ctx.model?.id || "no-model";
 	const modelLabel = prettyModel(ctx.model?.name || modelId);
 	const thinking = pi.getThinkingLevel();
 	const thinkingColor = thinkingLevelColor(theme, thinking);
-	const activityDot = isStreaming ? theme.fg("accent", "◉") : thinkingColor("●");
 	const fast = ctx.model?.reasoning ? ` ${theme.fg("accent", icons.fast)}` : "";
 
 	return [
 		theme.fg("accent", `${icons.model} ${modelLabel}`),
 		fast,
 		theme.fg("dim", " · "),
-		activityDot,
+		thinkingColor("●"),
 		" ",
 		thinkingColor(thinking),
 	].join("");
 }
 
+function workingPart(isThinking: boolean, theme: Theme): string {
+	const label = isThinking ? `${icons.thinking} Thinking` : "◉ Working...";
+	return `${ACTIVITY_FG}${theme.bold(label)}${RESET_FG}`;
+}
+
 function pathPart(ctx: ExtensionContext, theme: Theme): string {
-	return `${theme.fg("text", icons.folder)}${theme.fg("text", ` ${formatPath(ctx.cwd)}`)}`;
+	return `${theme.fg("text", icons.folder)}${theme.fg("text", ` ${basename(ctx.cwd) || ctx.cwd}`)}`;
+}
+
+function worktreePart(worktree: string, theme: Theme): string {
+	return `${theme.fg("dim", icons.worktree)}${theme.fg("text", ` ${worktree}`)}`;
+}
+
+async function getLinkedWorktreeName(pi: ExtensionAPI, cwd: string): Promise<string | undefined> {
+	const result = await pi.exec("git", ["rev-parse", "--show-toplevel", "--git-dir", "--git-common-dir"], { cwd })
+		.catch(() => undefined);
+	if (!result || result.code !== 0) return undefined;
+
+	const [topLevel, gitDir, commonDir] = result.stdout.trim().split("\n");
+	if (!topLevel || !gitDir || !commonDir) return undefined;
+
+	const gitDirPath = resolve(cwd, gitDir);
+	const commonDirPath = resolve(cwd, commonDir);
+	if (gitDirPath === commonDirPath) return undefined;
+
+	// Shopify's World checkout keeps every checkout at world/trees/<name>/src.
+	// Treat trees/root as the default checkout, and use the tree directory name
+	// for actual linked worktrees instead of displaying the unhelpful "src".
+	const treeDir = resolve(topLevel, "..");
+	const treesDir = resolve(treeDir, "..");
+	const worldDir = resolve(treesDir, "..");
+	if (basename(topLevel) === "src" && basename(treesDir) === "trees" && basename(worldDir) === "world") {
+		const treeName = basename(treeDir);
+		return treeName === "root" ? undefined : treeName;
+	}
+
+	return basename(topLevel) || undefined;
 }
 
 function contextPart(ctx: ExtensionContext, theme: Theme): string {
@@ -280,13 +394,6 @@ function fmt(n: number): string {
 	if (n >= 10_000) return `${Math.round(n / 1000)}k`;
 	if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
 	return `${n}`;
-}
-
-function formatPath(cwd: string): string {
-	const home = process.env.HOME;
-	if (home && cwd === home) return "~";
-	if (home && cwd.startsWith(`${home}/`)) return `~/${cwd.slice(home.length + 1)}`;
-	return cwd;
 }
 
 function prettyModel(id: string): string {
