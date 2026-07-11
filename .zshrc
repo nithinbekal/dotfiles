@@ -95,3 +95,6 @@ command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/nithin/.lmstudio/bin"
 # End of LM Studio CLI section
+
+# Added by Antigravity IDE
+export PATH="/Users/nithin/.antigravity-ide/antigravity-ide/bin:$PATH"
