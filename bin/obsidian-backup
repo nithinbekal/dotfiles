@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SOURCE="$HOME/Documents/Obsidian"
+SOURCE="$HOME/Documents/Obsidian/Main"
 DEST="$HOME/Documents/backups/obsidian"
 DATE=$(date +%Y-%m-%d)
 ZIPFILE="$DEST/$DATE.zip"

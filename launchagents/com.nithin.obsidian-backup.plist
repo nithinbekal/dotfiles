@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.nithin.obsidian-backup</string>
+    <string>com.nithin.obsidian-main-backup</string>
     <key>ProgramArguments</key>
     <array>
         <string>/Users/nithin/dotfiles/bin/obsidian-backup</string>
