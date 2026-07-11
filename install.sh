@@ -123,8 +123,8 @@ current_status "Installing languages via mise"
 mise install
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PNPM_HOME="$HOME/.local/share/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-mkdir -p "$PNPM_HOME"
+export PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
+mkdir -p "$PNPM_HOME/bin"
 
 current_status "Setting up pnpm"
 corepack enable

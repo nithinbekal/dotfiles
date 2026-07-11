@@ -31,7 +31,7 @@ export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"' # Set the defa
 export PATH=$HOME/dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PNPM_HOME=$HOME/.local/share/pnpm
-export PATH=$PNPM_HOME:$PATH
+export PATH=$PNPM_HOME/bin:$PATH
 
 # Aliases
 
