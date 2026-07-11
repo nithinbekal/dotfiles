@@ -146,7 +146,7 @@ current_status "Installing Codex"
 install_pnpm_global @openai/codex codex
 
 current_status "Installing Pi coding agent"
-install_pnpm_global @mariozechner/pi-coding-agent pi
+install_pnpm_global @earendil-works/pi-coding-agent pi
 
 current_status "Installing qmd"
 install_pnpm_global @tobilu/qmd qmd
