@@ -157,7 +157,10 @@ ln -sf ~/dotfiles/.config/irb/irbrc ~/.config/irb/irbrc
 
 current_status "Setting up Claude config"
 mkdir -p ~/.claude/commands
-ln -sf ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
+if [ -f ~/dotfiles/agents/claude/settings.json ]; then
+  [ ! -L ~/.claude/settings.json ] || rm ~/.claude/settings.json
+  cp -f ~/dotfiles/agents/claude/settings.json ~/.claude/settings.json
+fi
 ln -sf ~/dotfiles/agents/claude/statusline-command.sh ~/.claude/statusline-command.sh
 ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.claude/commands/pr.md
 ln -sf ~/dotfiles/agents/common/commands/commit.md ~/.claude/commands/commit.md
