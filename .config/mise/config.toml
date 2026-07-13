@@ -4,7 +4,7 @@ erlang = "latest"
 go = "latest"
 node = "24.2.0"
 ruby = "4.0.2"
-rust = "stable"
+rust = "1.94.1"
 uv = "latest"
 
 [settings]
