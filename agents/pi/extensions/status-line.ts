@@ -38,6 +38,8 @@ type StatusLineState = {
 	requestRender?: () => void;
 };
 
+type PrInfo = { number: string; url: string };
+
 // A continuous muted teal strip groups the status and complements the theme accent.
 const STATUS_BG = "\x1b[48;2;32;56;59m";
 const ACTIVITY_FG = "\x1b[38;2;255;158;100m";
@@ -77,12 +79,43 @@ export default function (pi: ExtensionAPI) {
 
 		ctx.ui.setFooter((tui, theme, footerData) => {
 			const state = getState();
+			let prInfo: PrInfo | undefined;
+
+			// Resolve the current branch's PR (number + web URL) via `gh pr view`.
+			// Skipped on main/master. Async + cached: refreshed only here and on
+			// branch change, then a re-render is requested when the result lands.
+			const refreshPrNumber = async () => {
+				const branch = footerData.getGitBranch();
+				if (!branch || branch === "main" || branch === "master") {
+					prInfo = undefined;
+					return;
+				}
+				const result = await pi
+					.exec("gh", ["pr", "view", "--json", "number,url"], { cwd: ctx.cwd })
+					.catch(() => undefined);
+				prInfo = undefined;
+				if (result && result.code === 0) {
+					try {
+						const parsed = JSON.parse(result.stdout);
+						if (parsed?.number != null && parsed?.url) {
+							prInfo = { number: String(parsed.number), url: String(parsed.url) };
+						}
+					} catch {}
+				}
+				state.requestRender?.();
+			};
+
 			const render: RenderStatusLine = (width) =>
-				buildStatusLine(width, pi, ctx, footerData, theme, isStreaming, isThinking, worktree);
+				buildStatusLine(width, pi, ctx, footerData, theme, isStreaming, isThinking, worktree, prInfo);
 			state.render = render;
 			state.requestRender = () => tui.requestRender();
 
-			const unsub = footerData.onBranchChange(() => tui.requestRender());
+			void refreshPrNumber();
+
+			const unsub = footerData.onBranchChange(() => {
+				void refreshPrNumber();
+				tui.requestRender();
+			});
 
 			return {
 				dispose() {
@@ -249,6 +282,7 @@ function buildStatusLine(
 	isStreaming: boolean,
 	isThinking: boolean,
 	worktree?: string,
+	prInfo?: PrInfo,
 ): string {
 	const sep = theme.fg("dim", ` ${icons.separator} `);
 	const accent = (s: string) => theme.fg("accent", s);
@@ -264,14 +298,11 @@ function buildStatusLine(
 
 	const branch = footerData.getGitBranch();
 	if (branch) {
-		leftParts.push(`${warning(icons.branch)}${text(` ${branch}`)}`);
-	}
-
-	leftParts.push(contextPart(ctx, theme));
-
-	const cost = totalCost(ctx);
-	if (cost > 0) {
-		leftParts.push(warning(`$${formatCost(cost)}`));
+		let branchPart = `${warning(icons.branch)}${text(` ${branch}`)}`;
+		if (prInfo && branch !== "main" && branch !== "master") {
+			branchPart += `${theme.fg("dim", " ")}${theme.fg("dim", hyperlink(`#${prInfo.number}`, prInfo.url))}`;
+		}
+		leftParts.push(branchPart);
 	}
 
 	const voice = voiceActivity(footerData);
@@ -281,9 +312,20 @@ function buildStatusLine(
 		leftParts.push(workingPart(isThinking, theme));
 	}
 
-	const left = leftParts.join(sep);
+	const rightParts = [contextPart(ctx, theme)];
+
+	const cost = totalCost(ctx);
+	if (cost > 0) {
+		rightParts.push(warning(`$${formatCost(cost)}`));
+	}
+
 	const sessionName = ctx.sessionManager.getSessionName?.();
-	const right = sessionName ? success(sessionName) : "";
+	if (sessionName) {
+		rightParts.push(success(sessionName));
+	}
+
+	const left = leftParts.join(sep);
+	const right = rightParts.join(sep);
 
 	return renderStatusBar(width, left, right);
 }
@@ -307,6 +349,14 @@ function renderStatusBar(width: number, left: string, right: string): string {
 
 function statusBg(text: string): string {
 	return `${STATUS_BG}${text}${RESET_BG}`;
+}
+
+// OSC 8 hyperlink. Terminals that support it (Ghostty, iTerm2) make `text`
+// command-clickable to open `url`; others render just the visible text.
+// pi-tui's visibleWidth/truncateToWidth strip OSC sequences, so this is safe
+// inside the status line's width math.
+function hyperlink(text: string, url: string): string {
+	return `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`;
 }
 
 function modelPart(pi: ExtensionAPI, ctx: ExtensionContext, theme: Theme): string {
