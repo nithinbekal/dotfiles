@@ -357,12 +357,17 @@ vim.diagnostic.config({
 })
 
 local function RenameFile()
-  local old_name = vim.fn.expand("%")
-  local new_name = vim.fn.input("New file name: ", vim.fn.expand("%"), "file")
-  if new_name ~= "" and new_name ~= old_name then
-    vim.cmd(":saveas " .. new_name)
-    vim.cmd(":silent !rm " .. old_name)
-    vim.cmd("redraw!")
+  local old_name = vim.fn.expand("%:p")
+  if old_name == "" then return end
+  local new_name = vim.fn.input("New file name: ", old_name, "file")
+  if new_name == "" or new_name == old_name then return end
+  new_name = vim.fn.expand(new_name)
+  -- Write to the new path and repoint the current buffer at it (same bufnr,
+  -- so undo history is preserved).
+  vim.cmd("saveas! " .. vim.fn.fnameescape(new_name))
+  local ok, err = os.remove(old_name)
+  if not ok then
+    vim.notify("Renamed buffer but failed to remove old file: " .. tostring(err), vim.log.levels.WARN)
   end
 end
 
