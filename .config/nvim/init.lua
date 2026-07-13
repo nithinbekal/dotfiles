@@ -16,9 +16,10 @@ vim.opt.foldenable = false
 
 vim.opt.grepprg = "rg --vimgrep"      -- Use ripgrep for file search
 vim.opt.laststatus = 2                -- Always show status line
+vim.opt.termguicolors = true          -- Enable 24-bit color (required by tokyonight; it sets this itself, but be explicit)
 vim.opt.list = true                   -- Show tabs and trailing whitespace
 vim.opt.listchars = "tab:>-,trail:·"  -- Set chars to show for tabs or trailing whitespace
-vim.opt.mouse = ""                    -- Disable mouse clicks but scrolling still works
+vim.opt.mouse = ""                    -- Disable mouse entirely (Neovim has no scroll-only mode)
 vim.opt.scrolloff = 10                -- Show next few lines when searching text
 vim.opt.shiftround = true             -- Indentation: When at 3 spaces, >> takes to 4, not 5
 vim.opt.shiftwidth = 2                -- Tab settings - Use 2 spaces for each indent level
@@ -419,7 +420,7 @@ end, { desc = "Open devdocs.io" })
 vim.keymap.set("n", "<leader>mv", RenameFile, { desc = "Rename file" })
 vim.keymap.set("n", "<leader>nv", ":e ~/dotfiles/.config/nvim/init.lua<cr>", { desc = "Edit nvim config" })
 vim.keymap.set("n", "<leader>o", ":only<cr>", { desc = "Only keep current pane" })
-vim.keymap.set("n", "<leader>q", "<C-w>c", { desc = "Close buffer" })
+vim.keymap.set("n", "<leader>q", "<C-w>c", { desc = "Close window" })
 vim.keymap.set("n", "<leader>rm", function()
   local path = vim.fn.expand("%:p")
   if path == "" then return end
