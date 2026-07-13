@@ -133,18 +133,6 @@ local plugins = {
   },
 
   {
-    "kassio/neoterm",
-    init = function() vim.g.neoterm_default_mod = "vertical" end,
-    lazy = false,
-    keys = {
-      { "<leader>tc", ":Tclear<cr>", desc = "Clear terminal" },
-      { "<leader>to", ":Ttoggle<cr>", desc = "Toggle terminal" },
-      { "<leader>tl", ":w<cr>:T dev test --include-branch-commits<cr>", desc = "Test local changes" },
-      { "<leader>ty", ":w<cr>:T bin/srb typecheck<cr>", desc = "Sorbet typecheck" },
-    },
-  },
-
-  {
     "lewis6991/gitsigns.nvim",
     opts = { signcolumn = false, numhl = true },
     event = { "CursorHold", "CursorHoldI" },
@@ -320,7 +308,12 @@ local plugins = {
 
   {
     "vim-test/vim-test",
-    init = function() vim.g["test#strategy"] = "neoterm" end,
+    init = function()
+      vim.g["test#strategy"] = "neovim_sticky"
+      vim.g["test#neovim#term_position"] = "botright vnew"
+      vim.g["test#neovim_sticky#kill_previous"] = 1
+      vim.g["test#neovim_sticky#reopen_window"] = 1
+    end,
     keys = {
       { "<leader>tf", ":w<cr>:TestFile<cr>", desc = "Test current file" },
       { "<leader>tn", ":w<cr>:TestNearest<cr>", desc = "Test current file" },
@@ -414,6 +407,64 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- Keymaps: misc
 vim.keymap.set({ "", "i" }, "<C-s>", "<esc>:w<cr>", { desc = "Save file" })
 vim.keymap.set("n", "<Esc>", ":nohlsearch<cr>", { desc = "Remove search highlight"})
+
+-- Persistent vertical terminal (replaces neoterm)
+local term = { bufnr = nil, job_id = nil }
+
+local function term_open()
+  vim.cmd("botright vnew")
+  vim.cmd("terminal")
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.bo[bufnr].bufhidden = "hide"
+  term.bufnr = bufnr
+  term.job_id = vim.b[bufnr].terminal_job_id
+  return bufnr
+end
+
+local function term_focus()
+  local bufnr = term.bufnr
+  if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+    local wins = vim.fn.win_findbuf(bufnr)
+    if #wins > 0 then
+      vim.api.nvim_set_current_win(wins[1])
+    else
+      vim.cmd("botright vnew")
+      vim.api.nvim_set_current_buf(bufnr)
+    end
+  else
+    term_open()
+  end
+end
+
+local function term_send(cmd)
+  term_focus()
+  if term.job_id then
+    vim.api.nvim_chan_send(term.job_id, cmd .. "\r")
+  end
+  vim.cmd("startinsert")
+end
+
+local function term_toggle()
+  local bufnr = term.bufnr
+  if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+    local wins = vim.fn.win_findbuf(bufnr)
+    if #wins > 0 then
+      for _, w in ipairs(wins) do
+        if #vim.api.nvim_list_wins() > 1 then
+          vim.api.nvim_win_close(w, false)
+        end
+      end
+      return
+    end
+  end
+  term_focus()
+end
+
+vim.keymap.set("n", "<leader>tc", function() term_send("clear") end, { desc = "Clear terminal" })
+vim.keymap.set("n", "<leader>to", term_toggle, { desc = "Toggle terminal" })
+vim.keymap.set("n", "<leader>tl", function() vim.cmd("w") term_send("dev test --include-branch-commits") end, { desc = "Test local changes" })
+vim.keymap.set("n", "<leader>ty", function() vim.cmd("w") term_send("bin/srb typecheck") end, { desc = "Sorbet typecheck" })
+
 vim.keymap.set("n", "<leader>dd", function()
   vim.fn.jobstart({ "open", "https://devdocs.io/#q=" .. vim.fn.expand("<cword>") })
 end, { desc = "Open devdocs.io" })
