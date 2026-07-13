@@ -415,6 +415,16 @@ vim.keymap.set("n", "<leader>mv", RenameFile, { desc = "Rename file" })
 vim.keymap.set("n", "<leader>nv", ":e ~/dotfiles/.config/nvim/init.lua<cr>", { desc = "Edit nvim config" })
 vim.keymap.set("n", "<leader>o", ":only<cr>", { desc = "Only keep current pane" })
 vim.keymap.set("n", "<leader>q", "<C-w>c", { desc = "Close buffer" })
-vim.keymap.set("n", "<leader>rm", ":!rm %", { desc = "Remove file" })
+vim.keymap.set("n", "<leader>rm", function()
+  local path = vim.fn.expand("%:p")
+  if path == "" then return end
+  if vim.fn.confirm("Delete file on disk?\n" .. path, "&Yes\n&No", 2) ~= 1 then return end
+  local ok, err = os.remove(path)
+  if not ok then
+    vim.notify("Failed to delete: " .. tostring(err), vim.log.levels.ERROR)
+    return
+  end
+  vim.cmd("bdelete!")
+end, { desc = "Remove file" })
 vim.keymap.set("n", "<leader>vv", ":vnew<cr>", { desc = "New vertical split" })
 vim.keymap.set("n", "glf", 'yaW<C-w><C-h>:e <C-r>"<cr>', { desc = "Open file in left split" })
