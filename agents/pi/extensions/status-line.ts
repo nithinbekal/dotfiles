@@ -41,6 +41,7 @@ type StatusLineState = {
 // A continuous muted teal strip groups the status and complements the theme accent.
 const STATUS_BG = "\x1b[48;2;32;56;59m";
 const ACTIVITY_FG = "\x1b[38;2;255;158;100m";
+const VOICE_FG = "\x1b[38;2;255;85;85m";
 const RESET_BG = "\x1b[49m";
 const RESET_FG = "\x1b[39m";
 
@@ -273,7 +274,10 @@ function buildStatusLine(
 		leftParts.push(warning(`$${formatCost(cost)}`));
 	}
 
-	if (isStreaming) {
+	const voice = voiceActivity(footerData);
+	if (voice) {
+		leftParts.push(voicePart(voice, theme));
+	} else if (isStreaming) {
 		leftParts.push(workingPart(isThinking, theme));
 	}
 
@@ -325,6 +329,34 @@ function modelPart(pi: ExtensionAPI, ctx: ExtensionContext, theme: Theme): strin
 function workingPart(isThinking: boolean, theme: Theme): string {
 	const label = isThinking ? `${icons.thinking} Thinking` : "◉ Working...";
 	return `${ACTIVITY_FG}${theme.bold(label)}${RESET_FG}`;
+}
+
+type VoiceState = { state: "recording" | "transcribing"; elapsed?: string };
+
+// The voice extension publishes its state via ctx.ui.setStatus("voice", ...).
+// We only surface the active phases (🔴 recording, ✍️ transcribing) here; the
+// idle "🎤" prompt is intentionally ignored so this slot stays quiet otherwise.
+function voiceActivity(footerData: ReadonlyFooterDataProvider): VoiceState | undefined {
+	const status = footerData.getExtensionStatuses().get("voice");
+	if (!status) return undefined;
+	if (status.includes("🔴")) {
+		const elapsed = status
+			.replace("🔴", "")
+			.replace("Recording...", "")
+			.replace(/\(.*\)/, "")
+			.trim();
+		return { state: "recording", elapsed: elapsed || undefined };
+	}
+	if (status.includes("✍")) return { state: "transcribing" };
+	return undefined;
+}
+
+function voicePart(voice: VoiceState, theme: Theme): string {
+	const label =
+		voice.state === "recording"
+			? `● REC${voice.elapsed ? ` ${voice.elapsed}` : ""}`
+			: "✎ Transcribing";
+	return `${VOICE_FG}${theme.bold(label)}${RESET_FG}`;
 }
 
 function pathPart(ctx: ExtensionContext, theme: Theme): string {
