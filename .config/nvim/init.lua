@@ -214,6 +214,8 @@ local plugins = {
         },
       })
 
+      vim.lsp.enable("lua_ls")
+
       vim.lsp.config("rust_analyzer", {})
       vim.lsp.enable("rust_analyzer")
     end,
