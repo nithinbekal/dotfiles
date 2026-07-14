@@ -298,6 +298,15 @@ local plugins = {
 
 
       vim.lsp.config("lua_ls", {
+        cmd = { "lua-language-server" },
+        filetypes = { "lua" },
+        root_dir = function(bufnr, on_dir)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+          local found = vim.fs.find({ ".luarc.json", ".git" }, { upward = true, path = vim.fs.dirname(bufname) })[1]
+          if found then
+            on_dir(vim.fs.dirname(found))
+          end
+        end,
         settings = {
           Lua = {
             workspace = {
@@ -315,7 +324,17 @@ local plugins = {
 
       vim.lsp.enable("lua_ls")
 
-      vim.lsp.config("rust_analyzer", {})
+      vim.lsp.config("rust_analyzer", {
+        cmd = { "rust-analyzer" },
+        filetypes = { "rust" },
+        root_dir = function(bufnr, on_dir)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+          local found = vim.fs.find({ "Cargo.toml", ".git" }, { upward = true, path = vim.fs.dirname(bufname) })[1]
+          if found then
+            on_dir(vim.fs.dirname(found))
+          end
+        end,
+      })
       vim.lsp.enable("rust_analyzer")
     end,
   },
