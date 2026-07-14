@@ -8,7 +8,7 @@ macos-non-native-fullscreen = true
 macos-option-as-alt = true
 macos-titlebar-style = tabs
 scrollback-limit = 100000
-theme = One Half Dark
+theme = Catppuccin Mocha
 window-colorspace = "display-p3"
 window-save-state = always
 
