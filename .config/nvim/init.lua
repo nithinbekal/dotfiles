@@ -344,6 +344,8 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+vim.lsp.inlay_hint.enable()
+
 vim.diagnostic.config({
   underline = { severity = { max = vim.diagnostic.severity.INFO } },
   virtual_text = { severity = { min = vim.diagnostic.severity.WARN } },
