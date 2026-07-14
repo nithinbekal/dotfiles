@@ -234,7 +234,8 @@ local plugins = {
     "nvim-treesitter/nvim-treesitter",
     branch = "main",
     build = ":TSUpdate",
-    init = function()
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
       local ensureInstalled = { "lua", "ruby", "rust", "vimdoc" }
       local alreadyInstalled = require("nvim-treesitter.config").get_installed()
       local parsersToInstall = vim.iter(ensureInstalled)
