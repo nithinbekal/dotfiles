@@ -56,54 +56,20 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-  "sapphire-project/vim-sapphire",
+  { "echasnovski/mini.pairs", event = "InsertEnter", opts = {} },
 
   {
-    "saghen/blink.cmp",
-    version = "*",
+    "folke/tokyonight.nvim",
+    priority = 1000,
     opts = {
-      completion = {
-        documentation = {
-          auto_show = true,
-          auto_show_delay_ms = 0,
-        },
-      },
-      keymap = {
-        preset = "default",
-        ["<CR>"] = { "accept", "fallback" },
-        ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
-        ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
-      },
-      sources = {
-        default = { "lsp", "path", "snippets", "copilot" },
-        providers = {
-          copilot = {
-            name = "copilot",
-            module = "blink-cmp-copilot",
-            score_offset = 100,
-            async = true,
-          },
-        },
-      },
-      enabled = function()
-        return vim.bo.filetype ~= "markdown"
+      on_highlights = function(hl, _)
+        hl.WinSeparator = { fg = "#3d59a1" }
       end,
     },
-    dependencies = {
-      {
-        "zbirenbaum/copilot.lua",
-        cmd = "Copilot",
-        event = "InsertEnter",
-        config = function()
-          require("copilot").setup({
-            copilot_node_command = vim.fn.exepath("node"),
-            suggestion = { enabled = false },
-            panel = { enabled = false },
-          })
-        end,
-      },
-      { "giuxtaposition/blink-cmp-copilot" },
-    },
+    config = function(_, opts)
+      require("tokyonight").setup(opts)
+      vim.cmd("colorscheme tokyonight")
+    end,
   },
 
   {
@@ -139,70 +105,6 @@ local plugins = {
       { "[h", ":Gitsigns prev_hunk<cr>", desc = "Gitsigns: Go to prev hunk" },
       { "ah", ":<C-U>Gitsigns select_hunk<CR>", mode = {"o", "x"}, desc = "Text object for git hunks" },
     },
-  },
-
-  {
-    "williamboman/mason.nvim",
-    opts = { ui = { border = "rounded" } },
-  },
-
-  {
-    "williamboman/mason-lspconfig.nvim",
-    config = function()
-      require("mason-lspconfig").setup({
-        ensure_installed = { "ruby_lsp", "lua_ls", "rust_analyzer" },
-      })
-
-      vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
-
-      vim.lsp.config("ruby_lsp", {
-        cmd = { "ruby-lsp" },
-        filetypes = { "ruby", "eruby" },
-        root_dir = function(bufnr, on_dir)
-          local bufname = vim.api.nvim_buf_get_name(bufnr)
-          local found = vim.fs.find({ "Gemfile", ".git" }, { upward = true, path = vim.fs.dirname(bufname) })[1]
-          if found then
-            on_dir(vim.fs.dirname(found))
-          end
-        end,
-      })
-      vim.lsp.enable("ruby_lsp")
-
-      vim.lsp.config("sorbet", {
-        cmd = { "srb", "tc", "--lsp" },
-        filetypes = { "ruby" },
-        root_dir = function(bufnr, on_dir)
-          local bufname = vim.api.nvim_buf_get_name(bufnr)
-          local found = vim.fs.find("sorbet/config", { upward = true, path = vim.fs.dirname(bufname) })[1]
-          if found then
-            on_dir(vim.fs.dirname(vim.fs.dirname(found)))
-          end
-        end,
-      })
-      vim.lsp.enable("sorbet")
-
-
-      vim.lsp.config("lua_ls", {
-        settings = {
-          Lua = {
-            workspace = {
-              checkThirdParty = false,
-              library = vim.list_extend(
-                vim.api.nvim_get_runtime_file("", true),
-                { "${3rd}/luv/library" }
-              ),
-            },
-            telemetry = { enable = false },
-            diagnostics = { globals = { "vim" } },
-          },
-        },
-      })
-
-      vim.lsp.enable("lua_ls")
-
-      vim.lsp.config("rust_analyzer", {})
-      vim.lsp.enable("rust_analyzer")
-    end,
   },
 
   {
@@ -276,18 +178,54 @@ local plugins = {
   },
 
   {
-    "folke/tokyonight.nvim",
-    priority = 1000,
+    "saghen/blink.cmp",
+    version = "*",
     opts = {
-      on_highlights = function(hl, _)
-        hl.WinSeparator = { fg = "#3d59a1" }
+      completion = {
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 0,
+        },
+      },
+      keymap = {
+        preset = "default",
+        ["<CR>"] = { "accept", "fallback" },
+        ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+        ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+      },
+      sources = {
+        default = { "lsp", "path", "snippets", "copilot" },
+        providers = {
+          copilot = {
+            name = "copilot",
+            module = "blink-cmp-copilot",
+            score_offset = 100,
+            async = true,
+          },
+        },
+      },
+      enabled = function()
+        return vim.bo.filetype ~= "markdown"
       end,
     },
-    config = function(_, opts)
-      require("tokyonight").setup(opts)
-      vim.cmd("colorscheme tokyonight")
-    end,
+    dependencies = {
+      {
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
+        event = "InsertEnter",
+        config = function()
+          require("copilot").setup({
+            copilot_node_command = vim.fn.exepath("node"),
+            suggestion = { enabled = false },
+            panel = { enabled = false },
+          })
+        end,
+      },
+      { "giuxtaposition/blink-cmp-copilot" },
+    },
   },
+
+  "sapphire-project/vim-sapphire",
 
   {
     "tpope/vim-fugitive",
@@ -318,10 +256,71 @@ local plugins = {
     },
   },
 
-  { "echasnovski/mini.pairs", event = "InsertEnter", opts = {} },
+  {
+    "williamboman/mason.nvim",
+    opts = { ui = { border = "rounded" } },
+  },
+
+  {
+    "williamboman/mason-lspconfig.nvim",
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "ruby_lsp", "lua_ls", "rust_analyzer" },
+      })
+
+      vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
+
+      vim.lsp.config("ruby_lsp", {
+        cmd = { "ruby-lsp" },
+        filetypes = { "ruby", "eruby" },
+        root_dir = function(bufnr, on_dir)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+          local found = vim.fs.find({ "Gemfile", ".git" }, { upward = true, path = vim.fs.dirname(bufname) })[1]
+          if found then
+            on_dir(vim.fs.dirname(found))
+          end
+        end,
+      })
+      vim.lsp.enable("ruby_lsp")
+
+      vim.lsp.config("sorbet", {
+        cmd = { "srb", "tc", "--lsp" },
+        filetypes = { "ruby" },
+        root_dir = function(bufnr, on_dir)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+          local found = vim.fs.find("sorbet/config", { upward = true, path = vim.fs.dirname(bufname) })[1]
+          if found then
+            on_dir(vim.fs.dirname(vim.fs.dirname(found)))
+          end
+        end,
+      })
+      vim.lsp.enable("sorbet")
+
+
+      vim.lsp.config("lua_ls", {
+        settings = {
+          Lua = {
+            workspace = {
+              checkThirdParty = false,
+              library = vim.list_extend(
+                vim.api.nvim_get_runtime_file("", true),
+                { "${3rd}/luv/library" }
+              ),
+            },
+            telemetry = { enable = false },
+            diagnostics = { globals = { "vim" } },
+          },
+        },
+      })
+
+      vim.lsp.enable("lua_ls")
+
+      vim.lsp.config("rust_analyzer", {})
+      vim.lsp.enable("rust_analyzer")
+    end,
+  },
+
   "wsdjeg/vim-fetch",
-
-
 }
 
 require("lazy").setup({
