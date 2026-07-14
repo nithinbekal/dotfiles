@@ -316,7 +316,7 @@ local plugins = {
     end,
     keys = {
       { "<leader>tf", ":w<cr>:TestFile<cr>", desc = "Test current file" },
-      { "<leader>tn", ":w<cr>:TestNearest<cr>", desc = "Test current file" },
+      { "<leader>tn", ":w<cr>:TestNearest<cr>", desc = "Test nearest" },
       { "<leader>ts", ":w<cr>:TestSuite<cr>", desc = "Test suite" },
       { "<leader>tt", ":w<cr>:TestLast<cr>", desc = "Rerun last test" },
     },
