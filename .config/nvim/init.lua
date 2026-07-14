@@ -2,7 +2,6 @@
 
 -- Setting options
 
-vim.opt.autoindent = true             -- Indent: Copy indent from current line when starting new line
 vim.opt.clipboard = "unnamedplus"     -- Sync clipboard between OS and Neovim
 vim.opt.colorcolumn = "120"           -- Show vertical bar to indicate 120 chars
 vim.opt.cursorline = true             -- Highlight the cursor line
@@ -15,8 +14,7 @@ vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt.foldenable = false
 
 vim.opt.grepprg = "rg --vimgrep"      -- Use ripgrep for file search
-vim.opt.laststatus = 2                -- Always show status line
-vim.opt.termguicolors = true          -- Enable 24-bit color (required by tokyonight; it sets this itself, but be explicit)
+vim.opt.termguicolors = true          -- Enable 24-bit color (kept explicit in case colorscheme doesn't set it)
 vim.opt.list = true                   -- Show tabs and trailing whitespace
 vim.opt.listchars = "tab:>-,trail:·"  -- Set chars to show for tabs or trailing whitespace
 vim.opt.mouse = ""                    -- Disable mouse entirely (Neovim has no scroll-only mode)
@@ -26,7 +24,6 @@ vim.opt.shiftwidth = 2                -- Tab settings - Use 2 spaces for each in
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.swapfile = false              -- No swap files; save often + git is sufficient
-vim.opt.autoread = true               -- Reload files when changed elsewhere
 vim.opt.undofile = true               -- Persist undo history across sessions
 vim.opt.updatetime = 200              -- Reduce updatetime
 vim.opt.wildmode = "list:full"        -- Completion mode: list all matches
@@ -36,8 +33,6 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 
 -- Search
-vim.opt.hlsearch = true               -- Highlight results
-vim.opt.incsearch = true              -- Show results as you type
 vim.opt.ignorecase = true             -- Ignore case
 vim.opt.smartcase = true              -- unless uppercase chars are given
 
