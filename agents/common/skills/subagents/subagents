@@ -17,7 +17,13 @@
 # body becomes the subagent's system prompt. Looked up in $SUBAGENTS_ROLE_DIRS
 # (colon-separated), else ~/.pi/agent/agents then ./.pi/agents.
 #
+# Session scoping: each tmux session gets its own subfolder under the state dir
+# (named after the tmux session id, e.g. <state>/$3/<id>/), so commands and the
+# watcher extension only ever see the current session's subagents — subagents
+# spawned in other tmux sessions are invisible and protected.
+#
 # Usage:
+#   subagents doctor                    Validate tmux/state layout, role models, and provider authentication.
 #   subagents run [-m MODEL] [--effort LEVEL] <role> <task...>
 #                                       Start a subagent from a role, give it the task. Prints its id.
 #                                       -m/--model overrides the role's model (use a provider-qualified
@@ -80,32 +86,54 @@ normalize_tools() {
 
 # ---- tmux window / pane helpers -------------------------------------------
 
-current_session() {
-	tmux display-message -pt "${TMUX_PANE:-}" '#{session_name}' 2>/dev/null \
-		|| tmux display-message -p '#{session_name}'
+# Absolute path to a subagent's state dir within the current session.
+sadir() { # id -> "$SR/<id>"
+	local id="$1"
+	[ -n "$id" ] || die "internal error: empty subagent id"
+	printf '%s/%s' "$(sr)" "$id"
 }
 
-# Session scoping: every command only sees subagents in the CURRENT tmux session.
+# Session scoping: state is partitioned into a per-session subfolder named after
+# the tmux session id (e.g. $STATE_DIR/$3/<id>/), so every command — and the
+# watcher extension — only ever sees subagents in the CURRENT tmux session. No
+# cross-session leakage is possible, because other sessions' subagents live in
+# sibling folders that nothing iterates into.
+#
+# Resolve the session id robustly: from $TMUX_PANE (targets the exact pane we
+# run in), then from $TMUX ("socket,pid,<session-num>" -> "$<num>"), then last
+# resort the active session. The $TMUX_PANE path is the reliable one; the others
+# cover contexts where it is unset.
 _CUR_SID=""
 cur_sid() {
-	[ -n "$_CUR_SID" ] || _CUR_SID=$(tmux display-message -pt "${TMUX_PANE:-}" '#{session_id}' 2>/dev/null)
+	[ -n "$_CUR_SID" ] && { printf '%s' "$_CUR_SID"; return 0; }
+	if [ -n "${TMUX_PANE:-}" ]; then
+		_CUR_SID=$(tmux display-message -pt "$TMUX_PANE" '#{session_id}' 2>/dev/null)
+	fi
+	if [ -z "$_CUR_SID" ] && [ -n "${TMUX:-}" ]; then
+		local num; num=$(printf '%s' "$TMUX" | awk -F, '{print $3}')
+		case "$num" in ''|*[!0-9]*) ;; *) _CUR_SID=\$"$num" ;; esac
+	fi
+	[ -n "$_CUR_SID" ] || _CUR_SID=$(tmux display-message -p '#{session_id}' 2>/dev/null)
 	printf '%s' "$_CUR_SID"
 }
-pane_sid() { # pane_id -> session_id of that pane
-	tmux list-panes -a -F '#{pane_id} #{session_id}' 2>/dev/null | awk -v p="$1" '$1==p{print $2; exit}'
-}
-# True when subagent <id> belongs to the current session. Uses the stored sid
-# (so it still scopes correctly after the pane dies); falls back to the pane's
-# live location for subagents spawned before sid tagging existed.
-in_session() { # id
-	local sid; sid=$(cat "$STATE_DIR/$1/sid" 2>/dev/null)
-	[ -n "$sid" ] || sid=$(pane_sid "$(cat "$STATE_DIR/$1/pane" 2>/dev/null)")
-	[ -n "$sid" ] && [ "$sid" = "$(cur_sid)" ]
+# Cached absolute path to the current session's state folder (created on demand).
+# Cached so the per-call mkdir only happens once; sr() is safe to call in loops.
+_SR=""
+sr() {
+	[ -n "$_SR" ] && { printf '%s' "$_SR"; return 0; }
+	local sid; sid=$(cur_sid)
+	[ -n "$sid" ] || die "cannot determine current tmux session"
+	_SR="$STATE_DIR/$sid"; mkdir -p "$_SR"
+	printf '%s' "$_SR"
 }
 
-subagents_window() { # session -> window_id of the subagents window (or empty)
+subagents_windows() { # session -> all matching window ids
 	tmux list-windows -t "$1" -F '#{window_id} #{window_name}' 2>/dev/null \
-		| awk -v p="$WIN_PREFIX" '$2==p || index($2, p" (")==1 {print $1; exit}'
+		| awk -v p="$WIN_PREFIX" '$2==p || index($2, p" (")==1 {print $1}'
+}
+
+subagents_window() { # session -> first matching window id (or empty)
+	subagents_windows "$1" | head -1
 }
 
 pane_alive() { # pane_id
@@ -129,12 +157,54 @@ file_mtime() { # path -> mtime epoch; works with GNU coreutils or BSD stat
 	printf '%s\n' "$m"
 }
 
-next_id() {
-	local seq="$STATE_DIR/.seq" n
-	n=$(cat "$seq" 2>/dev/null || echo 0)
-	n=$((n + 1))
-	echo "$n" >"$seq"
-	echo "$n"
+# Reserve the next id by creating its state directory. mkdir is the atomic
+# allocation primitive: concurrent callers may choose the same candidate, but
+# only one wins and the others rescan/retry. The returned directory already
+# exists and is exclusively owned by the caller.
+reserve_id() {
+	local root max dir name candidate
+	root=$(sr)
+	while :; do
+		max=0
+		for dir in "$root"/[0-9]*/; do
+			[ -d "$dir" ] || continue
+			name=$(basename "$dir")
+			case "$name" in *[!0-9]*|'') continue ;; esac
+			[ "$name" -gt "$max" ] && max="$name"
+		done
+		candidate=$((max + 1))
+		if mkdir "$root/$candidate" 2>/dev/null; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+}
+
+# Serialise the lookup/create/split sequence. In particular, a caller that saw
+# no window before waiting on the lock must re-check under the lock and reuse a
+# window created by the winner instead of creating a duplicate.
+create_subagent_pane() { # session command
+	local sess="$1" picmd="$2" lock q_lock win pane attempts=0
+	lock="$(sr)/.window-lock"
+	until mkdir "$lock" 2>/dev/null; do
+		attempts=$((attempts + 1))
+		[ "$attempts" -lt 200 ] || die "timed out waiting for subagents window lock"
+		sleep 0.05
+	done
+	q_lock=$(printf %q "$lock")
+	trap "rmdir $q_lock 2>/dev/null || true" EXIT
+	trap 'exit 1' HUP INT TERM
+
+	win=$(subagents_window "$sess")
+	if [ -z "$win" ]; then
+		pane=$(tmux new-window -d -t "$sess" -n "$WIN_PREFIX" -P -F '#{pane_id}' "$picmd") || return 1
+	else
+		pane=$(tmux split-window -d -t "$win" -P -F '#{pane_id}' "$picmd") || return 1
+		tmux select-layout -t "$win" tiled >/dev/null 2>&1 || true
+	fi
+	rmdir "$lock" 2>/dev/null || true
+	trap - EXIT HUP INT TERM
+	printf '%s\n' "$pane"
 }
 
 write_protocol() { # result_path
@@ -164,7 +234,7 @@ EOF
 # Snapshot a report to reports/<n>.md and echo its path. Copies $2 (a file) when
 # non-empty, otherwise captures the pane tail. Makes each event immutable.
 snapshot() { # id source-file-or-empty
-	local id="$1" src="$2" dir="$STATE_DIR/$id" n out
+	local id="$1" src="$2" dir; dir=$(sadir "$id")
 	n=$(cat "$dir/revent" 2>/dev/null || echo 0); n=$((n + 1)); echo "$n" >"$dir/revent"
 	mkdir -p "$dir/reports"; out="$dir/reports/$n.md"
 	if [ -n "$src" ] && [ -s "$src" ]; then
@@ -182,7 +252,7 @@ snapshot() { # id source-file-or-empty
 # serialises concurrent pollers (watcher extension + a manual `wait`) so the
 # same completion can't be double-emitted.
 detect_and_emit() { # id
-	local id="$1" dir="$STATE_DIR/$id"
+	local id="$1" dir; dir=$(sadir "$id")
 	[ -d "$dir" ] && [ -f "$dir/pane" ] || return 1
 	mkdir "$dir/.lock" 2>/dev/null || return 1   # another poller is mid-detect
 	local rc=1
@@ -192,7 +262,7 @@ detect_and_emit() { # id
 }
 
 _emit_for() { # id  (runs holding $dir/.lock)
-	local id="$1" dir="$STATE_DIR/$id"
+	local id="$1" dir; dir=$(sadir "$id")
 	local pane role; pane=$(cat "$dir/pane"); role=$(cat "$dir/role" 2>/dev/null)
 
 	if ! pane_alive "$pane"; then
@@ -247,6 +317,134 @@ _emit_for() { # id  (runs holding $dir/.lock)
 
 # ---- commands -------------------------------------------------------------
 
+provider_model() { # model -> true when provider-qualified
+	local model="$1" provider model_id
+	provider=${model%%/*}; model_id=${model#*/}
+	[ "$provider" != "$model" ] && [ -n "$provider" ] && [ -n "$model_id" ]
+}
+
+run_launcher() {
+	# Intentional word splitting: SUBAGENTS_PI may be a wrapper plus `pi`.
+	# shellcheck disable=SC2086
+	$PI_CMD "$@"
+}
+
+cmd_doctor() {
+	local failures=0 warnings=0 orphan_sessions=0 legacy_dirs=0 sid root count dir name pane pane_sid role_file model provider
+	local i found probe_out
+	local role_dir="$HOME/.pi/agent/agents"
+	local -a models=() model_roles=()
+	in_tmux || { echo "FAIL tmux: not in a tmux session"; return 1; }
+	sid=$(cur_sid); root=$(sr)
+
+	count=$(subagents_windows "$sid" | awk 'NF{n++} END{print n+0}')
+	if [ "$count" -le 1 ]; then
+		echo "ok   window: ${count} subagents window(s) in $sid"
+	else
+		echo "FAIL window: $count subagents windows in $sid (expected at most 1)"
+		failures=$((failures + 1))
+	fi
+
+	# The watcher resolves exactly $STATE_DIR/<literal tmux session_id>/<numeric id>.
+	case "$sid" in \$[0-9]*) ;; *)
+		echo "FAIL state: unexpected tmux session id '$sid'"
+		failures=$((failures + 1)) ;;
+	esac
+	for dir in "$STATE_DIR"/*/; do
+		[ -d "$dir" ] || continue
+		name=$(basename "$dir")
+		case "$name" in
+			\$[0-9]*)
+				if ! tmux list-sessions -F '#{session_id}' 2>/dev/null | grep -Fqx "$name"; then
+					orphan_sessions=$((orphan_sessions + 1))
+				fi
+				;;
+			[0-9]*) legacy_dirs=$((legacy_dirs + 1)) ;;
+			*)
+				echo "FAIL state: unexpected root entry $dir"
+				failures=$((failures + 1))
+				;;
+		esac
+	done
+	if [ "$legacy_dirs" -gt 0 ]; then
+		echo "WARN state: $legacy_dirs stale legacy numeric dir(s) under $STATE_DIR"
+		warnings=$((warnings + 1))
+	fi
+	if [ "$orphan_sessions" -gt 0 ]; then
+		echo "WARN state: $orphan_sessions orphaned tmux session dir(s) under $STATE_DIR"
+		warnings=$((warnings + 1))
+	fi
+	for dir in "$root"/*/; do
+		[ -d "$dir" ] || continue
+		name=$(basename "$dir")
+		case "$name" in *[!0-9]*|'')
+			echo "FAIL state: non-numeric agent dir $dir"
+			failures=$((failures + 1)); continue ;;
+		esac
+		if [ ! -s "$dir/pane" ] || [ ! -f "$dir/role" ] || [ ! -f "$dir/task" ] || [ ! -f "$dir/result.md" ]; then
+			echo "FAIL state: incomplete agent dir $dir"
+			failures=$((failures + 1)); continue
+		fi
+		pane=$(cat "$dir/pane")
+		pane_sid=$(tmux display-message -pt "$pane" '#{session_id}' 2>/dev/null || true)
+		if [ -z "$pane_sid" ]; then
+			echo "WARN state: orphaned agent #$name (pane $pane is gone)"
+			warnings=$((warnings + 1))
+		elif [ "$pane_sid" != "$sid" ]; then
+			echo "FAIL state: agent #$name pane belongs to $pane_sid, not $sid"
+			failures=$((failures + 1))
+		fi
+	done
+	[ "$failures" -gt 0 ] || echo "ok   state: watcher-compatible layout at $root"
+
+	if [ ! -d "$role_dir" ]; then
+		echo "FAIL roles: missing $role_dir"
+		failures=$((failures + 1))
+	else
+		for role_file in "$role_dir"/*.md; do
+			[ -f "$role_file" ] || continue
+			model=$(fm_get "$role_file" model)
+			if ! provider_model "$model"; then
+				echo "FAIL role: $(basename "$role_file") model '$model' is not provider-qualified"
+				failures=$((failures + 1)); continue
+			fi
+			found=0
+			for ((i = 0; i < ${#models[@]}; i++)); do
+				if [ "${models[$i]}" = "$model" ]; then
+					model_roles[$i]="${model_roles[$i]},$(basename "$role_file" .md)"
+					found=1; break
+				fi
+			done
+			if [ "$found" = 0 ]; then
+				models+=("$model"); model_roles+=("$(basename "$role_file" .md)")
+			fi
+		done
+	fi
+	[ "${#models[@]}" -gt 0 ] || { echo "FAIL roles: no valid role models found"; failures=$((failures + 1)); }
+
+	for ((i = 0; i < ${#models[@]}; i++)); do
+		model=${models[$i]}; provider=${model%%/*}
+		if probe_out=$(run_launcher --no-extensions --no-skills --no-prompt-templates --no-context-files \
+			--no-session --no-tools --thinking off --model "$model" --print "Reply with OK only." 2>&1); then
+			echo "ok   auth: $provider (${model_roles[$i]})"
+		else
+			probe_out=$(printf '%s\n' "$probe_out" | grep -E 'No API key|not found|[Ee]rror|[Ff]ailed|[Uu]nauthorized' | tail -1)
+			echo "FAIL auth: $provider (${model_roles[$i]})${probe_out:+ — $probe_out}"
+			failures=$((failures + 1))
+		fi
+	done
+
+	if [ "$failures" -gt 0 ]; then
+		echo "doctor: $failures failure(s), $warnings warning(s)"
+		return 1
+	fi
+	if [ "$warnings" -gt 0 ]; then
+		echo "doctor: healthy, $warnings warning(s)"
+	else
+		echo "doctor: healthy"
+	fi
+}
+
 cmd_run() {
 	local model_override="" effort_override=""
 	while [ $# -gt 0 ]; do
@@ -265,9 +463,9 @@ cmd_run() {
 
 	local rf; rf=$(role_file "$role") || die "role '$role' not found (try: subagents roles)"
 
-	local sess; sess=$(current_session)
-	local id; id=$(next_id)
-	local dir="$STATE_DIR/$id"; mkdir -p "$dir"
+	local sess; sess=$(cur_sid)
+	local id; id=$(reserve_id)
+	local dir; dir=$(sadir "$id")
 	local result="$dir/result.md"
 	: >"$result"
 
@@ -279,6 +477,10 @@ cmd_run() {
 	model=$(fm_get "$rf" model)
 	[ -n "$model_override" ] && model="$model_override"
 	tools=$(fm_get "$rf" tools)
+	if [ -n "$model" ] && [ "$model" != "inherit" ] && ! provider_model "$model"; then
+		rm -rf "$dir"
+		die "model '$model' is not provider-qualified (expected provider/model)"
+	fi
 	[ -n "$model" ] && [ "$model" != "inherit" ] && modelflag="--model $model"
 	[ -n "$effort_override" ] && thinkflag="--thinking $effort_override"
 	if [ -n "$tools" ]; then
@@ -298,13 +500,10 @@ cmd_run() {
 	[ -n "$toolsflag" ] && picmd="$picmd $toolsflag"
 	picmd="$picmd --append-system-prompt $q_role --append-system-prompt $q_proto $q_task"
 
-	local pane win
-	win=$(subagents_window "$sess")
-	if [ -z "$win" ]; then
-		pane=$(tmux new-window -d -t "$sess" -n "$WIN_PREFIX" -P -F '#{pane_id}' "$picmd")
-	else
-		pane=$(tmux split-window -d -t "$win" -P -F '#{pane_id}' "$picmd")
-		tmux select-layout -t "$win" tiled >/dev/null 2>&1 || true
+	local pane
+	if ! pane=$(create_subagent_pane "$sess" "$picmd") || [ -z "$pane" ]; then
+		rm -rf "$dir"
+		die "failed to create subagent pane"
 	fi
 
 	echo "$pane" >"$dir/pane"
@@ -317,17 +516,16 @@ cmd_run() {
 	tmux select-pane -t "$pane" -T "subagent#$id $role" 2>/dev/null || true
 
 	echo "started subagent #$id ($role) — pane $pane, model ${model:-inherited}${effort_override:+, effort $effort_override}"
-	echo "  watch:   subagents peek $id"
+	echo "  report:  pushed by subagents-watch — end your turn"
 	echo "  answer:  subagents tell $id <message>"
-	echo "  collect: subagents wait $id"
+	echo "  fallback without watcher: subagents wait $id"
 }
 
 cmd_tell() {
 	local id="${1:-}"; shift || true
 	local msg="$*"
 	[ -n "$id" ] && [ -n "$msg" ] || die "usage: subagents tell <id> <message...>"
-	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
-	in_session "$id" || die "subagent #$id is in another tmux session"
+	local dir; dir=$(sadir "$id"); [ -d "$dir" ] || die "no subagent #$id"
 	local pane; pane=$(cat "$dir/pane")
 	pane_alive "$pane" || die "subagent #$id is not running"
 	date +%s >"$dir/sent"
@@ -338,8 +536,7 @@ cmd_tell() {
 cmd_wait() {
 	local id="${1:-}"; local secs="${2:-$DEFAULT_WAIT}"
 	[ -n "$id" ] || die "usage: subagents wait <id> [seconds]"
-	[ -d "$STATE_DIR/$id" ] || die "no subagent #$id"
-	in_session "$id" || die "subagent #$id is in another tmux session"
+	[ -d "$(sadir "$id")" ] || die "no subagent #$id"
 	local i line status path
 	for ((i = 0; i < secs; i += 2)); do
 		if line=$(detect_and_emit "$id") && [ -n "$line" ]; then
@@ -354,13 +551,14 @@ cmd_wait() {
 	return 1
 }
 
-# Print NEW completion events across all subagents as TSV (one pass, non-blocking).
+# Print NEW completion events for THIS SESSION's subagents as TSV (one pass,
+# non-blocking). Iterating the per-session folder is the scoping mechanism —
+# other sessions' subagents live in sibling folders and are never visited.
 cmd_events() {
 	local dir id
-	for dir in "$STATE_DIR"/*/; do
+	for dir in "$(sr)"/*/; do
 		[ -d "$dir" ] || continue
 		id=$(basename "$dir"); [ -f "$dir/pane" ] || continue
-		in_session "$id" || continue
 		detect_and_emit "$id" || true
 	done
 }
@@ -381,10 +579,9 @@ cmd_reap() {
 # Non-blocking live status of each subagent (does not consume events).
 cmd_status() {
 	local dir id pane role st found=0 h1 h2
-	for dir in "$STATE_DIR"/*/; do
+	for dir in "$(sr)"/*/; do
 		[ -d "$dir" ] || continue
 		id=$(basename "$dir"); [ -f "$dir/pane" ] || continue
-		in_session "$id" || continue
 		pane=$(cat "$dir/pane"); role=$(cat "$dir/role" 2>/dev/null)
 		if ! pane_alive "$pane"; then
 			st="exited"
@@ -401,8 +598,7 @@ cmd_status() {
 cmd_peek() {
 	local id="${1:-}"; local lines="${2:-40}"
 	[ -n "$id" ] || die "usage: subagents peek <id> [lines]"
-	local dir="$STATE_DIR/$id"; [ -d "$dir" ] || die "no subagent #$id"
-	in_session "$id" || die "subagent #$id is in another tmux session"
+	local dir; dir=$(sadir "$id"); [ -d "$dir" ] || die "no subagent #$id"
 	local pane; pane=$(cat "$dir/pane")
 	pane_alive "$pane" || { echo "[subagent #$id not running]"; return 0; }
 	tmux capture-pane -p -t "$pane" | grep -v '^[[:space:]]*$' | tail -"$lines"
@@ -410,11 +606,10 @@ cmd_peek() {
 
 cmd_ls() {
 	local dir id pane role st task found=0
-	for dir in "$STATE_DIR"/*/; do
+	for dir in "$(sr)"/*/; do
 		[ -d "$dir" ] || continue
 		id=$(basename "$dir")
 		[ -f "$dir/pane" ] || continue
-		in_session "$id" || continue
 		pane=$(cat "$dir/pane")
 		role=$(cat "$dir/role" 2>/dev/null)
 		if pane_alive "$pane"; then st="alive"; else st="dead"; fi
@@ -430,19 +625,17 @@ cmd_stop() {
 	[ -n "$target" ] || die "usage: subagents stop <id|--all>"
 	if [ "$target" = "--all" ]; then
 		local dir id pane
-		for dir in "$STATE_DIR"/*/; do
+		for dir in "$(sr)"/*/; do
 			[ -d "$dir" ] || continue
 			id=$(basename "$dir")
 			[ -f "$dir/pane" ] || continue
-			in_session "$id" || continue
 			pane=$(cat "$dir/pane")
 			tmux kill-pane -t "$pane" 2>/dev/null || true
 			rm -rf "$dir"
 			echo "stopped subagent #$id"
 		done
 	else
-		local dir="$STATE_DIR/$target"; [ -d "$dir" ] || die "no subagent #$target"
-		in_session "$target" || die "subagent #$target is in another tmux session"
+		local dir; dir=$(sadir "$target"); [ -d "$dir" ] || die "no subagent #$target"
 		local pane; pane=$(cat "$dir/pane")
 		tmux kill-pane -t "$pane" 2>/dev/null || true
 		rm -rf "$dir"
@@ -471,6 +664,7 @@ usage() { awk 'NR>1 && /^#/{sub(/^# ?/,""); print; next} NR>1 && !/^#/{exit}' "$
 
 cmd="${1:-}"; shift || true
 case "$cmd" in
+	doctor)    cmd_doctor "$@" ;;
 	run)       cmd_run   "$@" ;;
 	tell)      cmd_tell  "$@" ;;
 	wait)      cmd_wait  "$@" ;;

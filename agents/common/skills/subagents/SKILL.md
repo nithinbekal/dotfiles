@@ -1,6 +1,12 @@
 ---
 name: subagents
-description: Delegate a complex or separable task to a focused subagent running in its own tmux pane, watch it work, exchange messages with it, and collect its report. Use when a task benefits from an isolated context (codebase recon, planning, review, a self-contained implementation/fix) or when you want to run several such tasks in parallel. Requires tmux. Subagents are driven via the `subagents` CLI in this skill directory.
+description: >-
+  Delegate a task to a focused subagent running in its own tmux pane, watch it
+  work, exchange messages with it, and collect its report. Default to delegating
+  — spawn subagents early and often, and split non-trivial work across
+  independent tracks rather than doing it all inline first. Use for anything
+  beyond a one-liner: recon, planning, review, a contained implementation/fix,
+  or several such tasks in parallel. Requires tmux. Subagents are driven via the `subagents` CLI in this skill directory.
 ---
 
 # Subagents
@@ -15,13 +21,53 @@ answer a subagent's questions, steer it, or unblock it mid-task.
 
 ## When to use
 
-- A task deserves its own context window (deep recon, planning, review, a
-  contained implementation or fix) so it doesn't crowd the main conversation.
-- Several independent tasks can run in parallel.
-- Pick a **role** from the available role files (see `subagents roles`). Each
-  role carries its own system prompt, model, and tool allowlist.
+**Default to delegating.** The bar is low: if a task has more than one step, a
+separable part, or would crowd the main context, hand it to a subagent. Spawn
+early and split non-trivial work across independent tracks (e.g. one subagent on
+recon while another starts implementation) — don't do the whole investigation
+inline first and only delegate after being prompted. A subagent's isolated
+context keeps the lead lean and lets work happen in parallel.
 
-Do NOT use a subagent for quick, single-step things you can just do yourself.
+Reach for a subagent when any of these apply (most of them usually do):
+
+- A task takes more than a single tool call or a single short answer.
+- It has a separable part (recon before editing, one PR per fix, a parallel
+  investigation track).
+- It would push the main conversation toward compaction.
+- Several independent tasks can run at once.
+- You want a different role/model/context for one piece of the work.
+
+Only do it inline when it's truly a one-liner — a single read/grep/edit, a
+one-shot question with an obvious answer, or something faster to just do than
+to describe. If you're unsure, lean toward delegating.
+
+Pick a **role** from the available role files (see `subagents roles`). Each
+role carries its own system prompt, model, and tool allowlist.
+
+## Valid roles (do not invent names)
+
+Role names must match a file in `~/.pi/agent/agents/` exactly. Spawning a
+non-existent role fails with `subagents: role '<name>' not found`. There are
+**five** roles (run `subagents roles` to confirm):
+
+| Role | Model | Use for |
+| --- | --- | --- |
+| `implementer` | gpt-5.6-sol | Heavyweight: implement a feature/fix/parity/test change end-to-end in a worktree, push, (optionally) open a PR |
+| `pr-fixer` | gpt-5.6-sol | Make an already-open PR's CI green + address review findings, push, retrigger CI |
+| `critic` | gpt-5.6-sol | Adversarial second opinion on another agent's output (plan, fix, review) |
+| `helper` | glm | Lightweight quick-task: fetch/summarize files, run one command, make a specific edit, find/list something |
+| `watcher` | glm | Long-running monitor of sibling subagents + open PRs |
+
+`implementer` is the default for "go do this implementation work." `pr-fixer`
+is for *already-open* PRs. `critic` reviews an agent's *output*, not diffs.
+`helper` is the lightweight role for small single-purpose tasks that don't need
+a worktree or end-to-end implementation. `watcher` is the long-running monitor.
+Heavyweight work uses `gpt-5.6-sol`; `helper` and `watcher` use the fast glm model.
+
+If you're unsure of a role name, run `subagents roles` — it lists every
+available role and its model. Never guess a role name; the names above are the
+complete set. Model names (`sonnet`, `opus`, `haiku`, `glm`, …) are **not**
+roles — pass them via `-m`, e.g. `-m openai/gpt-5.6-sol`.
 
 ## Running it
 
@@ -33,15 +79,16 @@ brevity; use the full path to the script in this directory.
 ## Commands
 
 ```bash
-subagents roles                  # list available roles (and their models)
-subagents run [-m MODEL] [--effort LEVEL] <role> "<task>"   # start a subagent; -m overrides the role's model
-subagents wait <id> [seconds]    # block until it finishes (returns early on completion/idle); prints its report
-subagents reap                   # print any newly-finished reports (pull mode; non-blocking)
-subagents status                 # show each subagent as working|idle|exited (non-blocking)
-subagents tell <id> "<message>"  # send a follow-up: answer a question, steer, or nudge
-subagents peek <id> [lines]      # show the tail of its pane (watch it work)
+subagents doctor                 # check window/state layout, role models, and live provider auth
+subagents roles                  # list roles and their provider-qualified models
+subagents run [-m MODEL] [--effort LEVEL] <role> "<task>"   # start; -m overrides the role model
+subagents tell <id> "<message>"  # answer a pushed question, steer, or nudge
+subagents status                 # show working|idle|exited (diagnostics only)
+subagents peek <id> [lines]      # inspect a reported stall (never poll with it)
 subagents ls                     # list active subagents
-subagents stop <id|--all>        # shut a subagent (or all) down (window closes when empty)
+subagents stop <id|--all>        # shut down one or all
+subagents wait <id> [seconds]    # pull fallback only; block and print report
+subagents reap                   # pull fallback only; drain finished reports
 ```
 
 ## Choosing a model
@@ -56,55 +103,37 @@ cross-family critic). Otherwise pick per task with `-m`, sized to complexity:
 Use provider-qualified ids (e.g. `anthropic/claude-sonnet-4-6`) to avoid an
 ambiguous-model error. `--effort` sets the thinking level (off..xhigh) for harder tasks.
 
-## Push mode vs pull mode
+## Push workflow (default)
 
-If the `subagents-watch` extension is loaded in the lead (it watches the state
-dir), finished reports are **pushed into your conversation automatically** and
-wake you — you don't need to `wait` or poll. Just `run` subagents, keep working,
-and reports arrive as they complete. Use `tell`/`peek` to respond. (Don't also
-`wait` on a subagent the watcher is handling — both consume the same event.)
+The `subagents-watch` extension watches the session state directory, pushes each
+finished/blocked report into the lead conversation, and wakes the lead.
 
-Without the extension, use **pull mode**: `subagents wait <id>` (block for one),
-or `subagents reap` (drain all newly-finished reports) and `subagents status`
-between your own steps.
+1. Run `subagents doctor` before the first delegation (and after changing roles,
+   launchers, auth, tmux sessions, or state). Fix every `FAIL`; warnings identify
+   stale/orphaned state worth cleaning up.
+2. Issue one or more `subagents run <role> "<task>"` commands.
+3. **END YOUR TURN immediately after the run command(s).** Do not call `wait`,
+   do not poll with `peek`/`status`, and do not keep doing the delegated work
+   inline. The extension will push the report and trigger the next turn.
+4. Read the pushed report. If it asks for input, use `tell`, then **end the turn
+   again**. Use `peek` only to diagnose a stall already reported by the watcher,
+   never as a polling loop.
+5. `stop` the agent when done, unless you will reuse its context for a follow-up.
 
-## Workflow (pull mode)
+## Responsiveness
 
-1. `subagents run <role> "<task>"` → note the `#id`.
-2. `subagents wait <id>` → read the report it wrote (or `reap` to drain all).
-3. If it asks a question or stalls: `subagents peek <id>` to see what's happening,
-   then `subagents tell <id> "<answer or nudge>"` and `subagents wait <id>` again.
-4. **Shut it down when done** with `subagents stop <id>`, unless you expect to
-   give it more related work soon (subagents keep their context between tasks, so
-   reuse one for follow-on work rather than spawning a fresh one).
+Push delivery is automatic: ending the lead turn lets the watcher wake it as
+soon as a report arrives. Polling competes for the same completion event, wastes
+turns, and can hide the pushed report, so never combine watcher mode with
+`wait`/`reap`. A pushed `idle` or `exited` report is the signal to inspect,
+answer with `tell`, restart, or stop the agent.
 
-Run several in parallel by issuing multiple `subagents run`s, then `wait` each.
+## Pull fallback (only without the extension)
 
-## Responsiveness (how often to check)
-
-`subagents wait` polls every couple seconds and returns as soon as the subagent
-finishes OR goes idle — including when it hits a blocker, since the protocol makes
-it surface the blocker and stop. A single `wait` blocks for at most ~2 min, then
-returns "still working" so you (or the human) can step in; call it again to keep
-waiting, or pass a longer timeout: `subagents wait <id> 600`.
-
-The lead acts one step at a time, so a subagent only gets an answer when you next
-`wait`/`peek`. For work you want to stay on top of, `run` then `wait` (responsive
-within seconds). If you fire several and check only occasionally, expect a blocked
-subagent to wait until your next check — subagents are told to work autonomously
-and stop only for true blockers, so this mostly costs latency, not throughput.
-
-## Handling stalls
-
-A subagent reports back by writing a result file; `subagents wait` also detects
-when one goes **idle**. If `wait` says the subagent is idle but wrote no report,
-or it times out:
-
-- `subagents peek <id>` to read its current state — it may be asking a question
-  or waiting for a decision.
-- `subagents tell <id> "<answer>"` to unblock it, or `subagents tell <id> "continue"`
-  to nudge, then `subagents wait <id>` again.
-- If it's wedged, `subagents stop <id>` and start over.
+If `subagents-watch` is not loaded, use `subagents wait <id>` for one agent or
+`subagents reap` to drain all reports. On timeout/idle, inspect once with `peek`,
+answer with `tell`, and `wait` again. Never use this fallback merely because a
+push-mode agent is still working.
 
 ## Notes
 
