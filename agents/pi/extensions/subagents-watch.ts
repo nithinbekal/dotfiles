@@ -30,7 +30,10 @@ const STATE_DIR = path.join(
 	"subagents",
 );
 const PREVIEW_CHARS = 1500;
-const DELIVERY_RETRY_MS = 15_000;
+// Long enough that a queued steer can survive an unusually long turn without
+// same-instance retry spam. Reload still retries immediately from the spool.
+const DELIVERY_RETRY_MS = 30 * 60_000;
+const DELIVERED_RETENTION_MS = 7 * 24 * 60 * 60_000;
 
 type CompletionEvent = {
 	id: string;
@@ -38,10 +41,13 @@ type CompletionEvent = {
 	status: string;
 	reportPath: string;
 	reportBody?: string;
+	incarnation?: string;
 };
 
-function completionEventId({ id, role, status, reportPath }: CompletionEvent): string {
-	return createHash("sha256").update(JSON.stringify({ id, role, status, reportPath })).digest("hex");
+function completionEventId({ id, role, status, reportPath, incarnation }: CompletionEvent): string {
+	return createHash("sha256")
+		.update(JSON.stringify({ id, role, status, reportPath, incarnation }))
+		.digest("hex");
 }
 
 // Resolve lazily from session_start rather than blocking every extension factory
@@ -96,6 +102,9 @@ export default function (pi: ExtensionAPI) {
 	let pendingDir: string | null = null;
 	let deliveredDir: string | null = null;
 	let sessionFile: string | undefined;
+	let sessionFileIdentity: string | null = null;
+	let sessionReadOffset = 0;
+	let sessionReadRemainder = "";
 	let active = false;
 	let draining = false;
 	let pending = false;
@@ -136,14 +145,32 @@ export default function (pi: ExtensionAPI) {
 	};
 
 	const snapshotEvent = (event: CompletionEvent): CompletionEvent => {
-		if (event.reportBody !== undefined) return event;
-		let reportBody = "";
-		try {
-			reportBody = fs.readFileSync(event.reportPath, "utf-8").trim().slice(0, PREVIEW_CHARS + 1);
-		} catch {
-			/* report file may be gone if the subagent was stopped */
+		let reportBody = event.reportBody;
+		if (reportBody === undefined) {
+			reportBody = "";
+			try {
+				reportBody = fs.readFileSync(event.reportPath, "utf-8").trim().slice(0, PREVIEW_CHARS + 1);
+			} catch {
+				/* report file may be gone if the subagent was stopped */
+			}
 		}
-		return { ...event, reportBody };
+
+		let incarnation = event.incarnation;
+		if (incarnation === undefined) {
+			const agentDir = path.dirname(path.dirname(event.reportPath));
+			try {
+				incarnation = fs.readFileSync(path.join(agentDir, "birth"), "utf-8").trim();
+			} catch {
+				// Compatibility for agents created before the CLI wrote `birth`.
+				try {
+					const stat = fs.statSync(agentDir);
+					incarnation = `legacy:${stat.dev}:${stat.ino}:${stat.birthtimeMs || stat.ctimeMs}`;
+				} catch {
+					incarnation = `legacy-report:${event.reportPath}`;
+				}
+			}
+		}
+		return { ...event, reportBody, incarnation };
 	};
 
 	const deliveredPath = (eventId: string): string | null =>
@@ -228,34 +255,64 @@ export default function (pi: ExtensionAPI) {
 		return typeof details?.eventId === "string" ? details.eventId : null;
 	};
 
-	const restoreDeliveredEntries = (ctx: ExtensionContext): void => {
-		for (const entry of ctx.sessionManager.getEntries()) {
-			const eventId = eventIdFromEntry(entry);
-			if (eventId) confirmDelivery(eventId);
+	const hasOutstandingEvents = (): boolean => {
+		if (memoryEvents.size > 0) return true;
+		if (!pendingDir) return false;
+		try {
+			return fs.readdirSync(pendingDir, { withFileTypes: true })
+				.some((file) => file.isFile() && file.name.endsWith(".json"));
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+				reportSpoolError(`could not inspect pending events ${pendingDir}`, error);
+			}
+			return false;
 		}
 	};
 
 	// A non-throwing pi.sendMessage call is not an acknowledgement: Pi catches
 	// asynchronous send failures internally. Confirm only after the custom message
 	// is observable in the persisted JSONL session, then write an on-disk ledger
-	// before removing its spool file. A crash after session append but before the
-	// ledger write can cause a duplicate on restart, which is intentionally safer
-	// than silent loss.
-	const reconcilePersistedDeliveries = (): void => {
-		if (!sessionFile) return;
-		let contents: string;
+	// before removing its spool file. Read only newly appended JSONL bytes while
+	// events are outstanding; inode changes and truncation reset the cursor. A crash
+	// after session append but before the ledger write can cause a duplicate on
+	// restart, which is intentionally safer than silent loss.
+	const reconcilePersistedDeliveries = (): boolean => {
+		if (!sessionFile || !hasOutstandingEvents()) return false;
+		let fd: number | null = null;
 		try {
-			contents = fs.readFileSync(sessionFile, "utf-8");
-		} catch {
-			return;
-		}
-		for (const line of contents.split("\n")) {
-			if (!line.trim()) continue;
-			try {
-				const eventId = eventIdFromEntry(JSON.parse(line));
-				if (eventId) confirmDelivery(eventId);
-			} catch {
-				/* a concurrent final JSONL line may not be complete yet */
+			fd = fs.openSync(sessionFile, "r");
+			const stat = fs.fstatSync(fd);
+			const identity = `${stat.dev}:${stat.ino}`;
+			if (identity !== sessionFileIdentity || stat.size < sessionReadOffset) {
+				sessionFileIdentity = identity;
+				sessionReadOffset = 0;
+				sessionReadRemainder = "";
+			}
+
+			const length = stat.size - sessionReadOffset;
+			if (length > 0) {
+				const buffer = Buffer.allocUnsafe(length);
+				const bytesRead = fs.readSync(fd, buffer, 0, length, sessionReadOffset);
+				sessionReadOffset += bytesRead;
+				const lines = (sessionReadRemainder + buffer.toString("utf-8", 0, bytesRead)).split("\n");
+				sessionReadRemainder = lines.pop() ?? "";
+				for (const line of lines) {
+					if (!line.trim()) continue;
+					try {
+						const eventId = eventIdFromEntry(JSON.parse(line));
+						if (eventId) confirmDelivery(eventId);
+					} catch {
+						/* malformed session entries are Pi's responsibility */
+					}
+				}
+			}
+			return true;
+		} catch (error) {
+			reportSpoolError(`could not reconcile session ${sessionFile}`, error);
+			return false;
+		} finally {
+			if (fd !== null) {
+				try { fs.closeSync(fd); } catch { /* ignore close errors */ }
 			}
 		}
 	};
@@ -359,7 +416,10 @@ export default function (pi: ExtensionAPI) {
 		let files: fs.Dirent[];
 		try {
 			files = fs.readdirSync(pendingDir, { withFileTypes: true });
-		} catch {
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+				reportSpoolError(`could not list pending events ${pendingDir}`, error);
+			}
 			return;
 		}
 
@@ -370,27 +430,42 @@ export default function (pi: ExtensionAPI) {
 		for (const file of files) {
 			if (!file.isFile() || !file.name.endsWith(".json")) continue;
 			const queuedPath = path.join(pendingDir, file.name);
-			let event: CompletionEvent;
+			let contents: string;
 			try {
-				const parsed = JSON.parse(fs.readFileSync(queuedPath, "utf-8")) as Partial<CompletionEvent>;
-				if (
-					typeof parsed.id !== "string" ||
-					typeof parsed.role !== "string" ||
-					typeof parsed.status !== "string" ||
-					typeof parsed.reportPath !== "string" ||
-					(parsed.reportBody !== undefined && typeof parsed.reportBody !== "string")
-				) {
-					throw new Error("invalid queued completion event");
-				}
-				event = parsed as CompletionEvent;
+				contents = fs.readFileSync(queuedPath, "utf-8");
+			} catch (error) {
+				// Transient IO failures are not corruption. Leave the original record in
+				// place so a later drain can retry it.
+				reportSpoolError(`could not read pending event ${queuedPath}`, error);
+				continue;
+			}
+
+			let parsed: Partial<CompletionEvent>;
+			try {
+				parsed = JSON.parse(contents) as Partial<CompletionEvent>;
 			} catch {
 				quarantineCorruptEvent(queuedPath);
 				continue;
 			}
-
+			if (
+				typeof parsed.id !== "string" ||
+				typeof parsed.role !== "string" ||
+				typeof parsed.status !== "string" ||
+				typeof parsed.reportPath !== "string" ||
+				(parsed.reportBody !== undefined && typeof parsed.reportBody !== "string") ||
+				(parsed.incarnation !== undefined && typeof parsed.incarnation !== "string")
+			) {
+				quarantineCorruptEvent(queuedPath);
+				continue;
+			}
+			const event = snapshotEvent(parsed as CompletionEvent);
 			const eventId = completionEventId(event);
 			if (isDelivered(eventId)) {
 				confirmDelivery(eventId);
+				// Spools from older extension versions may be named with the old hash.
+				if (queuedPath !== path.join(pendingDir, `${eventId}.json`)) {
+					try { fs.unlinkSync(queuedPath); } catch { /* retry cleanup next drain */ }
+				}
 				continue;
 			}
 			attemptDelivery(event);
@@ -444,6 +519,29 @@ export default function (pi: ExtensionAPI) {
 		}
 	};
 
+	const pruneDeliveredLedger = (): void => {
+		if (!deliveredDir) return;
+		let files: fs.Dirent[];
+		try {
+			files = fs.readdirSync(deliveredDir, { withFileTypes: true });
+		} catch {
+			return;
+		}
+		const cutoff = Date.now() - DELIVERED_RETENTION_MS;
+		for (const file of files) {
+			if (!file.isFile()) continue;
+			const marker = path.join(deliveredDir, file.name);
+			try {
+				if (fs.statSync(marker).mtimeMs < cutoff) {
+					fs.unlinkSync(marker);
+					confirmedEventIds.delete(file.name);
+				}
+			} catch {
+				/* best-effort pruning; delivery safety does not depend on it */
+			}
+		}
+	};
+
 	const start = (_event: unknown, ctx: ExtensionContext): void => {
 		if (active) return;
 		const sid = currentSessionId();
@@ -452,9 +550,12 @@ export default function (pi: ExtensionAPI) {
 		pendingDir = path.join(sessionDir, ".watcher-pending");
 		deliveredDir = path.join(sessionDir, ".watcher-delivered");
 		sessionFile = ctx.sessionManager.getSessionFile();
+		sessionFileIdentity = null;
+		sessionReadOffset = 0;
+		sessionReadRemainder = "";
 		active = true;
-		restoreDeliveredEntries(ctx);
 		try { fs.mkdirSync(sessionDir, { recursive: true }); } catch { /* later drains will retry */ }
+		pruneDeliveredLedger();
 
 		timer = setInterval(() => scheduleDrain(0), intervalMs);
 		if (typeof timer.unref === "function") timer.unref();
@@ -513,15 +614,13 @@ export default function (pi: ExtensionAPI) {
 		const eventId = eventIdFromEntry({ type: "message", message: event.message });
 		if (!eventId) return;
 		if (!sessionFile) {
-			// In-memory sessions have no stronger persistence signal. message_end means
-			// the report reached the agent event stream; a process crash before the
-			// in-memory session consumes it remains an unavoidable residual window.
-			confirmDelivery(eventId);
-		} else {
-			// The hook runs immediately before SessionManager persistence. Reconcile on
-			// the next timer tick rather than acknowledging prematurely.
-			scheduleDrain(0);
+			// Ephemeral sessions provide no durable acknowledgement. Keep the spool so
+			// the report is replayed at least once into a future persisted session.
+			return;
 		}
+		// The hook runs immediately before SessionManager persistence. Reconcile on
+		// the next timer tick rather than acknowledging prematurely.
+		scheduleDrain(0);
 	});
 	pi.on("session_shutdown", stop);
 }

@@ -157,27 +157,42 @@ file_mtime() { # path -> mtime epoch; works with GNU coreutils or BSD stat
 	printf '%s\n' "$m"
 }
 
-# Reserve the next id by creating its state directory. mkdir is the atomic
-# allocation primitive: concurrent callers may choose the same candidate, but
-# only one wins and the others rescan/retry. The returned directory already
-# exists and is exclusively owned by the caller.
+# Reserve a monotonically increasing id. The persistent counter survives
+# `stop`/`stop --all`, so a later subagent never reuses an earlier incarnation's
+# id. The lock serializes concurrent launchers; gaps after crashes are harmless.
 reserve_id() {
-	local root max dir name candidate
-	root=$(sr)
-	while :; do
-		max=0
-		for dir in "$root"/[0-9]*/; do
-			[ -d "$dir" ] || continue
-			name=$(basename "$dir")
-			case "$name" in *[!0-9]*|'') continue ;; esac
-			[ "$name" -gt "$max" ] && max="$name"
-		done
-		candidate=$((max + 1))
-		if mkdir "$root/$candidate" 2>/dev/null; then
-			printf '%s\n' "$candidate"
-			return 0
-		fi
+	local root lock attempts=0 seq max dir name candidate tmp q_lock
+	root=$(sr); lock="$root/.seq.lock"
+	until mkdir "$lock" 2>/dev/null; do
+		attempts=$((attempts + 1))
+		[ "$attempts" -lt 200 ] || die "timed out waiting for subagent id lock"
+		sleep 0.05
 	done
+	q_lock=$(printf %q "$lock")
+	trap "rmdir $q_lock 2>/dev/null || true" EXIT HUP INT TERM
+
+	seq=$(cat "$root/.seq" 2>/dev/null || echo 0)
+	case "$seq" in ''|*[!0-9]*) seq=0 ;; esac
+	# Migration: never allocate below ids created before the counter existed.
+	max=$seq
+	for dir in "$root"/[0-9]*/; do
+		[ -d "$dir" ] || continue
+		name=$(basename "$dir")
+		case "$name" in *[!0-9]*|'') continue ;; esac
+		[ "$name" -gt "$max" ] && max="$name"
+	done
+
+	while :; do
+		candidate=$((max + 1)); tmp="$root/.seq.tmp.$$.$RANDOM"
+		printf '%s\n' "$candidate" >"$tmp" || die "could not persist subagent id counter"
+		mv "$tmp" "$root/.seq" || die "could not persist subagent id counter"
+		if mkdir "$root/$candidate" 2>/dev/null; then break; fi
+		max=$candidate
+	done
+
+	rmdir "$lock" 2>/dev/null || true
+	trap - EXIT HUP INT TERM
+	printf '%s\n' "$candidate"
 }
 
 # Serialise the lookup/create/split sequence. In particular, a caller that saw
@@ -468,6 +483,11 @@ cmd_run() {
 	local dir; dir=$(sadir "$id")
 	local result="$dir/result.md"
 	: >"$result"
+	# Immutable run token used by the watcher in its durable delivery id. This
+	# also protects against legacy/manual id reuse and tmux session-id reuse.
+	LC_ALL=C od -An -N16 -tx1 /dev/urandom | tr -d ' \n' >"$dir/birth" \
+		|| { rm -rf "$dir"; die "could not create subagent incarnation token"; }
+	[ -s "$dir/birth" ] || { rm -rf "$dir"; die "could not create subagent incarnation token"; }
 
 	role_body "$rf" >"$dir/role.md"
 	write_protocol "$result" >"$dir/protocol.md"
