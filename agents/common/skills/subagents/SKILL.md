@@ -55,14 +55,14 @@ non-existent role fails with `subagents: role '<name>' not found`. There are
 | `implementer` | gpt-5.6-sol | Heavyweight: implement a feature/fix/parity/test change end-to-end in a worktree, push, (optionally) open a PR |
 | `pr-fixer` | gpt-5.6-sol | Make an already-open PR's CI green + address review findings, push, retrigger CI |
 | `critic` | gpt-5.6-sol | Adversarial second opinion on another agent's output (plan, fix, review) |
-| `helper` | glm | Lightweight quick-task: fetch/summarize files, run one command, make a specific edit, find/list something |
-| `watcher` | glm | Long-running monitor of sibling subagents + open PRs |
+| `helper` | gpt-5.6-luna | Lightweight quick-task: fetch/summarize files, run one command, make a specific edit, find/list something |
+| `watcher` | gpt-5.6-luna | Long-running monitor of sibling subagents + open PRs |
 
 `implementer` is the default for "go do this implementation work." `pr-fixer`
 is for *already-open* PRs. `critic` reviews an agent's *output*, not diffs.
 `helper` is the lightweight role for small single-purpose tasks that don't need
 a worktree or end-to-end implementation. `watcher` is the long-running monitor.
-Heavyweight work uses `gpt-5.6-sol`; `helper` and `watcher` use the fast glm model.
+Heavyweight work uses `gpt-5.6-sol`; `helper` and `watcher` use the fast gpt-5.6-luna model.
 
 If you're unsure of a role name, run `subagents roles` — it lists every
 available role and its model. Never guess a role name; the names above are the
