@@ -157,19 +157,36 @@ file_mtime() { # path -> mtime epoch; works with GNU coreutils or BSD stat
 	printf '%s\n' "$m"
 }
 
+seq_lock_is_stale() { # lock-dir -> true when old enough and owner is dead/missing
+	local lock="$1" pid started mtime now
+	[ -d "$lock" ] || return 1
+	mtime=$(file_mtime "$lock"); now=$(date +%s)
+	[ $((now - mtime)) -ge 3 ] || return 1
+	read -r pid started <"$lock/owner" 2>/dev/null || return 0
+	case "$pid" in ''|*[!0-9]*) return 0 ;; esac
+	! kill -0 "$pid" 2>/dev/null
+}
+
 # Reserve a monotonically increasing id. The persistent counter survives
 # `stop`/`stop --all`, so a later subagent never reuses an earlier incarnation's
 # id. The lock serializes concurrent launchers; gaps after crashes are harmless.
 reserve_id() {
-	local root lock attempts=0 seq max dir name candidate tmp q_lock
+	local root lock attempts=0 seq max dir name candidate tmp q_lock stale owner_pid
 	root=$(sr); lock="$root/.seq.lock"
 	until mkdir "$lock" 2>/dev/null; do
+		if seq_lock_is_stale "$lock"; then
+			stale="$root/.seq.lock.stale.${BASHPID:-$$}.$RANDOM"
+			if mv "$lock" "$stale" 2>/dev/null; then rm -rf "$stale"; fi
+			continue
+		fi
 		attempts=$((attempts + 1))
 		[ "$attempts" -lt 200 ] || die "timed out waiting for subagent id lock"
 		sleep 0.05
 	done
 	q_lock=$(printf %q "$lock")
-	trap "rmdir $q_lock 2>/dev/null || true" EXIT HUP INT TERM
+	trap "rm -rf $q_lock 2>/dev/null || true" EXIT HUP INT TERM
+	owner_pid=${BASHPID:-$$}
+	printf '%s %s\n' "$owner_pid" "$(date +%s)" >"$lock/owner" || die "could not record subagent id lock owner"
 
 	seq=$(cat "$root/.seq" 2>/dev/null || echo 0)
 	case "$seq" in ''|*[!0-9]*) seq=0 ;; esac
@@ -190,8 +207,8 @@ reserve_id() {
 		max=$candidate
 	done
 
-	rmdir "$lock" 2>/dev/null || true
 	trap - EXIT HUP INT TERM
+	rm -rf "$lock" 2>/dev/null || true
 	printf '%s\n' "$candidate"
 }
 
@@ -389,6 +406,12 @@ cmd_doctor() {
 		echo "WARN state: $orphan_sessions orphaned tmux session dir(s) under $STATE_DIR"
 		warnings=$((warnings + 1))
 	fi
+	if seq_lock_is_stale "$root/.seq.lock"; then
+		local lock_pid lock_started
+		read -r lock_pid lock_started <"$root/.seq.lock/owner" 2>/dev/null || { lock_pid="?"; lock_started="?"; }
+		echo "WARN state: stale subagent id lock (owner pid $lock_pid, started $lock_started)"
+		warnings=$((warnings + 1))
+	fi
 	for dir in "$root"/*/; do
 		[ -d "$dir" ] || continue
 		name=$(basename "$dir")
@@ -479,8 +502,10 @@ cmd_run() {
 	local rf; rf=$(role_file "$role") || die "role '$role' not found (try: subagents roles)"
 
 	local sess; sess=$(cur_sid)
-	local id; id=$(reserve_id)
+	local id; id=$(reserve_id) || die "failed to reserve subagent id"
+	case "$id" in ''|*[!0-9]*) die "failed to reserve subagent id" ;; esac
 	local dir; dir=$(sadir "$id")
+	[ -d "$dir" ] || die "failed to reserve subagent id"
 	local result="$dir/result.md"
 	: >"$result"
 	# Immutable run token used by the watcher in its durable delivery id. This

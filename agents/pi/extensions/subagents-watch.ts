@@ -157,17 +157,13 @@ export default function (pi: ExtensionAPI) {
 
 		let incarnation = event.incarnation;
 		if (incarnation === undefined) {
-			const agentDir = path.dirname(path.dirname(event.reportPath));
+			// Legacy agents have no birth token. Snapshot the immutable report file's
+			// identity now; never read a future run's birth file at the reused path.
 			try {
-				incarnation = fs.readFileSync(path.join(agentDir, "birth"), "utf-8").trim();
+				const stat = fs.statSync(event.reportPath);
+				incarnation = `legacy-report:${stat.dev}:${stat.ino}:${stat.mtimeMs}:${stat.size}`;
 			} catch {
-				// Compatibility for agents created before the CLI wrote `birth`.
-				try {
-					const stat = fs.statSync(agentDir);
-					incarnation = `legacy:${stat.dev}:${stat.ino}:${stat.birthtimeMs || stat.ctimeMs}`;
-				} catch {
-					incarnation = `legacy-report:${event.reportPath}`;
-				}
+				incarnation = `legacy-event:${randomUUID()}`;
 			}
 		}
 		return { ...event, reportBody, incarnation };
