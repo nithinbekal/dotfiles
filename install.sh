@@ -176,6 +176,7 @@ ln -sf ~/dotfiles/agents/pi/extensions/turn-timestamps.ts ~/.pi/agent/extensions
 ln -sf ~/dotfiles/agents/pi/extensions/compact-tool-rendering.ts ~/.pi/agent/extensions/compact-tool-rendering.ts
 ln -sf ~/dotfiles/agents/pi/extensions/notify.ts ~/.pi/agent/extensions/notify.ts
 ln -sf ~/dotfiles/agents/pi/extensions/subagents-watch.ts ~/.pi/agent/extensions/subagents-watch.ts
+ln -sf ~/dotfiles/agents/pi/extensions/side-pane-editor.ts ~/.pi/agent/extensions/side-pane-editor.ts
 [ ! -L ~/.pi/agent/extensions/diff-panel ] || rm ~/.pi/agent/extensions/diff-panel
 ln -sfn ~/dotfiles/agents/pi/extensions/self-review ~/.pi/agent/extensions/self-review
 ln -sf ~/dotfiles/agents/common/commands/pr.md ~/.pi/agent/prompts/pr.md
