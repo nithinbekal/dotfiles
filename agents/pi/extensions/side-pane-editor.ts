@@ -38,9 +38,10 @@ function paneCommand(
 	statusFile: string,
 	waitChannel: string,
 ): string {
-	// Match Pi's argv handling for configured commands such as "code --wait".
-	// Quoting each token keeps paths safe and ensures a malformed editor setting
-	// cannot prevent the EXIT trap from waking the waiting Pi process.
+	// Match Pi 0.80's simple space-delimited argv handling for commands such as
+	// "code --wait". Like Pi's built-in flow, this does not interpret shell quotes
+	// in editor paths or arguments. Quoting each resulting token keeps paths safe
+	// and ensures a malformed setting cannot suppress the EXIT trap.
 	const editorArgv = editorCommand.split(" ").filter(Boolean);
 	const command = [...editorArgv, temporaryFile].map(shellQuote).join(" ");
 
@@ -95,8 +96,10 @@ export default function (pi: ExtensionAPI) {
 			fs.writeFileSync(temporaryFile, ctx.ui.getEditorText(), "utf-8");
 			editing = true;
 
+			const targetPane = process.env.TMUX_PANE;
+			let sidePane: string | undefined;
+
 			try {
-				const targetPane = process.env.TMUX_PANE;
 				const splitArgs = [
 					"split-window",
 					"-h",
@@ -114,6 +117,10 @@ export default function (pi: ExtensionAPI) {
 				const split = await pi.exec("tmux", splitArgs);
 				if (split.code !== 0) {
 					throw new Error(split.stderr.trim() || "tmux could not create the side pane");
+				}
+				sidePane = split.stdout.trim();
+				if (!/^%\d+$/.test(sidePane)) {
+					throw new Error(`tmux returned an invalid side-pane id: ${sidePane || "(empty)"}`);
 				}
 
 				const waited = await pi.exec("tmux", ["wait-for", waitChannel]);
@@ -135,6 +142,10 @@ export default function (pi: ExtensionAPI) {
 					"error",
 				);
 			} finally {
+				// A dead pane persists when remain-on-exit is enabled. Remove it by the
+				// id printed by split-window, then explicitly return focus to Pi.
+				if (sidePane) await pi.exec("tmux", ["kill-pane", "-t", sidePane]);
+				if (targetPane) await pi.exec("tmux", ["select-pane", "-t", targetPane]);
 				editing = false;
 				fs.rmSync(temporaryDir, { recursive: true, force: true });
 			}

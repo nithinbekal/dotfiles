@@ -171,6 +171,8 @@ ln -sf ~/dotfiles/agents/common/commands/pr-address-reviews.md ~/.claude/command
 
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
+python3 ~/dotfiles/agents/pi/install-keybindings.py \
+  ~/dotfiles/agents/pi/keybindings.json ~/.pi/agent/keybindings.json
 ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
 ln -sf ~/dotfiles/agents/pi/extensions/turn-timestamps.ts ~/.pi/agent/extensions/turn-timestamps.ts
 ln -sf ~/dotfiles/agents/pi/extensions/compact-tool-rendering.ts ~/.pi/agent/extensions/compact-tool-rendering.ts
