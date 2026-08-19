@@ -175,7 +175,6 @@ python3 ~/dotfiles/agents/pi/install-keybindings.py \
   ~/dotfiles/agents/pi/keybindings.json ~/.pi/agent/keybindings.json
 ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
 ln -sf ~/dotfiles/agents/pi/extensions/turn-timestamps.ts ~/.pi/agent/extensions/turn-timestamps.ts
-ln -sf ~/dotfiles/agents/pi/extensions/compact-tool-rendering.ts ~/.pi/agent/extensions/compact-tool-rendering.ts
 ln -sf ~/dotfiles/agents/pi/extensions/notify.ts ~/.pi/agent/extensions/notify.ts
 ln -sf ~/dotfiles/agents/pi/extensions/subagents-watch.ts ~/.pi/agent/extensions/subagents-watch.ts
 ln -sf ~/dotfiles/agents/pi/extensions/side-pane-editor.ts ~/.pi/agent/extensions/side-pane-editor.ts
