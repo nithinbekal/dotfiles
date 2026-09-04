@@ -80,11 +80,7 @@ Standalone Pi projects (cloned and registered by `install.sh`):
 - [`pi-subagents`](https://github.com/nithinbekal/pi-subagents) — tmux-based subagent runner and report watcher (the `subagents` CLI + `subagents` skill)
 - [`pi-atlas`](https://github.com/nithinbekal/pi-atlas) — file-based persistent memory extension
 
-One manual package remains after `pi` is installed and authenticated:
-
-```bash
-pi install git:github.com/Shopify/pi-tool-gateway-extension
-```
+One internal extension is installed manually with `pi install <source>` after `pi` is authenticated (not listed here since it lives in a private repo).
 
 ## Tmux helpers
 
