@@ -60,6 +60,35 @@ Agent-related files live under `agents/`:
 
 Shared skills are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.pi/agent/skills/`.
 
+### Pi
+
+[pi](https://github.com/earendil-works/pi) is installed via its installer; extensions, skills, and themes live under `agents/pi/` and are linked into `~/.pi/agent/` by `install.sh`.
+
+Extensions in this repo (linked into `~/.pi/agent/extensions/`):
+
+- `status-line.ts` — status line with git branch/worktree awareness
+- `subagents-watch.ts` — pushes subagent reports to the lead agent
+- `side-pane-editor.ts` — side-pane file editor
+- `turn-timestamps.ts` — per-turn timestamps
+- `notify.ts` — desktop notifications
+- `self-review` — self-review extension
+
+Skills in this repo (under `agents/common/skills/`): `nithin-writing-voice`, `subagents`.
+
+Standalone Pi projects:
+
+- [`pi-subagents`](https://github.com/nithinbekal/pi-subagents) — tmux-based subagent runner and report watcher (the `subagents` CLI + `subagents` skill)
+- [`pi-atlas`](https://github.com/nithinbekal/pi-atlas) — file-based persistent memory extension
+
+On a new machine, add packages after `pi` is installed and authenticated:
+
+```bash
+pi install git:github.com/Shopify/pi-tool-gateway-extension
+pi install ~/src/pi-atlas   # after cloning the sibling projects below
+```
+
+The custom theme (`nithinbekal.json`) is linked from `agents/pi/themes/`.
+
 ## Tmux helpers
 
 - `m` — compact popup switcher for tmux windows running Pi or Claude Code. Press prefix + `m` inside tmux, type to filter by agent/session/worktree/window, then use `1`-`9` or Enter to jump. Press Ctrl-P to toggle pane preview.
