@@ -75,19 +75,16 @@ Extensions in this repo (linked into `~/.pi/agent/extensions/`):
 
 Skills in this repo (under `agents/common/skills/`): `nithin-writing-voice`, `subagents`.
 
-Standalone Pi projects:
+Standalone Pi projects (cloned and registered by `install.sh`):
 
 - [`pi-subagents`](https://github.com/nithinbekal/pi-subagents) — tmux-based subagent runner and report watcher (the `subagents` CLI + `subagents` skill)
 - [`pi-atlas`](https://github.com/nithinbekal/pi-atlas) — file-based persistent memory extension
 
-On a new machine, add packages after `pi` is installed and authenticated:
+One manual package remains after `pi` is installed and authenticated:
 
 ```bash
 pi install git:github.com/Shopify/pi-tool-gateway-extension
-pi install ~/src/pi-atlas   # after cloning the sibling projects below
 ```
-
-The custom theme (`nithinbekal.json`) is linked from `agents/pi/themes/`.
 
 ## Tmux helpers
 

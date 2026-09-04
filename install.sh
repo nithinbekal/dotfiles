@@ -148,6 +148,12 @@ install_pnpm_global @openai/codex codex
 current_status "Installing Pi coding agent"
 install_pnpm_global @earendil-works/pi-coding-agent pi
 
+current_status "Installing pi-subagents CLI"
+if ! command -v subagents > /dev/null 2>&1; then
+  mkdir -p ~/src && git clone https://github.com/nithinbekal/pi-subagents ~/src/pi-subagents
+  (cd ~/src/pi-subagents && pnpm install && pnpm link --global)
+fi
+
 current_status "Installing qmd"
 install_pnpm_global @tobilu/qmd qmd
 
@@ -171,6 +177,11 @@ ln -sf ~/dotfiles/agents/common/commands/pr-address-reviews.md ~/.claude/command
 
 current_status "Setting up Pi config"
 mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
+# Atlas memory extension (clone sibling project, then register as a local package)
+if [ ! -d ~/src/pi-atlas ] && command -v pi > /dev/null 2>&1; then
+  git clone https://github.com/nithinbekal/pi-atlas ~/src/pi-atlas
+  pi install ~/src/pi-atlas
+fi
 python3 ~/dotfiles/agents/pi/install-keybindings.py \
   ~/dotfiles/agents/pi/keybindings.json ~/.pi/agent/keybindings.json
 ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
