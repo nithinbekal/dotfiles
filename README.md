@@ -62,22 +62,21 @@ Shared skills are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.
 
 ### Pi
 
-[pi](https://github.com/earendil-works/pi) is installed via its installer; extensions, skills, and themes live under `agents/pi/` and are linked into `~/.pi/agent/` by `install.sh`.
+[pi](https://github.com/earendil-works/pi) is installed via its installer. Dotfiles-managed extensions, skills, and themes live under `agents/`; `pi-subagents` is cloned into `~/src/pi-subagents`. `install.sh` links both sources into `~/.pi/agent/`.
 
 Extensions in this repo (linked into `~/.pi/agent/extensions/`):
 
 - `status-line.ts` — status line with git branch/worktree awareness
-- `subagents-watch.ts` — pushes subagent reports to the lead agent
 - `side-pane-editor.ts` — side-pane file editor
 - `turn-timestamps.ts` — per-turn timestamps
 - `notify.ts` — desktop notifications
 - `self-review` — self-review extension
 
-Skills in this repo (under `agents/common/skills/`): `nithin-writing-voice`, `subagents`.
+Skills in this repo live under `agents/common/skills/`, including `nithin-writing-voice`.
 
 Standalone Pi projects (cloned and registered by `install.sh`):
 
-- [`pi-subagents`](https://github.com/nithinbekal/pi-subagents) — tmux-based subagent runner and report watcher (the `subagents` CLI + `subagents` skill)
+- [`pi-subagents`](https://github.com/nithinbekal/pi-subagents) — the single source for the tmux-based `subagents` CLI, skill, and report watcher; `install.sh` links its skill and watcher directly into Pi
 - [`pi-atlas`](https://github.com/nithinbekal/pi-atlas) — file-based persistent memory extension
 
 One internal extension is installed manually with `pi install <source>` after `pi` is authenticated (not listed here since it lives in a private repo).
