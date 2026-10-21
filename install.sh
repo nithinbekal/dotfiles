@@ -155,6 +155,8 @@ fi
 if ! command -v subagents > /dev/null 2>&1; then
   (cd ~/src/pi-subagents && pnpm install && pnpm link --global)
 fi
+# The pi package provides the subagents skill and watcher extension; don't symlink them too.
+command -v pi > /dev/null 2>&1 && pi install ~/src/pi-subagents
 
 current_status "Installing qmd"
 install_pnpm_global @tobilu/qmd qmd
@@ -190,7 +192,6 @@ ln -sf ~/dotfiles/agents/pi/AGENTS.md ~/.pi/agent/AGENTS.md
 ln -sf ~/dotfiles/agents/pi/extensions/status-line.ts ~/.pi/agent/extensions/status-line.ts
 ln -sf ~/dotfiles/agents/pi/extensions/turn-timestamps.ts ~/.pi/agent/extensions/turn-timestamps.ts
 ln -sf ~/dotfiles/agents/pi/extensions/notify.ts ~/.pi/agent/extensions/notify.ts
-ln -sf ~/src/pi-subagents/extensions/subagents-watch.ts ~/.pi/agent/extensions/subagents-watch.ts
 ln -sf ~/dotfiles/agents/pi/extensions/side-pane-editor.ts ~/.pi/agent/extensions/side-pane-editor.ts
 [ ! -L ~/.pi/agent/extensions/diff-panel ] || rm ~/.pi/agent/extensions/diff-panel
 ln -sfn ~/dotfiles/agents/pi/extensions/self-review ~/.pi/agent/extensions/self-review
@@ -212,6 +213,5 @@ do
   ln -sfn "$skill" ~/.claude/skills/$skill_name
   ln -sfn "$skill" ~/.pi/agent/skills/$skill_name
 done
-ln -sfn ~/src/pi-subagents/skills/subagents ~/.pi/agent/skills/subagents
 
 current_status "Installation successful 🚀"
