@@ -1,20 +1,24 @@
 /**
- * Side-pane external editor (Ctrl+G)
+ * External editor on Ctrl+G
  *
- * Pi's built-in external-editor shortcut is remapped to Ctrl+Shift+G in the
- * user keybindings so this extension can own Ctrl+G. It follows the same edit
- * contract as Pi's built-in flow, but runs the editor in a tmux pane on the
- * right instead of suspending Pi's TUI:
+ * Pi's built-in external-editor shortcut is unbound in the user keybindings so
+ * this extension can own Ctrl+G. It follows the same edit contract as Pi's
+ * built-in flow:
  *
  *   1. Write the current prompt to a temporary Markdown file.
- *   2. Split the current tmux pane and run the configured external editor there.
+ *   2. Run the configured external editor on it.
  *   3. Wait for the editor to exit.
  *   4. On exit status 0, replace Pi's prompt with the edited file contents.
+ *
+ * Inside tmux, the editor runs in a pane on the right and Pi's TUI stays up.
+ * Outside tmux, it suspends the TUI and runs in the same terminal, like Pi's
+ * built-in flow.
  *
  * The editor command uses the same precedence as Pi: settings.json
  * `externalEditor`, $VISUAL, $EDITOR, then the platform default.
  */
 
+import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -64,19 +68,49 @@ function externalEditorCommand(ctx: ExtensionContext): string | undefined {
 	}).getExternalEditorCommand();
 }
 
+async function editInTerminal(ctx: ExtensionContext, editorCommand: string): Promise<void> {
+	const temporaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-editor-"));
+	const temporaryFile = path.join(temporaryDir, "prompt.pi.md");
+	fs.writeFileSync(temporaryFile, ctx.ui.getEditorText(), "utf-8");
+
+	try {
+		const status = await ctx.ui.custom<number | null>((tui, _theme, _keybindings, done) => {
+			tui.stop();
+			const [editor, ...editorArgs] = editorCommand.split(" ").filter(Boolean);
+			const child = spawn(editor, [...editorArgs, temporaryFile], { stdio: "inherit" });
+			let finished = false;
+			const finish = (code: number | null) => {
+				if (finished) return;
+				finished = true;
+				// done() restores the prompt text saved before ctx.ui.custom(), so set the
+				// edited text after it and before the restarted TUI renders.
+				done(code);
+				if (code === 0) ctx.ui.setEditorText(fs.readFileSync(temporaryFile, "utf-8").replace(/\n$/, ""));
+				tui.start();
+				tui.requestRender(true);
+			};
+			child.on("error", () => finish(null));
+			child.on("close", finish);
+			return { render: () => [], invalidate: () => {} };
+		});
+
+		if (status !== 0) {
+			ctx.ui.notify(`Editor exited with status ${status ?? "error"}; prompt unchanged.`, "warning");
+		}
+	} finally {
+		fs.rmSync(temporaryDir, { recursive: true, force: true });
+	}
+}
+
 export default function (pi: ExtensionAPI) {
 	let editing = false;
 
 	pi.registerShortcut("ctrl+g", {
-		description: "Edit prompt in external editor in a tmux side pane",
+		description: "Edit prompt in external editor (tmux side pane when inside tmux)",
 		handler: async (ctx: ExtensionContext) => {
 			if (ctx.mode !== "tui") return;
 			if (editing) {
 				ctx.ui.notify("The side-pane editor is already open.", "warning");
-				return;
-			}
-			if (!process.env.TMUX) {
-				ctx.ui.notify("The side-pane editor requires tmux.", "error");
 				return;
 			}
 
@@ -86,6 +120,11 @@ export default function (pi: ExtensionAPI) {
 					"No editor configured. Set externalEditor in settings.json or $VISUAL/$EDITOR.",
 					"error",
 				);
+				return;
+			}
+
+			if (!process.env.TMUX) {
+				await editInTerminal(ctx, editorCommand);
 				return;
 			}
 
