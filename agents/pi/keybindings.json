@@ -1,3 +1,4 @@
 {
-  "app.editor.external": "ctrl+shift+g"
+  "app.editor.external": "ctrl+shift+g",
+  "tui.altScreen.searchNext": "enter"
 }
