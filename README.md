@@ -62,7 +62,7 @@ Shared skills are linked into `~/.agents/skills/`, `~/.claude/skills/`, and `~/.
 
 ### Pi
 
-[pi](https://github.com/earendil-works/pi) is installed via its installer. Dotfiles-managed extensions, skills, and themes live under `agents/`; `pi-subagents` is cloned into `~/src/pi-subagents`. `install.sh` links both sources into `~/.pi/agent/`.
+[pi](https://github.com/earendil-works/pi) is installed via its installer. Dotfiles-managed extensions, skills, and themes live under `agents/` and are linked into `~/.pi/agent/`. `pi-subagents` is cloned into `~/src/pi-subagents` and registered as a local Pi package, which loads its extension and skill.
 
 Extensions in this repo (linked into `~/.pi/agent/extensions/`):
 
@@ -76,7 +76,7 @@ Skills in this repo live under `agents/common/skills/`, including `nithin-writin
 
 Standalone Pi projects (cloned and registered by `install.sh`):
 
-- [`pi-subagents`](https://github.com/nithinbekal/pi-subagents) — the single source for the tmux-based `subagents` CLI, skill, and report watcher; `install.sh` links its skill and watcher directly into Pi
+- [`pi-subagents`](https://github.com/nithinbekal/pi-subagents) — the single source for the tmux-based `subagents` CLI, skill, and report watcher; `install.sh` installs it as a local Pi package
 - [`pi-atlas`](https://github.com/nithinbekal/pi-atlas) — file-based persistent memory extension
 
 One internal extension is installed manually with `pi install <source>` after `pi` is authenticated (not listed here since it lives in a private repo).
