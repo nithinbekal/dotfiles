@@ -229,43 +229,6 @@ print_padding() {
   printf '%*s' "$PADDING" ''
 }
 
-infer_feature() {
-  local path="$1"
-  local rest="$path"
-
-  rest="${rest#*/world/trees/}"
-  if [ "$rest" != "$path" ]; then
-    printf '%s' "${rest%%/src*}"
-    return
-  fi
-
-  printf '%s' "-"
-}
-
-infer_project() {
-  local session="$1"
-  local path="$2"
-  local feature="$3"
-  local rest="$path"
-  local from_session
-
-  rest="${rest#*/areas/core/}"
-  if [ "$rest" != "$path" ]; then
-    printf '%s' "${rest%%/*}"
-    return
-  fi
-
-  if [ "$feature" != "-" ]; then
-    from_session="${session%-$feature}"
-    if [ -n "$from_session" ] && [ "$from_session" != "$session" ]; then
-      printf '%s' "$from_session"
-      return
-    fi
-  fi
-
-  basename "$path"
-}
-
 fmt_age() {
   local seconds="$1"
 
@@ -394,8 +357,8 @@ refresh_entries() {
     agent=$(detect_agent "$pane_tty" "$command")
     [ -n "$agent" ] || continue
 
-    feature=$(infer_feature "$path")
-    project=$(infer_project "$session" "$path" "$feature")
+    feature="-"
+    project="$(basename "${path:-.}")"
 
     sessions+=("$session")
     window_indexes+=("$window_index")

@@ -121,20 +121,11 @@ git_branch() {
   printf '%s' '-'
 }
 
-# Git has no concept of a worktree "name" - worktrees are identified by path.
-# Derive a useful short label: the Shopify `world/trees/<name>` segment when
-# present, otherwise the basename of the git worktree top-level (correct for
-# normal one-folder-per-worktree repos), falling back to the path basename.
+# Git worktrees are identified by path, so use the worktree's top-level directory.
 worktree_name() {
-  local path="$1" rest top
+  local path="$1" top
 
   [ -n "$path" ] || { printf '%s' '-'; return; }
-
-  rest="${path#*/world/trees/}"
-  if [ "$rest" != "$path" ]; then
-    printf '%s' "${rest%%/*}"
-    return
-  fi
 
   top=$(git -C "$path" rev-parse --show-toplevel 2>/dev/null)
   if [ -n "$top" ]; then

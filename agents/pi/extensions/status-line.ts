@@ -429,17 +429,6 @@ async function getLinkedWorktreeName(pi: ExtensionAPI, cwd: string): Promise<str
 	const commonDirPath = resolve(cwd, commonDir);
 	if (gitDirPath === commonDirPath) return undefined;
 
-	// Shopify's World checkout keeps every checkout at world/trees/<name>/src.
-	// Treat trees/root as the default checkout, and use the tree directory name
-	// for actual linked worktrees instead of displaying the unhelpful "src".
-	const treeDir = resolve(topLevel, "..");
-	const treesDir = resolve(treeDir, "..");
-	const worldDir = resolve(treesDir, "..");
-	if (basename(topLevel) === "src" && basename(treesDir) === "trees" && basename(worldDir) === "world") {
-		const treeName = basename(treeDir);
-		return treeName === "root" ? undefined : treeName;
-	}
-
 	return basename(topLevel) || undefined;
 }
 
