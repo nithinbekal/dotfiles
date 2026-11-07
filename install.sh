@@ -153,7 +153,10 @@ if [ ! -d ~/src/pi-subagents ]; then
   mkdir -p ~/src && git clone https://github.com/nithinbekal/pi-subagents ~/src/pi-subagents
 fi
 if ! command -v subagents > /dev/null 2>&1; then
-  (cd ~/src/pi-subagents && pnpm install && pnpm link --global)
+  # pnpm 11 treats ignored build scripts as a failed install; none are needed here
+  (cd ~/src/pi-subagents && pnpm install --config.strict-dep-builds=false)
+  # `pnpm link --global` is invalid on pnpm 11; adding the local directory globally links it
+  pnpm add -g ~/src/pi-subagents
 fi
 # The pi package provides the subagents skill and watcher extension; don't symlink them too.
 command -v pi > /dev/null 2>&1 && pi install ~/src/pi-subagents
@@ -185,6 +188,10 @@ mkdir -p ~/.pi/agent/extensions ~/.pi/agent/prompts ~/.pi/agent/themes
 if [ ! -d ~/src/pi-atlas ] && command -v pi > /dev/null 2>&1; then
   git clone https://github.com/nithinbekal/pi-atlas ~/src/pi-atlas
   pi install ~/src/pi-atlas
+fi
+# pi-subagents extension and skill, loaded from the local package
+if command -v pi > /dev/null 2>&1; then
+  pi install ~/src/pi-subagents
 fi
 python3 ~/dotfiles/agents/pi/install-keybindings.py \
   ~/dotfiles/agents/pi/keybindings.json ~/.pi/agent/keybindings.json
