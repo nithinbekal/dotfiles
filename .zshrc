@@ -78,9 +78,9 @@ setopt prompt_subst
 PROMPT='%F{blue}%B%~%b%f%F{240} %F{green}${vcs_info_msg_0_}%f
 %F{magenta}❯%f '
 
-for _brew in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
-  [[ -x $_brew ]] && eval "$($_brew shellenv)" && break
-done
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
 
