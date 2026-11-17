@@ -244,21 +244,6 @@ const notifyOsascript = (title: string, body: string): boolean => {
 	}
 };
 
-/**
- * In RPC mode (pi-desktop, pide, etc.), emit the notification as a JSON line so
- * the host can show it natively. Gated on PI_MODE=rpc to avoid injecting JSON
- * into piped shells, CI runners, and --mode json consumers.
- */
-const notifyRpcHost = (title: string, body: string): boolean => {
-	if (process.env.PI_MODE !== "rpc") return false;
-	try {
-		process.stdout.write(JSON.stringify({ type: "desktop_notification", title, body }) + "\n");
-		return true;
-	} catch {
-		return false;
-	}
-};
-
 /** Only send native notifications from an interactive terminal session.
  * BB and other RPC hosts provide their own notification path. */
 const isTerminalSession = (): boolean =>
