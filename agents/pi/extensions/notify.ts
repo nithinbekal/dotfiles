@@ -259,8 +259,13 @@ const notifyRpcHost = (title: string, body: string): boolean => {
 	}
 };
 
+/** Only send native notifications from an interactive terminal session.
+ * BB and other RPC hosts provide their own notification path. */
+const isTerminalSession = (): boolean =>
+	process.env.PI_MODE !== "rpc" && process.stdin.isTTY === true && process.stdout.isTTY === true;
+
 const notify = (title: string, body: string): void => {
-	if (notifyRpcHost(title, body)) return;
+	if (!isTerminalSession()) return;
 	const term = getOuterTerminal();
 	// terminal-notifier first: it's the only path whose click can switch tmux.
 	if (notifyTerminalNotifier(title, body)) return;
@@ -296,7 +301,7 @@ export default function (pi: ExtensionAPI) {
 
 	pi.events.on("notify:send", (payload: unknown) => {
 		const p = payload as { title: string; body: string };
-		if (enabled && p && p.title && p.body) notify(p.title, p.body);
+		if (enabled && isTerminalSession() && p && p.title && p.body) notify(p.title, p.body);
 	});
 
 	const getTitle = (): string => {
@@ -318,6 +323,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("agent_end", async (event) => {
+		if (!isTerminalSession()) return;
 		if (pendingTimer) clearTimeout(pendingTimer);
 		const title = getTitle();
 		const body = summarize(extractLastText(event.messages ?? []));
@@ -332,6 +338,10 @@ export default function (pi: ExtensionAPI) {
 	pi.registerCommand("notify", {
 		description: "Send a test desktop notification",
 		handler: async (_args, ctx) => {
+			if (!isTerminalSession()) {
+				ctx.ui.notify("Desktop notifications are only enabled in an interactive terminal session", "info");
+				return;
+			}
 			const term = getOuterTerminal();
 			const via = hasTerminalNotifier() ? "terminal-notifier" : OSC_TERMINALS.has(term) ? "OSC" : "osascript";
 			ctx.ui.notify(`Testing via ${via} (term: ${term || "unknown"})`, "info");
